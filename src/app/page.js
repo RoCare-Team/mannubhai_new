@@ -12,6 +12,7 @@ import Services from './_components/Home/Services';
 import PopularCities from './_components/Home/PopularCities';
 import ClientReviews from './_components/Home/ClientReviews';
 import FooterLinks from './_components/Home/FooterLinks';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 // ✅ App Router metadata
 export const metadata = {
@@ -20,11 +21,11 @@ export const metadata = {
     template: "%s | Mannubhai Services",
   },
       alternates: {
-    canonical: "https://www.mannubhai.com", 
+    canonical: "https://mannubhai-new.vercel.app/", 
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
   description:
     "Mannubhai is your one-stop destination for expert local services in India. Book trusted professionals for appliance repair, beauty services, home care, and more.",
@@ -36,7 +37,7 @@ export const metadata = {
     "home care",
     "handyman services",
   ],
-  metadataBase: new URL('https://www.mannubhai.com/'),
+  metadataBase: new URL('https://mannubhai-new.vercel.app/'),
   openGraph: {
     title: "Mannubhai - Professional Home Services",
     description: "Book trusted professionals for all your home service needs",

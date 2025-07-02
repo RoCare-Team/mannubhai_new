@@ -57,14 +57,14 @@ const fetchCities = async () => {
 // Generate metadata for the page (unchanged)
 export async function generateMetadata({ params }) {
   const { slug = [] } = params;
-  const baseUrl = "https://www.mannubhai.com/";
+  const baseUrl = "https://mannubhai-new.vercel.app/";
 
   const defaultMetadata = {
     title: "Home Services | Mannu Bhai",
     description: "Find trusted home service professionals near you",
     robots: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
     },
 
   };
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }) {
           description: cityDoc.meta_description,
           keywords: cityDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: cityDoc.meta_title,
             description: cityDoc.meta_description,
@@ -112,7 +112,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services | Mannu Bhai`,
             description: `Professional ${catDoc.category_name} services nationwide.`,
@@ -144,7 +144,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`,
             description: `Top-rated ${catDoc.category_name} services in ${cityDoc.city_name}.`,

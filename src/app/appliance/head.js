@@ -13,10 +13,10 @@ export default function Head() {
         name="keywords"
         content="Home care services, Home care service near me, At-home caregiving, Best home care services, water purifie repair service, air conditioner repair service ,Washing Machine repair Services, Refrigerator repair Services, Microwave & Kitchen Appliances repair service and TV & Electronics repair service"/>
 
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content="noindex, nofollow" />
  
       {/* canonical URL */}
-      <link rel="canonical" href="https://www.mannubhai.com/appliance" />
+      <link rel="canonical" href="https://mannubhai-new.vercel.app/appliance" />
     </>
   );
 }

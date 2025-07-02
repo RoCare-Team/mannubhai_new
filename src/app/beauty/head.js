@@ -14,10 +14,10 @@ export default function Head() {
         name="keywords"
         content="beauty care services, professional beauty services, salon services at home, beauty parlour services, skincare services, hair care services facial treatment services, beauty services near me, beauty care at home, best beauty salon services, bridal makeup services, waxing and threading, manicure and pedicure at home, hair spa at home, full body wax service anti-aging facial services, hair coloring services, dandruff treatment for hair, glowing skin facial"/>
 
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content="noindex, nofollow" />
 
       {/* canonical URL */}
-      <link rel="canonical" href="https://www.mannubhai.com/beauty" />
+      <link rel="canonical" href="https://mannubhai-new.vercel.app/beauty" />
     </>
   );
 }
