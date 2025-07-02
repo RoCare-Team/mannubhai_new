@@ -1,13 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import LogoLoader from "@/components/LogoLoader";
 
+// Constants moved outside component to avoid recreation on every render
 const DEFAULT_IMAGE = "/BeautyCare/default.png";
-const IMAGE_MAP = {
+const IMAGE_MAP = Object.freeze({
   "Women Salon At Home": "/BeautyCare/women salon at home.png",
   "Makeup": "/BeautyCare/makeup.png",
   "Spa For Women": "/BeautyCare/spa for women.png",
@@ -15,9 +17,9 @@ const IMAGE_MAP = {
   "Massage For Men": "/BeautyCare/massage for men.png",
   "Pedicure And Manicure": "/BeautyCare/pedicure and manicure.png",
   "Hair Studio": "/BeautyCare/hair studio.png",
-};
+});
 
-const DESIRED_ORDER = [
+const DESIRED_ORDER = Object.freeze([
   "Women Salon At Home",
   "Makeup",
   "Spa For Women",
@@ -25,12 +27,15 @@ const DESIRED_ORDER = [
   "Massage For Men",
   "Pedicure And Manicure",
   "Hair Studio",
-];
+]);
 
-const orderMap = DESIRED_ORDER.reduce((acc, name, idx) => {
-  acc[name] = idx;
-  return acc;
-}, {});
+// Precompute the order map
+const ORDER_MAP = Object.freeze(
+  DESIRED_ORDER.reduce((acc, name, idx) => {
+    acc[name] = idx;
+    return acc;
+  }, {})
+);
 
 const getSubServiceImage = (type) => IMAGE_MAP[type] || DEFAULT_IMAGE;
 
@@ -40,50 +45,49 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchSubServices = async () => {
-      try {
-        const q = query(
-          collection(db, "lead_type"),
-          where("mannubhai_cat_id", "==", "3")
-        );
-        const snapshot = await getDocs(q);
+  // Memoized fetch function
+  const fetchSubServices = useCallback(async () => {
+    try {
+      const q = query(
+        collection(db, "lead_type"),
+        where("mannubhai_cat_id", "==", "3")
+      );
+      const snapshot = await getDocs(q);
 
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          ServiceName: doc.data().type,
-          ServiceIcon: getSubServiceImage(doc.data().type),
-        }));
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        ServiceName: doc.data().type,
+        ServiceIcon: getSubServiceImage(doc.data().type),
+      }));
 
-        data.sort(
-          (a, b) =>
-            (orderMap[a.ServiceName] ?? Number.MAX_SAFE_INTEGER) -
-            (orderMap[b.ServiceName] ?? Number.MAX_SAFE_INTEGER)
-        );
+      data.sort(
+        (a, b) =>
+          (ORDER_MAP[a.ServiceName] ?? Number.MAX_SAFE_INTEGER) -
+          (ORDER_MAP[b.ServiceName] ?? Number.MAX_SAFE_INTEGER)
+      );
 
-        setSubServices(data);
-      } catch (error) {
-        console.error("Error fetching sub-services:", error);
-        setSubServices([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubServices();
+      setSubServices(data);
+    } catch (error) {
+      console.error("Error fetching sub-services:", error);
+      setSubServices([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const getCategoryUrlByLeadTypeId = async (lead_type_id) => {
+  // Memoized category URL fetch
+  const getCategoryUrlByLeadTypeId = useCallback(async (lead_type_id) => {
     const q = query(
       collection(db, "category_manage"),
       where("lead_type_id", "==", lead_type_id)
     );
     const snapshot = await getDocs(q);
     return snapshot.empty ? null : snapshot.docs[0].data().category_url;
-  };
+  }, []);
 
-  const handleSubServiceClick = async (service) => {
+  // Memoized click handler
+  const handleSubServiceClick = useCallback(async (service) => {
     setRouteLoading(true);
     try {
       const category_url = await getCategoryUrlByLeadTypeId(service.id);
@@ -97,13 +101,17 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         }
       } else {
         alert("Category URL not found!");
-        setRouteLoading(false);
       }
     } catch (error) {
       console.error("Navigation error:", error);
+    } finally {
       setRouteLoading(false);
     }
-  };
+  }, [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router]);
+
+  useEffect(() => {
+    fetchSubServices();
+  }, [fetchSubServices]);
 
   return (
     <main className="relative pb-5 px-3 sm:mt-6 sm:px-6 md:px-8 lg:px-20 mt-0 mb-0 sm:mt-5 sm:mb-5">
@@ -132,10 +140,10 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
             <p className="text-center text-sm text-gray-500 mb-4">
               Loading services…
             </p>
-            <div className="grid grid-cols-4 sm:grid-cols-4 gap-4 sm:gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
+            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-4 sm:gap-6">
+              {Array.from({ length: Math.min(8, DESIRED_ORDER.length) }).map((_, i) => (
                 <div
-                  key={i}
+                  key={`skeleton-${i}`}
                   className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow animate-pulse"
                 >
                   <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
@@ -149,7 +157,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
             No beauty services found.
           </p>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}
@@ -157,7 +165,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
                 aria-label={`View ${service.ServiceName} services`}
                 className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2 shadow group-hover:shadow-xl transition">
+                <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
                   <Image
                     src={service.ServiceIcon}
                     alt={service.ServiceName}
@@ -166,7 +174,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
                     placeholder="blur"
                     blurDataURL="/blur.png"
                     loading="lazy"
-                    sizes="(max-width:640px) 80px, (max-width:1024px) 96px, 120px"
+                    sizes="(max-width: 640px) 80px, 96px"
                   />
                 </div>
                 <span className="text-[10px] font-semibold text-center text-gray-700 leading-tight">
@@ -202,7 +210,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
                 priority
                 placeholder="blur"
                 blurDataURL="/blur-banner.png"
-                sizes="(min-width:768px) 1000px"
+                sizes="100vw"
                 className="hidden md:block w-full h-auto"
               />
             </div>
