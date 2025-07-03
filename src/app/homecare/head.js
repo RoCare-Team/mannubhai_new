@@ -14,10 +14,10 @@ export default function Head() {
         content="Home care services Home care near me, Best home care services, Sofa Cleaning service, Bathroom Cleaning service,Home Deep Cleaning service, Kitchen Cleaning service, Tank Cleaning service
 "/>
 
-      <meta name="robots" content="noindex, nofollow" />
+      <meta name="robots" content="index, follow" />
 
       {/* canonical URL */}
-      <link rel="canonical" href="https://mannubhai-new.vercel.app/homecare"/>
+      <link rel="canonical" href="https://www.mannubhai.com/homecare"/>
     </>
   );
 }
