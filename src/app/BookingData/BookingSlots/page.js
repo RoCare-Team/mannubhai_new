@@ -114,7 +114,7 @@ function BookingSlots({ phoneNumber }) {
 
 
       {/* User Details */}
-      <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm">
+      {/* <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm">
         <p className="text-blue-700 font-semibold mb-2">Your Details</p>
         <div className="space-y-1 text-sm text-gray-700">
           <p className="flex items-center gap-2">
@@ -127,7 +127,7 @@ function BookingSlots({ phoneNumber }) {
             <FontAwesomeIcon icon={faPhone} className="text-blue-500" /> {phoneNumber || "Not Provided"}
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Address Section */}
       <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">

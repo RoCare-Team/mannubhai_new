@@ -208,7 +208,7 @@ export default function HomecareServices({ hideBrightBanner = false, onServiceCl
                 className="block md:hidden w-full h-auto"
               />
               <Image
-                src="/HomeBanner/homecare.webp"
+                src="/HomeBanner/handyman.webp"
                 alt="Promotional banner for homecare services"
                 width={1920}
                 height={400}
