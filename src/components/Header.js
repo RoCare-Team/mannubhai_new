@@ -245,7 +245,7 @@ const Header = () => {
   const getbookingdata = async () => {
     const user_no = localStorage.getItem("userPhone");
     const payload = { user_no };
-    const res = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/all_complaints.php", {
+    const res = await fetch("https://www.waterpurifierservicecenter.in/customer/app/all_complaints_mb.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
