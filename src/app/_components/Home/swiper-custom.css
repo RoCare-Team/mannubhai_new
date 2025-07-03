@@ -1,0 +1,49 @@
+.swiper-button-next,
+.swiper-button-prev {
+  background: #fff;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  width: 44px;
+  height: 44px;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  color: #000;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  transition: box-shadow 0.2s;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #e7516c, #21679c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-size:2rem;
+}
+
+.text-css{
+    background: linear-gradient(to right, #e7516c, #21679c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-size: 1rem;
+}
