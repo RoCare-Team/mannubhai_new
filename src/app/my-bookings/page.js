@@ -24,9 +24,8 @@ import {
   FiWifiOff
 } from "react-icons/fi";
 
-function Booking() {
+export default function BookingPage() {
   const [activeTab, setActiveTab] = useState("active");
-  const [leadDetails, setLeadDetails] = useState([]);
   const [currentServices, setCurrentServices] = useState([]);
   const [allLeadData, setAllLeadData] = useState([]);
   const [leadStatus, setLeadStatus] = useState([]);
@@ -147,14 +146,11 @@ function Booking() {
       }
 
       const payload = { phone };
-      const res = await fetch(
-        "https://waterpurifierservicecenter.in/customer/ro_customer/all_lead.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch('/api/fetchLeads', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -173,6 +169,9 @@ function Booking() {
     } catch (err) {
       console.error("Error fetching services:", err);
       setError("Failed to fetch bookings. Please try again.");
+      if (err.message.includes('Failed to fetch')) {
+        setError("Network error. Please check your connection.");
+      }
     } finally {
       setLoading(false);
     }
@@ -206,14 +205,11 @@ function Booking() {
       setViewModalOpen(true);
       
       const payload = { lead_id: booking.lead_id };
-      const res = await fetch(
-        "https://waterpurifierservicecenter.in/customer/ro_customer/lead_details.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch('/api/fetchLeadDetails', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       
       const data = await res.json();
       
@@ -252,7 +248,6 @@ function Booking() {
   const handleCancelBooking = async (bookingId) => {
     if (window.confirm("Are you sure you want to cancel this booking?")) {
       try {
-        console.log("Cancelling booking:", bookingId);
         setAllLeadData(prev => 
           prev.map(booking => 
             booking.lead_id === bookingId 
@@ -746,5 +741,3 @@ function Booking() {
     </>
   );
 }
-
-export default Booking;

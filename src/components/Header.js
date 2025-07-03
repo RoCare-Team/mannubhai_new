@@ -12,6 +12,7 @@ import MobileMenu from "./MobileMenu";
 import LoginPopup from "./login";
 import MobileBottomNavigation from "./MobileBottomNavigation";
 import navigationItems from "./navigationItems";
+import { toast } from "react-toastify";
 
 const AddToCart = dynamic(() => import("../app/checkout/page.js"), { ssr: false });
 
@@ -54,6 +55,8 @@ const Header = () => {
   });
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
   const dropdownTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -203,6 +206,69 @@ const Header = () => {
     run();
   }, []);
 
+  const getbookingdata = async () => {
+    setLoadingBookings(true);
+    try {
+      const user_no = localStorage.getItem("userPhone");
+      if (!user_no) {
+        toast.error("Please login to view bookings");
+        setShowLogin(true);
+        return null;
+      }
+
+      const payload = { user_no };
+      
+      const res = await fetch('/api/fetchBookings', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch: ${res.status}`);
+      }
+
+      const data = await res.json();
+      
+      if (data.complainDetails) {
+        const transformedData = data.complainDetails.map(item => ({
+          id: item.id || "N/A",
+          status: item.status || "Unknown",
+          service_type: item.service_type || "Unknown Service",
+          created_at: item.created_at || new Date().toISOString(),
+          amount: item.amount || "0",
+          customer_name: item.customer_name || "N/A",
+          address: item.address || "N/A",
+          mobile: item.mobile || "N/A",
+          appointment_date: item.appointment_date || "N/A",
+          appointment_time: item.appointment_time || "N/A",
+          payment_status: item.payment_status || "Pending",
+          ...item
+        }));
+        
+        localStorage.setItem("all_cmpl", JSON.stringify(transformedData));
+        setBookings(transformedData);
+        toast.success("Bookings updated successfully");
+        return transformedData;
+      } else {
+        throw new Error("No booking data found");
+      }
+    } catch (error) {
+      console.error("Booking fetch error:", error);
+      toast.error(error.message || "Failed to fetch bookings");
+      return null;
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  const handleViewBookings = async () => {
+    const data = await getbookingdata();
+    if (data) {
+      router.push('/my-bookings');
+    }
+  };
+
   useEffect(() => { initializeLocation(); }, [initializeLocation]);
   useEffect(() => { const handleScroll = () => setIsScrolled(window.scrollY > 10); window.addEventListener("scroll", handleScroll); return () => window.removeEventListener("scroll", handleScroll); }, []);
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
@@ -232,26 +298,18 @@ const Header = () => {
     };
     setUser(storedUser);
     localStorage.setItem("user", JSON.stringify(storedUser));
+    localStorage.setItem("userPhone", userData.mobile);
     setShowLogin(false);
+    toast.success(`Welcome back, ${storedUser.name}`);
   };
 
   const handleLogout = () => {
-  setUser(null);
-  ["user", "userPhone", "userToken", "userName", "userEmail", "customer_id"].forEach(k => localStorage.removeItem(k));
-  setIsMobileMenuOpen(false);
-  router.push("/"); // Add this line to redirect to home page
-}
-
-  const getbookingdata = async () => {
-    const user_no = localStorage.getItem("userPhone");
-    const payload = { user_no };
-    const res = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/all_complaints.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    localStorage.setItem("all_cmpl", JSON.stringify(data.complainDetails));
+    setUser(null);
+    setBookings([]);
+    ["user", "userPhone", "userToken", "userName", "userEmail", "customer_id", "all_cmpl"].forEach(k => localStorage.removeItem(k));
+    setIsMobileMenuOpen(false);
+    toast.info("Logged out successfully");
+    router.push("/");
   };
 
   const locationText = location.loading
@@ -266,22 +324,87 @@ const Header = () => {
     <>
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
-          <MobileHeader {...{ cartCount, locationText, setShowLocationSearch, location, setShowLogin, setIsMobileMenuOpen, user }} />
-          <DesktopHeader {...{ cartCount, locationText, setShowLocationSearch, setShowLogin, user, navigationItems, pathname, handleLogout, getbookingdata, location }} />
+          <MobileHeader 
+            {...{ 
+              cartCount, 
+              locationText, 
+              setShowLocationSearch, 
+              location, 
+              setShowLogin, 
+              setIsMobileMenuOpen, 
+              user,
+              handleViewBookings,
+              loadingBookings
+            }} 
+          />
+          <DesktopHeader 
+            {...{ 
+              cartCount, 
+              locationText, 
+              setShowLocationSearch, 
+              setShowLogin, 
+              user, 
+              navigationItems, 
+              pathname, 
+              handleLogout, 
+              handleViewBookings,
+              loadingBookings,
+              location 
+            }} 
+          />
         </div>
       </header>
 
-      {showLocationSearch && <LocationSearch onClose={() => setShowLocationSearch(false)} onSelectCity={handleCitySelection} />}
-      <MobileMenu {...{ isMobileMenuOpen, setIsMobileMenuOpen, user, setShowLogin, navigationItems, locationText, setShowLocationSearch, handleLogout, getbookingdata }} />
-      <MobileBottomNavigation {...{ navigationItems, pathname }} />
-      <LoginPopup show={showLogin} onClose={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />
+      {showLocationSearch && (
+        <LocationSearch 
+          onClose={() => setShowLocationSearch(false)} 
+          onSelectCity={handleCitySelection} 
+        />
+      )}
+      
+      <MobileMenu 
+        {...{ 
+          isMobileMenuOpen, 
+          setIsMobileMenuOpen, 
+          user, 
+          setShowLogin, 
+          navigationItems, 
+          locationText, 
+          setShowLocationSearch, 
+          handleLogout, 
+          handleViewBookings,
+          loadingBookings
+        }} 
+      />
+      
+      <MobileBottomNavigation 
+        {...{ 
+          navigationItems, 
+          pathname,
+          handleViewBookings
+        }} 
+      />
+      
+      <LoginPopup 
+        show={showLogin} 
+        onClose={() => setShowLogin(false)} 
+        onLoginSuccess={handleLoginSuccess} 
+      />
 
       <style jsx global>{`
-        body { padding-top: 75px; padding-bottom: 80px; }
-        @media (min-width: 1024px) {
-          body { padding-top: 80px; padding-bottom: 0; }
+        body { 
+          padding-top: 75px; 
+          padding-bottom: 80px; 
         }
-        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
+        @media (min-width: 1024px) {
+          body { 
+            padding-top: 80px; 
+            padding-bottom: 0; 
+          }
+        }
+        .safe-area-pb { 
+          padding-bottom: env(safe-area-inset-bottom); 
+        }
       `}</style>
     </>
   );
