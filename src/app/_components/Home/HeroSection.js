@@ -267,35 +267,33 @@ const HeroSection = () => {
         </div>
       </div>
       
-      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-12 xl:px-16 2xl:px-20 mt-0 sm:mt-0">
-        <div className="max-w-7xl mx-auto flex flex-col items-center">
-          <div className="w-full rounded-lg overflow-hidden">
-            <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mt-0 sm:mt-0">
-              {/* Mobile Banner */}
-              <div className="block sm:hidden relative w-full rounded-lg overflow-hidden mt-0">
-                <Image
-                  src="/HomeBanner/app_mob.webp"
-                  alt="Mobile promotional banner"
-                  width={768}
-                  height={300}
-                  className="object-contain w-full h-auto rounded-lg"
-                  priority
-                />
-              </div>
-
-              {/* Desktop Banner */}
-              <div className="hidden sm:block">
-                <Image
-                  src="/HomeBanner/appliance.webp"
-                  alt="Desktop promotional banner"
-                  width={1920}
-                  height={300}
-                  className="object-cover w-full h-auto rounded-lg"
-                  priority
-                />
-              </div>
-            </div>
+      {/* Banner below Swiper - Aligned to container */}
+      <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
+        <div className="max-w-7xl mx-auto">
+          {/* Mobile Banner */}
+          <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
+            <Image
+              src="/HomeBanner/app_mob.webp"
+              alt="Mobile promotional banner"
+              width={768}
+              height={300}
+              className="object-contain w-full h-auto rounded-lg"
+              priority
+            />
           </div>
+
+          {/* Desktop Banner */}
+         <div className="hidden sm:block mt-4 shadow-lg rounded-lg overflow-hidden">
+  <Image
+    src="/HomeBanner/appliance.webp"
+    alt="Desktop promotional banner"
+    width={1920}
+    height={400}
+    className="object-cover w-full h-auto"
+    priority
+  />
+</div>
+
         </div>
       </div>
     </section>

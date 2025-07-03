@@ -38,10 +38,10 @@ function extractImagesAndContent(html) {
 
 // Service priority mapping
 const servicePriority = {
-  service: 1,
-  repair: 2,
-  install: 3,
-  uninstall: 4,
+  service: 1,       // "service"
+  repair: 2,        // "repair"
+  install: 3,       // "install" (not "installation")
+  uninstallation: 4, // "uninstallation" (not "uninstall")
   amc: 5,
   foamjet: 6,
   gasfilling: 7,
@@ -135,17 +135,24 @@ const CategoryDetails = ({
         .trim();
 
       const firstWordMatch = cleanedName.match(/^([a-zA-Z-]+)/);
-      let groupKey = firstWordMatch ? firstWordMatch[0].toLowerCase() : "other";
+     let groupKey = firstWordMatch ? firstWordMatch[0].toLowerCase() : "other";
+if (cleanedName.toLowerCase().startsWith("installation")) {
+  groupKey = "install"; // Force "install" instead of "installation"
+} 
+else if (cleanedName.toLowerCase().startsWith("un-installation")) {
+  groupKey = "uninstallation";
+}
+else if (cleanedName.toLowerCase().startsWith("gas filling")) {
+  groupKey = "gasfilling";
+}
+else if (cleanedName.toLowerCase().startsWith("foam jet")) {
+  groupKey = "foamjet";
+}
+else {
+  groupKey = firstWordMatch ? firstWordMatch[0].toLowerCase() : "other";
+}
 
-      if (cleanedName.toLowerCase().startsWith("un-installation")) {
-        groupKey = "uninstallation";
-      } else if (cleanedName.toLowerCase().startsWith("gas filling")) {
-        groupKey = "gasfilling";
-      } else if (cleanedName.toLowerCase().startsWith("foam jet")) {
-        groupKey = "foamjet";
-      }
-
-      let priority = servicePriority[groupKey] || 99;
+let priority = servicePriority[groupKey] || 99; // 99 will push to end
 
       if (!groups[groupKey]) {
         let displayName;
@@ -181,16 +188,16 @@ const CategoryDetails = ({
     return groups;
   }, [category]);
 
-  const orderedServiceNames = useMemo(() => {
-    return Object.keys(serviceGroups).sort((a, b) => {
-      const pA = serviceGroups[a].priority || 99;
-      const pB = serviceGroups[b].priority || 99;
-      if (pA !== pB) return pA - pB;
-      return serviceGroups[a].displayName.localeCompare(
-        serviceGroups[b].displayName
-      );
-    });
-  }, [serviceGroups]);
+ const orderedServiceNames = useMemo(() => {
+  return Object.keys(serviceGroups).sort((a, b) => {
+    const pA = serviceGroups[a].priority || 99;
+    const pB = serviceGroups[b].priority || 99;
+    if (pA !== pB) return pA - pB;
+    return serviceGroups[a].displayName.localeCompare(
+      serviceGroups[b].displayName
+    );
+  });
+}, [serviceGroups]);
 
   // Helper functions
   const scrollToService = (serviceName) => {
@@ -331,65 +338,66 @@ const CategoryDetails = ({
       <div className="mx-auto px-4 sm:px-6 py-8">
         <div className="w-full flex flex-col lg:flex-row gap-8">
           {/* Services Navigation Sidebar */}
-          <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <FiCheck className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    Services
-                  </h2>
-                  <p className="text-gray-500">{category.category_name}</p>
-                </div>
-              </div>
+        <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
+  <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    {/* Header */}
+    <div className="flex items-center gap-4 mb-6">
+      <div className="bg-blue-100 p-2 rounded-lg">
+        <FiCheck className="h-6 w-6 text-blue-600" />
+      </div>
+      <div>
+        <h2 className="text-lg md:text-xl font-semibold text-gray-800">Services</h2>
+        <p className="text-sm text-gray-500">{category.category_name}</p>
+      </div>
+    </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 gap-2">
-                {orderedServiceNames.map((serviceName) => {
-                  const group = serviceGroups[serviceName];
-                  return (
-                    <button
-                      key={serviceName}
-                      onClick={() => scrollToService(serviceName)}
-                      className={`
-                        flex flex-col items-center p-3 rounded-lg transition-all
-                        ${
-                          selectedService === serviceName
-                            ? "bg-blue-50 text-blue-700 font-semibold"
-                            : "hover:bg-gray-50 text-gray-700"
-                        }
-                      `}
-                    >
-                      <div className="bg-white p-2 rounded-lg border border-gray-200 w-full flex items-center justify-center h-16 mb-2">
-                        <Image
-                          src={group.image}
-                          alt={serviceName}
-                          width={40}
-                          height={40}
-                          className="object-contain w-10 h-10"
-                        />
-                      </div>
-                      <span className="text-[15px] font-semibold leading-tight text-center w-full line-clamp-2">
-                        {group.displayName}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+    {/* Services Grid */}
+    <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 gap-2">
+      {orderedServiceNames.map((serviceName) => {
+        const group = serviceGroups[serviceName];
+        return (
+     <button
+  key={serviceName}
+  onClick={() => scrollToService(serviceName)}
+  className={`flex flex-col items-center rounded-lg transition-all border ${
+    selectedService === serviceName
+      ? "bg-blue-50 border-blue-200 text-blue-700 font-semibold"
+      : "hover:bg-gray-50 border-gray-200 text-gray-700"
+  }`}
+>
+  <div className="w-full flex items-center justify-center mb-2 bg-white rounded-lg h-20">
+    <Image
+      src={group.image}
+      alt={serviceName}
+      width={56}
+      height={56}
+      className="object-contain w-14 h-14"
+    />
+  </div>
+  <span className="text-xs font-medium text-center leading-tight">
+    {group.displayName}
+  </span>
+</button>
 
-            {category.imageUrl && (
-              <div className="hidden lg:block relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-100 mt-6">
-                <Image
-                  src={category.imageUrl}
-                  alt={`${category.name} service illustration`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </aside>
+
+        );
+      })}
+    </div>
+  </div>
+
+  {/* Optional Category Image */}
+  {category.imageUrl && (
+    <div className="hidden lg:block relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-100 mt-6">
+      <Image
+        src={category.imageUrl}
+        alt={`${category.name} service illustration`}
+        fill
+        className="object-cover"
+      />
+    </div>
+  )}
+</aside>
+
 
           {/* Main Content Area */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
