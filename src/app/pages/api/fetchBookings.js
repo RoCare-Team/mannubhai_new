@@ -19,7 +19,8 @@ export default async function handler(req, res) {
         body: JSON.stringify({ user_no }),
       }
     );
-
+ console.log('mobile api -----------',response);
+ 
     if (!response.ok) {
       throw new Error(`API responded with status ${response.status}`);
     }

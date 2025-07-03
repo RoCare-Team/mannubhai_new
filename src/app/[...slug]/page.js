@@ -106,7 +106,7 @@ const metadataCache = new Map();
 
 export async function generateMetadata({ params }) {
   const { slug = [] } = params;
-  const baseUrl = "https://www.mannubhai.com/";
+  const baseUrl = "https://vercel.com/mannubhais-projects/manuubhai";
   const cacheKey = slug.join('-') || 'home';
   
   if (metadataCache.has(cacheKey)) {
@@ -116,7 +116,7 @@ export async function generateMetadata({ params }) {
   const defaultMetadata = {
     title: "Home Services | Mannu Bhai",
     description: "Find trusted home service professionals near you",
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 
   if (slug.length === 0) {
@@ -132,7 +132,7 @@ export async function generateMetadata({ params }) {
   try {
     if (slug.length === 1) {
       const [segment] = slug;
-      const canonasicalUrl = `${baseUrl}/${segment}`;
+      const canonicalUrl = `${baseUrl}/${segment}`;
 
       const [cityDoc, catDoc] = await Promise.all([
         fetchDoc("city_tb", "city_url", segment),
@@ -145,7 +145,7 @@ export async function generateMetadata({ params }) {
           description: cityDoc.meta_description,
           keywords: cityDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: cityDoc.meta_title,
             description: cityDoc.meta_description,
@@ -174,7 +174,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services | Mannu Bhai`,
             description: `Professional ${catDoc.category_name} services nationwide.`,
@@ -213,7 +213,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`,
             description: `Top-rated ${catDoc.category_name} services in ${cityDoc.city_name}.`,

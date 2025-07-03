@@ -15,10 +15,10 @@ export default function Head() {
         content=":handyman services, handyman near me, local handyman, professional handyman, best handyman services, handyman at home, furniture, electrical services ,plumbing handyman services, home maintenance, wall painting, AC repair, carpentry services, home renovation, Masons Service, Electrician Service, Carpenter Service, Plumber Service, Painter Service
 "/>
 
-     <meta name="robots" content="index, follow" />
+     <meta name="robots" content="noindex, nofollow" />
 
       {/* canonical URL */}
-      <link rel="canonical" href="https://www.mannubhai.com/handyman" />
+      <link rel="canonical" href="https://mannubhai-new.vercel.app/handyman" />
     </>
   );
 }

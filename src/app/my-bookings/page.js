@@ -20,12 +20,13 @@ import {
   FiCreditCard,
   FiImage,
   FiHash,
-  FiAlertCircle,
-  FiWifiOff
 } from "react-icons/fi";
+import Image from "next/image";
 
-export default function BookingPage() {
+function Booking() {
   const [activeTab, setActiveTab] = useState("active");
+  const [open, setOpen] = useState(false);
+  const [leadDetails, setLeadDetails] = useState([]);
   const [currentServices, setCurrentServices] = useState([]);
   const [allLeadData, setAllLeadData] = useState([]);
   const [leadStatus, setLeadStatus] = useState([]);
@@ -33,198 +34,104 @@ export default function BookingPage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [bookingImages, setBookingImages] = useState([]);
-  const [isOnline, setIsOnline] = useState(true);
-  const [error, setError] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   const router = useRouter();
 
-  // Network status detection
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Pull-to-refresh functionality
-  useEffect(() => {
-    const container = document.querySelector('.min-h-screen');
-    let startY = 0;
-
-    const handleTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e) => {
-      const y = e.touches[0].clientY;
-      if (y > startY + 50 && window.scrollY === 0 && !refreshing) {
-        setRefreshing(true);
-        fetchServices().finally(() => setRefreshing(false));
-      }
-    };
-
-    container?.addEventListener('touchstart', handleTouchStart);
-    container?.addEventListener('touchmove', handleTouchMove);
-
-    return () => {
-      container?.removeEventListener('touchstart', handleTouchStart);
-      container?.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [refreshing]);
-
-  // Initial data loading
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const userVerified = JSON.parse(localStorage.getItem("userPhone"));
-        if (!userVerified) {
-          router.push("/");
-          return;
-        }
-
-        await fetchServices();
-        
-        if (allLeadData.length === 0) {
-          const allServices = JSON.parse(localStorage.getItem("all_cmpl") || "[]");
-          if (allServices.length > 0) {
-            setCurrentServices(allServices);
-            setAllLeadData(allServices);
-          }
-        }
-      } catch (err) {
-        console.error("Initial data loading error:", err);
-        setError("Failed to load booking data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
+    const userVerified = JSON.parse(localStorage.getItem("userPhone"));
+    if (!userVerified) {
+      router.push("/");
+    } else {
+      fetchAllLeads();
+    }
   }, [router]);
 
-  // Filter leads based on active tab
-  useEffect(() => {
-    if (allLeadData.length > 0) {
-      let filtered = [];
-      switch (activeTab) {
-        case "active":
-          filtered = allLeadData.filter(
-            lead => lead.status === "Active" || lead.status === "Follow-up"
-          );
-          break;
-        case "delivered":
-          filtered = allLeadData.filter(lead => lead.status === "Complete");
-          break;
-        case "cancelled":
-          filtered = allLeadData.filter(
-            lead => lead.status === "Cancelled" || lead.status === "Inactive"
-          );
-          break;
-        default:
-          filtered = allLeadData;
-      }
-      setLeadStatus(filtered);
-    }
-  }, [activeTab, allLeadData]);
-
-  const fetchServices = async () => {
+  const fetchAllLeads = async () => {
     try {
       setLoading(true);
-      setError(null);
-      
       const phone = JSON.parse(localStorage.getItem("userPhone"));
-      if (!phone) {
-        router.push("/");
-        return;
-      }
-
       const payload = { phone };
-      const res = await fetch('/api/fetchLeads', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const data = await res.json();
       
+      const res = await fetch(
+        "https://waterpurifierservicecenter.in/customer/ro_customer/all_lead.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      
+      const data = await res.json();
       if (data.service_details) {
-        const transformedData = transformLeadData(data.service_details);
-        setCurrentServices(transformedData);
-        setAllLeadData(transformedData);
-        localStorage.setItem("all_cmpl", JSON.stringify(transformedData));
-      } else {
-        throw new Error("Invalid data format from API");
+        setCurrentServices(data.service_details);
+        setAllLeadData(data.service_details);
       }
-    } catch (err) {
-      console.error("Error fetching services:", err);
-      setError("Failed to fetch bookings. Please try again.");
-      if (err.message.includes('Failed to fetch')) {
-        setError("Network error. Please check your connection.");
-      }
-    } finally {
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching services:", error);
       setLoading(false);
     }
   };
 
-  const transformLeadData = (rawData) => {
-    if (!Array.isArray(rawData)) return [];
-    
-    return rawData.map(item => ({
-      lead_id: item.lead_id || "N/A",
-      status: item.status || "Unknown",
-      lead_type: item.lead_type || "Unknown Service",
-      lead_add_date: item.lead_add_date || new Date().toLocaleDateString(),
-      amount: item.amount || "0",
-      name: item.name || "N/A",
-      address: item.address || "N/A",
-      mobile: item.mobile || "N/A",
-      email: item.email || "N/A",
-      appointment_date: item.appointment_date || item.lead_add_date || "N/A",
-      appointment_time: item.appointment_time || "N/A",
-      payment_status: item.payment_status || "Unknown",
-      call_to_number: item.call_to_number || "+911234567890",
-      product_image: item.product_image || null,
-      ...item
-    }));
-  };
+  const getLeadDetails = async (lead_id) => {
+    const payload = { lead_id };
 
-  const handleViewBooking = async (booking) => {
-    try {
-      setSelectedBooking(booking);
-      setViewModalOpen(true);
-      
-      const payload = { lead_id: booking.lead_id };
-      const res = await fetch('/api/fetchLeadDetails', {
+    const res = await fetch(
+      "https://waterpurifierservicecenter.in/customer/ro_customer/lead_details.php",
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
-      
+      }
+    );
+
+    const data = await res.json();
+    setLeadDetails(data.service_details[0]);
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
+  const handleViewBooking = async (booking) => {
+    setSelectedBooking(booking);
+    setViewModalOpen(true);
+    
+    try {
+      const payload = { lead_id: booking.lead_id };
+      const res = await fetch(
+        "https://waterpurifierservicecenter.in/customer/ro_customer/lead_details.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
       
-      if (data.service_details?.[0]) {
+      if (data.service_details && data.service_details.length > 0) {
         const serviceDetail = data.service_details[0];
-        setSelectedBooking(prev => ({ ...prev, ...serviceDetail }));
+        setSelectedBooking({ ...booking, ...serviceDetail });
         
-        setBookingImages(
-          serviceDetail.product_image 
-            ? [{ id: 1, url: serviceDetail.product_image, name: "Service Image", isProductImage: true }]
-            : []
-        );
+        if (serviceDetail.product_image) {
+          setBookingImages([
+            { 
+              id: 1, 
+              url: serviceDetail.product_image, 
+              name: "Service Image",
+              isProductImage: true 
+            }
+          ]);
+        } else {
+          setBookingImages([]);
+        }
+      } else {
+        setSelectedBooking(booking);
+        setBookingImages([]);
       }
     } catch (error) {
       console.error("Error fetching booking details:", error);
+      setSelectedBooking(booking);
+      setBookingImages([]);
     }
   };
 
@@ -248,6 +155,7 @@ export default function BookingPage() {
   const handleCancelBooking = async (bookingId) => {
     if (window.confirm("Are you sure you want to cancel this booking?")) {
       try {
+        console.log("Cancelling booking:", bookingId);
         setAllLeadData(prev => 
           prev.map(booking => 
             booking.lead_id === bookingId 
@@ -274,96 +182,67 @@ export default function BookingPage() {
     window.open(`tel:${supportNumber}`, "_self");
   };
 
+  useEffect(() => {
+    if (allLeadData.length > 0) {
+      let filtered = [];
+      if (activeTab === "active") {
+        filtered = allLeadData.filter(
+          (lead) => lead.status === "Active" || lead.status === "Follow-up"
+        );
+      } else if (activeTab === "delivered") {
+        filtered = allLeadData.filter((lead) => lead.status === "Complete");
+      } else if (activeTab === "cancelled") {
+        filtered = allLeadData.filter(
+          (lead) => lead.status === "Cancelled" || lead.status === "Inactive"
+        );
+      }
+      setLeadStatus(filtered);
+    }
+  }, [activeTab, allLeadData]);
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
 
   const StatusBadge = ({ status }) => {
-    const statusConfig = {
-      "Complete": { bg: "bg-green-100", text: "text-green-800", icon: <FiCheckCircle /> },
-      "Active": { bg: "bg-blue-100", text: "text-blue-800", icon: <FiClock /> },
-      "Follow-up": { bg: "bg-yellow-100", text: "text-yellow-800", icon: <FiClock /> },
-      "Cancelled": { bg: "bg-red-100", text: "text-red-800", icon: <FiXCircle /> },
-      "Inactive": { bg: "bg-red-100", text: "text-red-800", icon: <FiXCircle /> },
-      default: { bg: "bg-gray-100", text: "text-gray-800", icon: null }
-    };
+    let bgColor = "";
+    let textColor = "";
+    let icon = null;
 
-    const { bg, text, icon } = statusConfig[status] || statusConfig.default;
+    switch (status) {
+      case "Complete":
+        bgColor = "bg-green-100";
+        textColor = "text-green-800";
+        icon = <FiCheckCircle className="mr-1" />;
+        break;
+      case "Active":
+        bgColor = "bg-blue-100";
+        textColor = "text-blue-800";
+        icon = <FiClock className="mr-1" />;
+        break;
+      case "Follow-up":
+        bgColor = "bg-yellow-100";
+        textColor = "text-yellow-800";
+        icon = <FiClock className="mr-1" />;
+        break;
+      case "Cancelled":
+      case "Inactive":
+        bgColor = "bg-red-100";
+        textColor = "text-red-800";
+        icon = <FiXCircle className="mr-1" />;
+        break;
+      default:
+        bgColor = "bg-gray-100";
+        textColor = "text-gray-800";
+    }
 
     return (
-      <span className={`${bg} ${text} px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center`}>
-        {icon && React.cloneElement(icon, { className: "mr-1" })}
+      <span
+        className={`${bgColor} ${textColor} px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center`}
+      >
+        {icon}
         {status}
       </span>
-    );
-  };
-
-  const renderEmptyState = () => {
-    if (!isOnline) {
-      return (
-        <div className="text-center py-8 sm:py-10">
-          <div className="mx-auto bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-            <FiWifiOff className="text-red-500 text-2xl" />
-          </div>
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">
-            No Internet Connection
-          </h4>
-          <p className="text-gray-500 mb-6">
-            Please check your network and try again.
-          </p>
-          <button 
-            onClick={fetchServices}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-6 rounded-full transition-all shadow-lg hover:shadow-2xl text-sm sm:text-base"
-          >
-            Retry
-          </button>
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="text-center py-8 sm:py-10">
-          <div className="mx-auto bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-            <FiAlertCircle className="text-red-500 text-2xl" />
-          </div>
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">
-            Error Loading Data
-          </h4>
-          <p className="text-gray-500 mb-6">
-            {error}
-          </p>
-          <button 
-            onClick={fetchServices}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-6 rounded-full transition-all shadow-lg hover:shadow-2xl text-sm sm:text-base"
-          >
-            Retry
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="text-center py-8 sm:py-10">
-        <div className="mx-auto bg-gray-100 p-3 sm:p-4 rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-4">
-          <FiClock className="text-gray-400 text-2xl sm:text-3xl" />
-        </div>
-        <h4 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
-          No {activeTab === "active" ? "Active" : activeTab === "delivered" ? "Completed" : "Cancelled"} Bookings
-        </h4>
-        <p className="text-sm sm:text-base text-gray-500 mb-6 max-w-md mx-auto px-4">
-          {activeTab === "active"
-            ? "You don't have any active bookings at the moment."
-            : activeTab === "delivered"
-            ? "Your completed services will appear here."
-            : "Cancelled services will appear here."}
-        </p>
-        <Link href={"/service"}>
-          <button className="bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-medium py-2.5 px-6 rounded-full transition-all shadow-lg hover:shadow-2xl text-sm sm:text-base">
-            Explore Our Services
-          </button>
-        </Link>
-      </div>
     );
   };
 
@@ -381,6 +260,7 @@ export default function BookingPage() {
 
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-2 sm:p-4">
         <div className="w-full max-w-7xl">
+          {/* Breadcrumb */}
           <div className="flex items-center text-left mb-4 sm:mb-6 px-2 sm:px-0">
             <Link
               href={"/"}
@@ -394,6 +274,7 @@ export default function BookingPage() {
           </div>
 
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100">
+            {/* Header Section */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                 <div>
@@ -417,6 +298,7 @@ export default function BookingPage() {
               </div>
             </div>
 
+            {/* Tab Navigation - Mobile Optimized */}
             <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 bg-gray-50 p-3 sm:p-4 border-b border-gray-200">
               <div className="flex flex-row gap-2 sm:gap-4 overflow-x-auto">
                 <button
@@ -475,6 +357,7 @@ export default function BookingPage() {
               </div>
             </div>
 
+            {/* Booking List */}
             <div className="p-3 sm:p-6">
               {loading ? (
                 <div className="flex justify-center py-10 opacity-70">
@@ -487,7 +370,9 @@ export default function BookingPage() {
                       key={service.lead_id}
                       className="border border-gray-100 bg-white rounded-2xl p-4 sm:p-6 hover:shadow-2xl transition-shadow group relative overflow-hidden"
                     >
+                      {/* Content */}
                       <div className="relative z-10 flex flex-col h-full">
+                        {/* Booking ID for Active bookings */}
                         {activeTab === "active" && (
                           <div className="flex items-center justify-between mb-3 sm:mb-4">
                             <div className="flex items-center gap-1 sm:gap-2">
@@ -513,6 +398,7 @@ export default function BookingPage() {
                           </div>
                         </div>
 
+                        {/* Status + Amount */}
                         <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center mb-4 gap-2 xs:gap-0">
                           <StatusBadge status={service.status} />
                           <p className="text-base sm:text-lg font-bold text-purple-600 flex items-center">
@@ -521,6 +407,7 @@ export default function BookingPage() {
                           </p>
                         </div>
 
+                        {/* View Button */}
                         <button
                           onClick={() => handleViewBooking(service)}
                           className="w-full bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-medium py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -533,16 +420,43 @@ export default function BookingPage() {
                   ))}
                 </div>
               ) : (
-                renderEmptyState()
+                <div className="text-center py-8 sm:py-10">
+                  <div className="mx-auto bg-gray-100 p-3 sm:p-4 rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-4">
+                    <FiClock className="text-gray-400 text-2xl sm:text-3xl" />
+                  </div>
+                  <h4 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
+                    No{" "}
+                    {activeTab === "active"
+                      ? "Active"
+                      : activeTab === "delivered"
+                      ? "Completed"
+                      : "Cancelled"}{" "}
+                    Bookings
+                  </h4>
+                  <p className="text-sm sm:text-base text-gray-500 mb-6 max-w-md mx-auto px-4">
+                    {activeTab === "active"
+                      ? "You don't have any active bookings at the moment."
+                      : activeTab === "delivered"
+                      ? "Your completed services will appear here."
+                      : "Cancelled services will appear here."}
+                  </p>
+                  <Link href={"/service"}>
+                    <button className="bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-medium py-2.5 px-6 rounded-full transition-all shadow-lg hover:shadow-2xl text-sm sm:text-base">
+                      Explore Our Services
+                    </button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Mobile Optimized Booking Details Modal */}
       {viewModalOpen && selectedBooking && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-4 sm:p-6 rounded-t-2xl sticky top-0 z-10">
               <div className="flex justify-between items-center">
                 <div>
@@ -563,6 +477,7 @@ export default function BookingPage() {
             </div>
 
             <div className="p-4 sm:p-6">
+              {/* User Information - Mobile Optimized Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-start gap-3">
@@ -666,6 +581,7 @@ export default function BookingPage() {
                 </div>
               </div>
 
+              {/* Images Section - Mobile Optimized */}
               <div className="mb-6 sm:mb-8">
                 <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between mb-4 gap-3">
                   <h4 className="text-lg font-semibold">Service Images</h4>
@@ -705,6 +621,7 @@ export default function BookingPage() {
                 </div>
               </div>
 
+              {/* Action Buttons - Mobile Optimized */}
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center">
                 <button
                   onClick={handleCallSupport}
@@ -741,3 +658,5 @@ export default function BookingPage() {
     </>
   );
 }
+
+export default Booking;

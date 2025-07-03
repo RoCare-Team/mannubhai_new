@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
+ac
     const data = await response.json();
     res.status(200).json(data);
   } catch (error) {
