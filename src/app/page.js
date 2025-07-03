@@ -21,11 +21,11 @@ export const metadata = {
     template: "%s | Mannubhai Services",
   },
       alternates: {
-    canonical: "https://mannubhai-new.vercel.app/", 
+    canonical: "https://www.mannubhai.com/", 
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
   description:
     "Mannubhai is your one-stop destination for expert local services in India. Book trusted professionals for appliance repair, beauty services, home care, and more.",
@@ -37,7 +37,7 @@ export const metadata = {
     "home care",
     "handyman services",
   ],
-  metadataBase: new URL('https://mannubhai-new.vercel.app/'),
+  metadataBase: new URL('https://www.mannubhai.com/'),
   openGraph: {
     title: "Mannubhai - Professional Home Services",
     description: "Book trusted professionals for all your home service needs",
