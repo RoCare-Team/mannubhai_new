@@ -149,7 +149,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
         ) : subServices.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No appliance services found.</p>
         ) : (
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 sm:gap-6">
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-4 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}

@@ -154,7 +154,7 @@ export default function HomecareServices({ hideBrightBanner = false, onServiceCl
             <p className="text-center text-sm text-gray-500 mb-4">
               Loading services…
             </p>
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-6">
               {skeletonItems}
             </div>
           </>
@@ -163,7 +163,7 @@ export default function HomecareServices({ hideBrightBanner = false, onServiceCl
             No home care services found.
           </p>
         ) : (
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo ,useRef} from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -152,8 +152,8 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
           </p>
         ) : (
           <>
-            {/* Mobile - Grid View */}
-            <div className="sm:hidden grid grid-cols-2 xs:grid-cols-3 gap-3">
+            {/* Mobile - Grid View (4 items per row) */}
+            <div className="sm:hidden grid grid-cols-4 gap-3">
               {subServices.map((service) => (
                 <button
                   key={service.id}
@@ -161,14 +161,14 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
                   className="bg-white rounded-2xl shadow-md p-2 flex flex-col items-center transition hover:scale-105 hover:shadow-xl h-full"
                   aria-label={`View ${service.ServiceName}`}
                 >
-                  <div className="relative w-16 h-16 bg-blue-50 rounded-full mb-2">
+                  <div className="relative w-12 h-12 bg-blue-50 rounded-full mb-2">
                     <Image
                       src={service.ServiceIcon}
                       alt={service.ServiceName}
                       fill
                       className="object-contain"
                       loading="lazy"
-                      sizes="(max-width: 640px) 64px"
+                      sizes="(max-width: 640px) 48px"
                     />
                   </div>
                   <p className="text-center text-[10px] font-semibold leading-tight text-gray-700 break-words w-full">
