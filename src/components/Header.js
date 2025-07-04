@@ -242,17 +242,6 @@ const Header = () => {
   router.push("/"); // Add this line to redirect to home page
 }
 
-  const getbookingdata = async () => {
-    const user_no = localStorage.getItem("userPhone");
-    const payload = { user_no };
-    const res = await fetch("https://www.waterpurifierservicecenter.in/customer/app/all_complaints_mb.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    localStorage.setItem("all_cmpl", JSON.stringify(data.complainDetails));
-  };
 
   const locationText = location.loading
     ? "Detecting location..."
@@ -267,12 +256,12 @@ const Header = () => {
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
           <MobileHeader {...{ cartCount, locationText, setShowLocationSearch, location, setShowLogin, setIsMobileMenuOpen, user }} />
-          <DesktopHeader {...{ cartCount, locationText, setShowLocationSearch, setShowLogin, user, navigationItems, pathname, handleLogout, getbookingdata, location }} />
+          <DesktopHeader {...{ cartCount, locationText, setShowLocationSearch, setShowLogin, user, navigationItems, pathname, handleLogout, location }} />
         </div>
       </header>
 
       {showLocationSearch && <LocationSearch onClose={() => setShowLocationSearch(false)} onSelectCity={handleCitySelection} />}
-      <MobileMenu {...{ isMobileMenuOpen, setIsMobileMenuOpen, user, setShowLogin, navigationItems, locationText, setShowLocationSearch, handleLogout, getbookingdata }} />
+      <MobileMenu {...{ isMobileMenuOpen, setIsMobileMenuOpen, user, setShowLogin, navigationItems, locationText, setShowLocationSearch, handleLogout}} />
       <MobileBottomNavigation {...{ navigationItems, pathname }} />
       <LoginPopup show={showLogin} onClose={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />
 

@@ -13,7 +13,7 @@ import "swiper/css/navigation";
 import "../_components/Home/swiper-custom.css";
 import BeautyCare from "../_components/Home/BeautyCare";
 import Head from "./head";
-
+import Link from "next/link";
 // Constants moved outside component to prevent recreation on every render
 const SUBSERVICE_IMAGES = {
   "Women Salon At Home": "/BeautyCare/women salon at home.png",
@@ -27,7 +27,7 @@ const SUBSERVICE_IMAGES = {
 
 const DEFAULT_SERVICE_IMAGE = "/BeautyCare/default.png";
 const LOADER_LOGO = "/logo.png";
-const MAIN_BANNER = "/All Front Banners/BeautyServices.png";
+const MAIN_BANNER = "/All Front Banners/BeautyServices.webp";
 
 const DESIRED_ORDER = [
   "Women Salon At Home",
@@ -40,12 +40,33 @@ const DESIRED_ORDER = [
 ];
 
 const FEATURED_SERVICES = [
-  { src: "/BeautyCare/hairstudioforwomen.webp", alt: "hairstudio at home" },
-  { src: "/BeautyCare/haircutathome.webp", alt: "haircut at home" },
-  { src: "/BeautyCare/massageforman.webp", alt: "massage for man" },
-  { src: "/BeautyCare/spaforwoman.webp", alt: "spa for women" },
-  { src: "/BeautyCare/waxing.webp", alt: "waxing and facials" },
+  {
+    src: "/BeautyCare/hairstudioforwomen.webp",
+    alt: "hairstudio at home",
+    link: "/hair-studio",
+  },
+  {
+    src: "/BeautyCare/haircutathome.webp",
+    alt: "haircut at home",
+    link: "/men-salon-at-home",
+  },
+  {
+    src: "/BeautyCare/massageforman.webp",
+    alt: "massage for man",
+    link: "/men-massage-at-home",
+  },
+  {
+    src: "/BeautyCare/spaforwoman.webp",
+    alt: "spa for women",
+    link: "/spa-for-women",
+  },
+  {
+    src: "/BeautyCare/waxing.webp",
+    alt: "waxing and facials",
+    link: "/women-salon-at-home",
+  },
 ];
+
 
 const getSubServiceImage = (type) => SUBSERVICE_IMAGES[type] || DEFAULT_SERVICE_IMAGE;
 
@@ -246,12 +267,12 @@ const Beauty = () => {
 
               {/* Main Banner */}
               <div className="hidden lg:block hero-section-main-img flex-1 w-full order-1 lg:order-2 relative">
-                <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
+                <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[800px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
                   <Image
                     src={MAIN_BANNER}
                     alt="Professional home beauty services"
                     fill
-                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
                     priority
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
                   />
@@ -286,20 +307,22 @@ const Beauty = () => {
                   1280: { slidesPerView: 3, spaceBetween: 32 },
                 }}
               >
-                {FEATURED_SERVICES.map((banner, idx) => (
-                  <SwiperSlide key={idx}>
-                    <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                      <Image
-                        src={banner.src}
-                        alt={banner.alt}
-                        width={300}
-                        height={200}
-                        className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))}
+            {FEATURED_SERVICES.map((banner, idx) => (
+  <SwiperSlide key={idx}>
+    <Link href={banner.link} passHref>
+      <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+        <Image
+          src={banner.src}
+          alt={banner.alt}
+          width={300}
+          height={200}
+          className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+      </div>
+    </Link>
+  </SwiperSlide>
+))}
               </Swiper>
             </div>
           </div>
@@ -342,14 +365,18 @@ const ContentSections = () => {
     {
       title: "Welcome to Mannubhai: Your Trusted Partner for Beauty Care Services at Home",
       content: [
-        "At Mannubhai, we believe beauty and relaxation should come to you. Our mission is to deliver top-notch beauty and wellness services that you can enjoy in the comfort of your home. Whether you're preparing for a special occasion, need some self-care, or simply want to unwind, Mannubhai is here to make it happen.",
-        "Our team of experienced professionals ensures that you get premium services customized to your needs. Let us pamper you with our exceptional offerings, designed for both men and women."
+        "At Mannubhai,we believe beauty and relaxation should come to you.Our mission is to deliver top-notch beauty and wellness services that you can enjoy in the comfort of your home.Whether you’re preparing for a special occasion,need some self-care,or simply want to unwind,Mannubhai is here to make it happen.",
+        "Our team of experienced professionals ensures that you get premium services customized to your needs.Let us pamper you with our exceptional offerings,designed for both men and women."
       ]
+    },
+    {
+      title: "Our Beauty Care Services",
+      content: []
     },
     {
       title: "Women Salon at Home",
       content: [
-        "Why step out when luxury can come to your doorstep? Our Women Salon at Home service brings the best salon experience to you. Whether it's haircuts, hairstyling, waxing, facials, threading, or other grooming needs, our trained beauticians use high-quality products and adhere to strict hygiene protocols to ensure your satisfaction.",
+        "Why step out when luxury can come to your doorstep?OurWomen Salon at Homeservice brings the best salon experience to you.Whether it’s haircuts,hairstyling,waxing,facials,threading,or other grooming needs,our trained beauticians use high-quality products and adhere to strict hygiene protocols to ensure your satisfaction."
       ],
       list: {
         title: "Popular Services for Women:",
@@ -360,25 +387,130 @@ const ContentSections = () => {
           "Threading for perfectly shaped eyebrows"
         ]
       },
-      closing: "Our beauticians are not just skilled but also friendly, ensuring you feel at ease throughout your salon experience."
+      closing: "Our beauticians are not just skilled but also friendly,ensuring you feel at ease throughout your salon experience."
     },
-    // Add all other sections in the same format
-    // ...
+    {
+      title: "Men Salon at Home",
+      content: [
+        "At Mannubhai,we understand that men,too,deserve top-notch grooming services.OurMen Salon at Homeservice caters to all your grooming needs,from stylish haircuts to beard trimming and facials.We bring the expertise of a professional barber directly to your home."
+      ],
+      list: {
+        title: "Popular Services for Men:",
+        items: [
+          "Modern and classic haircuts tailored to your style",
+          "Beard styling,trimming,and shaping",
+          "Skin-friendly facials to rejuvenate your skin",
+          "Head massages for ultimate relaxation"
+        ]
+      },
+      closing: "With Mannubhai,you can look sharp and feel confident without stepping out of your home."
+    },
+    {
+      title: "Makeup Service at Home",
+      content: [
+        "Be it a wedding,party,or corporate event,looking your best is non-negotiable.OurMakeup Service at Homeensures you shine on your special day.From subtle,natural looks to bold,glamorous transformations,our professional makeup artists use top-quality products to enhance your natural beauty."
+      ],
+      list: {
+        title: "Our Makeup Services Include:",
+        items: [
+          "Bridal makeup for your big day",
+          "Party makeup to dazzle every occasion",
+          "Natural,everyday makeup for a polished look",
+          "Hairstyling services to complement your makeup"
+        ]
+      },
+      closing: "With our expertise,you’re guaranteed to turn heads and make a lasting impression."
+    },
+    {
+      title: "Spa for Women",
+      content: [
+        "Relaxation and rejuvenation are just a call away with ourSpa for Womenservice.Our expert therapists bring a tranquil spa experience to your home,helping you unwind and recharge."
+      ],
+      list: {
+        title: "Our Spa Services Include:",
+        items: [
+          "Body massages to relieve stress and tension",
+          "Aromatherapy for a calming experience",
+          "Body scrubs for smooth and glowing skin",
+          "Detoxifying body wraps"
+        ]
+      },
+      closing: "Indulge in some well-deserved me-time with Mannubhai’s spa services,designed to leave you feeling refreshed and radiant."
+    },
+    {
+      title: "Men Massage at Home",
+      content: [
+        "Men,too,deserve a break!OurMen Massage at Homeservice is tailored to provide relaxation and relief after a long day.Whether it’s deep tissue therapy or a simple stress-relieving massage,our trained therapists ensure you feel rejuvenated."
+      ],
+      list: {
+        title: "Our Massage Options Include:",
+        items: [
+          "Swedish massage for overall relaxation",
+          "Deep tissue massage for muscle recovery",
+          "Head and shoulder massage to ease tension",
+          "Foot reflexology for stress relief"
+        ]
+      },
+      closing: "Experience the ultimate comfort as our therapists bring the spa experience to your living room."
+    },
+    {
+      title: "Best Hair Studio",
+      content: [
+        "At Mannubhai,your hair is in expert hands.Whether you’re looking for a trendy new look or a classic style,ourBest Hair Studioservice provides exceptional hair care at home."
+      ],
+      list: {
+        title: "Our Hair Services Include:",
+        items: [
+          "Haircuts for men,women,and kids",
+          "Hair coloring and highlights",
+          "Hair treatments for dryness,dandruff,and damage",
+          "Hair spa for soft,silky locks"
+        ]
+      },
+      closing: "Let our professionals bring out the best in your hair while ensuring you enjoy a salon-like experience at home."
+    },
+    {
+      title: "Manicure and Pedicure Services",
+      content: [
+        "Your hands and feet deserve some TLC,and ourManicure and Pedicure Servicesare here to provide just that.Our experts use the finest products and tools to leave your nails clean,shaped,and polished,while also caring for your skin."
+      ],
+      list: {
+        title: "Our Offerings Include:",
+        items: [
+          "Classic manicure and pedicure for basic care",
+          "Gel polish for long-lasting color",
+          "Nail art for a creative touch",
+          "Foot scrubs and exfoliation for soft,smooth feet"
+        ]
+      },
+      closing: "Experience a luxurious pampering session that leaves your hands and feet feeling fabulous."
+    },
+    {
+      title: "Why Choose Mannubhai?",
+      content: [
+        "At Mannubhai,we are committed to delivering exceptional beauty care experiences.Here’s what sets us apart:"],
+      list: {
+        items: [
+          "Professional Expertise",
+          "Convenience at Your Doorstep",
+          "Hygiene and Safety First",
+          "Customized Services",
+          "Affordable Luxury"
+        ]
+      }
+    },
     {
       title: "Book Your Appointment Today",
       content: [
-        "Ready to experience beauty and relaxation like never before? Booking your appointment with Mannubhai is simple:",
+        "Ready to experience beauty and relaxation like never before?Booking your appointment with Mannubhai is simple:",
+        "Visit our website and choose the service you need.",
+        "Select a date and time that works for you.",
+        "Relax and let us handle the rest."
       ],
-      list: {
-        items: [
-          "Visit our website and choose the service you need.",
-          "Select a date and time that works for you.",
-          "Relax and let us handle the rest."
-        ]
-      },
       closing: [
-        "At Mannubhai, we're committed to making you look and feel your best. Our services are available across multiple cities, ensuring that quality beauty care is always within your reach.",
-        "At Mannubhai, we don't just provide beauty services; we deliver experiences that rejuvenate your mind, body, and spirit. Trust us to make every day your best day."
+        "At Mannubhai,we’re committed to making you look and feel your best.Our services are available across multiple cities,ensuring that quality beauty care is always within your reach.",
+        "At Mannubhai,we don’t just provide beauty services;we deliver experiences that rejuvenate your mind,body,and spirit.Trust us to make every day your best day.",
+        "Book your appointment now and let us bring beauty to your doorstep."
       ]
     }
   ];
@@ -400,7 +532,6 @@ const ContentSections = () => {
                 {paragraph}
               </p>
             ))}
-            
             {section.list && (
               <>
                 {section.list.title && (

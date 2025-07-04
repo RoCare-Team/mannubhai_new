@@ -13,7 +13,7 @@ import "swiper/css/navigation";
 import "../_components/Home/swiper-custom.css";
 import HomecareServcies from "../_components/Home/HomecareServcies";
 import Head from "./head";
-
+import Link from "next/link";
 // Constants moved outside component
 const SUBSERVICE_IMAGES = {
   "Home Deep Cleaning": "/HomeCare/HOMEDEEPCLEANING.png",
@@ -26,7 +26,7 @@ const SUBSERVICE_IMAGES = {
 
 const DEFAULT_SERVICE_IMAGE = "/BeautyCare/default.png";
 const LOADER_LOGO = "/logo.png";
-const MAIN_BANNER = "/All Front Banners/HomeCareServices.png";
+const MAIN_BANNER = "/All Front Banners/HomeCareServices.webp";
 const PROMO_BANNER = "/HomeBanner/homecare.webp";
 
 const DESIRED_ORDER = [
@@ -39,13 +39,32 @@ const DESIRED_ORDER = [
 ];
 
 const FEATURED_SERVICES = [
-  { src: "/HomeCare/deepcleaning-services-banner.png", alt: "Deep cleaning services" },
-  { src: "/HomeCare/kitchen-cleaning-service-banner.png", alt: "Kitchen cleaning service" },
-  { src: "/HomeCare/pest-control-service-banner.png", alt: "Pest control service" },
-  { src: "/HomeCare/sofa-cleaning-service-banner.png", alt: "Sofa cleaning service" },
-  { src: "/HomeCare/Bathroom-service-banner.png", alt: "Bathroom cleaning service" },
+  {
+    src: "/HomeCare/deepcleaning-services-banner.png",
+    alt: "Deep cleaning services",
+    href: "/home-deep-cleaning",
+  },
+  {
+    src: "/HomeCare/kitchen-cleaning-service-banner.png",
+    alt: "Kitchen cleaning service",
+    href: "/kitchen-cleaning",
+  },
+  {
+    src: "/HomeCare/pest-control-service-banner.png",
+    alt: "Pest control service",
+    href: "/pest-control-service",
+  },
+  {
+    src: "/HomeCare/sofa-cleaning-service-banner.png",
+    alt: "Sofa cleaning service",
+    href: "/sofa-cleaning",
+  },
+  {
+    src: "/HomeCare/Bathroom-service-banner.png",
+    alt: "Bathroom cleaning service",
+    href: "/bathroom-cleaning",
+  },
 ];
-
 const CONTENT_SECTIONS = [
   {
     title: "Home Care Services",
@@ -332,12 +351,12 @@ const HeroSection = ({ subServices, handleSubServiceClick }) => (
 
         {/* Main Banner */}
         <div className="hero-section-main-img flex-1 w-full order-1 lg:order-2 relative">
-          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
+          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[800px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
             <Image
               src={MAIN_BANNER}
               alt="Professional home care services"
               fill
-              className="object-cover hover:scale-105 transition-transform duration-500"
+              className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
               priority
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
             />
@@ -380,16 +399,18 @@ const ServicesSlider = () => (
         >
           {FEATURED_SERVICES.map((banner, idx) => (
             <SwiperSlide key={idx}>
-              <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                <Image
-                  src={banner.src}
-                  alt={banner.alt}
-                  width={300}
-                  height={200}
-                  className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
+              <Link href={banner.href} className="block group">
+                <div className="rounded-lg overflow-hidden shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                  <Image
+                    src={banner.src}
+                    alt={banner.alt}
+                    width={300}
+                    height={200}
+                    className="object-cover w-full h-auto group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+              </Link>
             </SwiperSlide>
           ))}
         </Swiper>
@@ -397,6 +418,7 @@ const ServicesSlider = () => (
     </div>
   </section>
 );
+
 
 const PromotionalBanner = () => (
   <section className="w-full px-4 sm:px-6 lg:px-8 my-8 sm:my-12" aria-label="Promotional offer">

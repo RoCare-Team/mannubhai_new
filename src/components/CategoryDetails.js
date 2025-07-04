@@ -338,95 +338,90 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
       <div className="mx-auto px-4 sm:px-6 py-8">
         <div className="w-full flex flex-col lg:flex-row gap-8">
           {/* Services Navigation Sidebar */}
-        <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
-  <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-    {/* Header */}
-    <div className="flex items-center gap-4 mb-6">
-      <div className="bg-blue-100 p-2 rounded-lg">
-        <FiCheck className="h-6 w-6 text-blue-600" />
-      </div>
-      <div>
-        <h2 className="text-lg md:text-xl font-semibold text-gray-800">Services</h2>
-        <p className="text-sm text-gray-500">{category.category_name}</p>
-      </div>
-    </div>
+          <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              {/* Header */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <FiCheck className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-xl font-semibold text-gray-800">Services</h2>
+                  <p className="text-sm text-gray-500">{category.category_name}</p>
+                </div>
+              </div>
 
-    {/* Services Grid */}
-    <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-3 gap-2">
-      {orderedServiceNames.map((serviceName) => {
-        const group = serviceGroups[serviceName];
-        return (
-     <button
-  key={serviceName}
-  onClick={() => scrollToService(serviceName)}
-  className={`flex flex-col items-center rounded-lg transition-all border ${
-    selectedService === serviceName
-      ? "bg-blue-50 border-blue-200 text-blue-700 font-semibold"
-      : "hover:bg-gray-50 border-gray-200 text-gray-700"
-  }`}
->
-  <div className="w-full flex items-center justify-center mb-2 bg-white rounded-lg h-20">
-    <Image
-      src={group.image}
-      alt={serviceName}
-      width={56}
-      height={56}
-      className="object-contain w-14 h-14"
-    />
-  </div>
-  <span className="text-xs font-medium text-center leading-tight">
-    {group.displayName}
-  </span>
-</button>
+              {/* Services Grid - 3 cols mobile, 4 cols desktop */}
+              <div className="grid grid-cols-3 gap-2">
+                {orderedServiceNames.map((serviceName) => {
+                  const group = serviceGroups[serviceName];
+                  return (
+                    <button
+                      key={serviceName}
+                      onClick={() => scrollToService(serviceName)}
+                      className={`flex flex-col items-center rounded-lg transition-all border p-1 ${
+                        selectedService === serviceName
+                          ? "bg-blue-50 border-blue-200 text-blue-700 font-semibold"
+                          : "hover:bg-gray-50 border-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <div className="w-full flex items-center justify-center mb-1 bg-white rounded-lg h-16 md:h-20">
+                        <Image
+                          src={group.image}
+                          alt={serviceName}
+                          width={56}
+                          height={56}
+                          className="object-contain w-12 h-12 md:w-14 md:h-14"
+                        />
+                      </div>
+                      <span className="text-[14px] md:text-[10px] font-semibold text-center leading-tight px-1">
+                        {group.displayName}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-
-        );
-      })}
-    </div>
-  </div>
-
-  {/* Optional Category Image */}
-  {category.imageUrl && (
-    <div className="hidden lg:block relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-100 mt-6">
-      <Image
-        src={category.imageUrl}
-        alt={`${category.name} service illustration`}
-        fill
-        className="object-cover"
-      />
-    </div>
-  )}
-</aside>
-
-
+            {/* Optional Category Image */}
+            {category.imageUrl && (
+              <div className="hidden lg:block relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-100 mt-6">
+                <Image
+                  src={category.imageUrl}
+                  alt={`${category.name} service illustration`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+          </aside>
           {/* Main Content Area */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
               {/* Hero Section */}
-              <div className="relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
-                <Image
-                  src={
-                    category.banner?.trim() ? category.banner : defaultBanner
-                  }
-                  alt={`${category.category_name || "Category"} banner`}
-                  fill
-                  className="object-cover"
-                  priority
-                  onError={(e) => {
-                    e.currentTarget.src = defaultBanner;
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6 sm:p-8">
-                  <div className="max-w-2xl">
-                    <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                      Premium {category.category_name} Services
-                    </h1>
-                    <p className="text-white/90 sm:text-lg">
-                      Expert services at your doorstep
-                    </p>
-                  </div>
-                </div>
-              </div>
+<div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
+  <Image
+    src={category.banner?.trim() ? category.banner : defaultBanner}
+    alt={`${category.category_name || "Category"} banner`}
+    fill
+    className="object-cover"
+    priority
+    onError={(e) => {
+      e.currentTarget.src = defaultBanner;
+    }}
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6 sm:p-8">
+    <div className="max-w-2xl">
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
+        Premium {category.category_name} Services
+      </h1>
+      <p className="text-white/90 sm:text-lg">
+        Expert services at your doorstep
+      </p>
+    </div>
+  </div>
+</div>
+
 
               {/* Services List */}
               {orderedServiceNames.map((serviceName) => {
@@ -510,9 +505,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                                 </button>
 
                                 <div className="text-center">
-                                  <span className="block text-[11px] text-gray-500">
-                                    Starting from
-                                  </span>
+                                
                                   <span className="text-sm font-semibold text-gray-900">
                                     ₹{service.price}
                                   </span>

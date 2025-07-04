@@ -21,7 +21,10 @@ import {
   FiImage,
   FiHash,
   FiAlertCircle,
-  FiWifiOff
+  FiWifiOff,
+  FiTool,
+  FiTag,
+  FiUserCheck
 } from "react-icons/fi";
 
 function Booking() {
@@ -54,76 +57,67 @@ function Booking() {
     fetchBookings();
   }, [activeTab]);
 
-const fetchBookings = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    // Get phone number from localStorage
-    const phone = localStorage.getItem("userPhone");
-    if (!phone) {
-      router.push("/");
-      return;
-    }
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const phone = localStorage.getItem("userPhone");
+      if (!phone) {
+        router.push("/");
+        return;
+      }
 
-    // API Request
-    const response = await fetch('/api/bookings/', {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_no: phone,
-        status: activeTab
-      }),
-    });
+      const statusMap = {
+        "Active": 1,
+        "Completed": 2,
+        "Cancelled": 3
+      };
 
-    // Handle HTTP errors
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `Request failed with status ${response.status}`
+      const response = await fetch('/api/bookings/', {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_no: phone,
+          status: statusMap[activeTab]
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data?.complainDetails?.length) {
+        throw new Error('No booking data received');
+      }
+
+      setBookings(data.complainDetails.map(item => ({
+        id: item.lead_id || "N/A",
+        status: item.status || "Unknown",
+        serviceType: item.lead_type || "Unknown Service",
+        bookingDate: formatDate(item.lead_add_date),
+        amount: item.payment_with_wallet_discount || "0",
+        paymentStatus: item.payment_status || "Pending",
+        paymentMode: item.payment_mode || "N/A",
+        image: item.image || null,
+        call_to_number: "+911234567890"
+      })));
+    } catch (err) {
+      console.error("Booking fetch error:", err);
+      setError(
+        err.message === "Failed to fetch" 
+          ? "Network error. Please check your connection."
+          : err.message || "Failed to load bookings. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Process response data
-    const data = await response.json();
-    
-    // Check if we have the expected data structure
-    if (!data || !data.complainDetails || !Array.isArray(data.complainDetails)) {
-      throw new Error('Invalid data structure received from server');
-    }
-
-    // Transform data with fallbacks
-    const transformedData = data.complainDetails.map(item => ({
-      id: item.lead_id || item.complain_id || "N/A",
-      status: item.status || "Unknown",
-      serviceType: item.lead_type || "Unknown Service",
-      bookingDate: formatDate(item.lead_add_date),
-      amount: item.payment_with_wallet_discount || "0",
-      name: "N/A", // Not present in API response
-      address: "N/A", // Not present in API response
-      mobile: "N/A", // Not present in API response
-      email: "N/A", // Not present in API response
-      appointmentDate: "N/A", // Not present in API response
-      paymentStatus: item.payment_status || "Pending",
-      paymentMode: item.payment_mode || "N/A",
-      image: item.image || null,
-      call_to_number: "+911234567890" // Default support number
-    }));
-
-    setBookings(transformedData);
-  } catch (err) {
-    console.error("Booking fetch error:", err);
-    setError(
-      err.message === "Failed to fetch" 
-        ? "Network error. Please check your connection."
-        : err.message || "Failed to load bookings. Please try again."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     try {
@@ -133,9 +127,57 @@ const fetchBookings = async () => {
     }
   };
 
-  const handleViewBooking = (booking) => {
-    setSelectedBooking(booking);
-    setViewModalOpen(true);
+  const handleViewBooking = async (booking) => {
+    try {
+      setLoading(true);
+      
+      const phone = localStorage.getItem("userPhone");
+      if (!phone) {
+        router.push("/");
+        return;
+      }
+
+      const response = await fetch('/api/booking-details', {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_no: phone,
+          lead_id: booking.id
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data?.error === false && data?.service_details?.[0]) {
+        const details = data.service_details[0];
+        setSelectedBooking({
+          ...booking,
+          name: details.name || "N/A",
+          address: details.address || "N/A",
+          mobile: details.mobile || "N/A",
+          date: details.appointment_date || "N/A",
+          time: details.appointment_time || "N/A",
+          payment_status: details.payment_status || "Pending",
+          image: details.product_image || booking.image,
+          email: details.email || "N/A",
+          call_to_number: details.call_to_number || "+911234567890"
+        });
+      } else {
+        setSelectedBooking(booking);
+      }
+    } catch (err) {
+      console.error("Failed to fetch booking details:", err);
+      setSelectedBooking(booking);
+    } finally {
+      setLoading(false);
+      setViewModalOpen(true);
+    }
   };
 
   const handleTabClick = (tab) => {
@@ -288,19 +330,13 @@ const fetchBookings = async () => {
     <>
       <Head>
         <title>Booking History | Your Service Bookings</title>
-        <meta
-          name="description"
-          content="View your active, completed, and cancelled service bookings."
-        />
+        <meta name="description" content="View your active, completed, and cancelled service bookings." />
       </Head>
 
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-2 sm:p-4">
         <div className="w-full max-w-7xl">
           <div className="flex items-center text-left mb-4 sm:mb-6 px-2 sm:px-0">
-            <Link
-              href={"/"}
-              className="flex items-center text-gray-600 hover:text-purple-600 transition-colors text-sm sm:text-base"
-            >
+            <Link href={"/"} className="flex items-center text-gray-600 hover:text-purple-600 transition-colors text-sm sm:text-base">
               <FiHome className="mr-1 sm:mr-2 text-sm sm:text-base" />
               <span>Home</span>
             </Link>
@@ -312,21 +348,15 @@ const fetchBookings = async () => {
             <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    Your Service Bookings
-                  </h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">Your Service Bookings</h3>
                   <p className="text-purple-200 mt-1 text-sm sm:text-base">
-                    {activeTab === "Active"
-                      ? "Active & upcoming services"
-                      : activeTab === "Completed"
-                      ? "Completed services"
-                      : "Cancelled services"}
+                    {activeTab === "Active" ? "Active & upcoming services" : 
+                     activeTab === "Completed" ? "Completed services" : "Cancelled services"}
                   </p>
                 </div>
                 <div className="bg-white/20 p-2 rounded-lg self-end sm:self-auto">
                   <span className="text-white text-sm font-medium">
-                    {bookings.length}{" "}
-                    {bookings.length === 1 ? "booking" : "bookings"}
+                    {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
                   </span>
                 </div>
               </div>
@@ -334,59 +364,33 @@ const fetchBookings = async () => {
 
             <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 bg-gray-50 p-3 sm:p-4 border-b border-gray-200">
               <div className="flex flex-row gap-2 sm:gap-4 overflow-x-auto">
-                <button
-                  className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 transition-all whitespace-nowrap ${
-                    activeTab === "Active"
-                      ? "bg-purple-600 text-white shadow-lg"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-purple-100"
-                  }`}
-                  onClick={() => handleTabClick("Active")}
-                >
-                  <FiClock className="text-xs sm:text-sm" />
-                  <span className="hidden xs:inline">Active</span>
-                  <span className="xs:hidden">Act</span>
-                  {activeTab === "Active" && (
-                    <span className="bg-white text-purple-700 font-bold px-1.5 sm:px-2 py-0.5 text-xs rounded-full">
-                      {bookings.length}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 transition-all whitespace-nowrap ${
-                    activeTab === "Completed"
-                      ? "bg-green-600 text-white shadow-lg"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-green-100"
-                  }`}
-                  onClick={() => handleTabClick("Completed")}
-                >
-                  <FiCheckCircle className="text-xs sm:text-sm" />
-                  <span className="hidden xs:inline">Completed</span>
-                  <span className="xs:hidden">Done</span>
-                  {activeTab === "Completed" && (
-                    <span className="bg-white text-green-700 font-bold px-1.5 sm:px-2 py-0.5 text-xs rounded-full">
-                      {bookings.length}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 transition-all whitespace-nowrap ${
-                    activeTab === "Cancelled"
-                      ? "bg-red-600 text-white shadow-lg"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-red-100"
-                  }`}
-                  onClick={() => handleTabClick("Cancelled")}
-                >
-                  <FiXCircle className="text-xs sm:text-sm" />
-                  <span className="hidden xs:inline">Cancelled</span>
-                  <span className="xs:hidden">Can</span>
-                  {activeTab === "Cancelled" && (
-                    <span className="bg-white text-red-700 font-bold px-1.5 sm:px-2 py-0.5 text-xs rounded-full">
-                      {bookings.length}
-                    </span>
-                  )}
-                </button>
+                {["Active", "Completed", "Cancelled"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 transition-all whitespace-nowrap ${
+                      activeTab === tab
+                        ? `bg-${
+                            tab === "Active" ? "purple" : 
+                            tab === "Completed" ? "green" : "red"
+                          }-600 text-white shadow-lg`
+                        : "bg-white text-gray-600 border border-gray-200 hover:bg-purple-100"
+                    }`}
+                    onClick={() => handleTabClick(tab)}
+                  >
+                    {tab === "Active" ? <FiClock /> : 
+                     tab === "Completed" ? <FiCheckCircle /> : <FiXCircle />}
+                    <span className="hidden xs:inline">{tab}</span>
+                    <span className="xs:hidden">{tab.slice(0, 3)}</span>
+                    {activeTab === tab && (
+                      <span className={`bg-white text-${
+                        tab === "Active" ? "purple" : 
+                        tab === "Completed" ? "green" : "red"
+                      }-700 font-bold px-1.5 sm:px-2 py-0.5 text-xs rounded-full`}>
+                        {bookings.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -398,18 +402,13 @@ const fetchBookings = async () => {
               ) : bookings.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                   {bookings.map((service) => (
-                    <div
-                      key={service.id}
-                      className="border border-gray-100 bg-white rounded-2xl p-4 sm:p-6 hover:shadow-2xl transition-shadow group relative overflow-hidden"
-                    >
+                    <div key={service.id} className="border border-gray-100 bg-white rounded-2xl p-4 sm:p-6 hover:shadow-2xl transition-shadow group relative overflow-hidden">
                       <div className="relative z-10 flex flex-col h-full">
                         {activeTab === "Active" && (
                           <div className="flex items-center justify-between mb-3 sm:mb-4">
                             <div className="flex items-center gap-1 sm:gap-2">
                               <FiHash className="text-purple-600 text-xs sm:text-sm" />
-                              <span className="text-xs sm:text-sm font-mono text-gray-600">
-                                ID: {service.id}
-                              </span>
+                              <span className="text-xs sm:text-sm font-mono text-gray-600">ID: {service.id}</span>
                             </div>
                           </div>
                         )}
@@ -456,154 +455,185 @@ const fetchBookings = async () => {
       </div>
 
       {viewModalOpen && selectedBooking && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-4 sm:p-6 rounded-t-2xl sticky top-0 z-10">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    Booking Details
-                  </h3>
-                  <p className="text-purple-200 text-sm sm:text-base">
-                    ID: #{selectedBooking.id}
-                  </p>
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+    <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-xl">
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-5 sm:p-6 rounded-t-2xl sticky top-0 z-10">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">Booking Summary</h3>
+            <p className="text-indigo-100 mt-1">ID: #{selectedBooking.id}</p>
+          </div>
+          <button
+            onClick={() => setViewModalOpen(false)}
+            className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+            aria-label="Close modal"
+          >
+            <FiX className="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="p-5 sm:p-6">
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-14 h-14 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <>
+            {/* Two-column layout for booking info */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Left column - Customer details */}
+              <div className="space-y-5">
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <FiUser className="text-indigo-600" />
+                    Customer Information
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</p>
+                      <p className="font-medium text-gray-900 mt-1">{selectedBooking.name || "Not provided"}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</p>
+                      <p className="font-medium text-gray-900 mt-1">{selectedBooking.mobile || "Not provided"}</p>
+                      {selectedBooking.email && (
+                        <p className="text-sm text-gray-600 mt-1 break-all">{selectedBooking.email}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</p>
+                      <p className="font-medium text-gray-900 mt-1 whitespace-pre-line">
+                        {selectedBooking.address || "Not provided"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setViewModalOpen(false)}
-                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-                >
-                  <FiX className="text-lg sm:text-xl" />
-                </button>
               </div>
-            </div>
 
-            <div className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiUser className="text-purple-600" />
+              {/* Right column - Booking details */}
+              <div className="space-y-5">
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <FiCalendar className="text-indigo-600" />
+                    Appointment Details
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {selectedBooking.date || "Not set"}
+                        </div>
+                        {selectedBooking.time && (
+                          <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {selectedBooking.time}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Customer Name</p>
-                      <p className="font-semibold truncate">
-                        {selectedBooking.name || "N/A"}
-                      </p>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <PaymentStatusBadge status={selectedBooking.payment_status} />
+                        <span className="font-bold text-gray-900">₹{selectedBooking.amount || "0"}</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiMapPin className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Address</p>
-                      <p className="font-semibold text-sm leading-relaxed break-words">
-                        {selectedBooking.address || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiCalendar className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Appointment Date</p>
-                      <p className="font-semibold text-sm break-words">
-                        {selectedBooking.appointmentDate || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiPhone className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Contact</p>
-                      <p className="font-semibold break-all">
-                        {selectedBooking.mobile || "N/A"}
-                      </p>
-                      <p className="text-sm text-gray-500 break-all">
-                        {selectedBooking.email || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiCreditCard className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Payment Status</p>
-                      <div className="flex flex-col xs:flex-row xs:items-center gap-2">
-                        <PaymentStatusBadge status={selectedBooking.paymentStatus} />
-                        <span className="font-semibold">₹{selectedBooking.amount || "0"}</span>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
+                      <div className="mt-1">
+                        <StatusBadge status={selectedBooking.status} />
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiCheckCircle className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Service Status</p>
-                      <StatusBadge status={selectedBooking.status} />
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                      <FiPhone className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-gray-500">Support Number</p>
-                      <p className="font-semibold text-blue-600 break-all">
-                        {selectedBooking.call_to_number || "N/A"}
-                      </p>
-                    </div>
+                {/* Support contact card */}
+                <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                  <h4 className="text-lg font-semibold text-indigo-800 mb-3 flex items-center gap-2">
+                    <FiPhone className="text-indigo-600" />
+                    Need Help?
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Contact our support team for any assistance with your booking.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <FiPhone className="text-indigo-600 flex-shrink-0" />
+                    <a 
+                      href={`tel:${selectedBooking.call_to_number}`}
+                      className="text-lg font-bold text-indigo-700 hover:text-indigo-800 transition-colors"
+                    >
+                      {selectedBooking.call_to_number}
+                    </a>
                   </div>
                 </div>
-              </div>
-
-              {selectedBooking.image && (
-                <div className="mb-6 sm:mb-8">
-                  <h4 className="text-lg font-semibold">Service Image</h4>
-                  <img
-                    src={selectedBooking.image}
-                    alt="Service"
-                    className="w-full h-48 object-cover rounded-lg border mt-2"
-                  />
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center">
-                <button
-                  onClick={handleCallSupport}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
-                >
-                  <FiPhone className="text-sm" />
-                  Call Support
-                </button>
-
-                {selectedBooking.status === "Active" && (
-                  <button
-                    onClick={() => handleCancelBooking(selectedBooking.id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
-                  >
-                    <FiXCircle className="text-sm" />
-                    Cancel Booking
-                  </button>
-                )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Service image section */}
+            {selectedBooking.image && (
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <FiImage className="text-indigo-600" />
+                  Service Reference
+                </h4>
+                <div className="relative group">
+                  <img
+                    src={selectedBooking.image}
+                    alt="Service reference"
+                    className="w-full h-64 sm:h-72 object-cover rounded-xl border border-gray-200 shadow-sm transition-transform group-hover:shadow-md"
+                    onError={(e) => {
+                      e.target.src = 'https://www.waterpurifierservicecenter.in/customer_app_images/service_and_repair.jpg';
+                      e.target.className = 'w-full h-64 sm:h-72 object-contain rounded-xl border border-gray-200 bg-gray-100 p-4';
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => window.open(selectedBooking.image, '_blank')}
+                      className="bg-white/90 hover:bg-white text-indigo-600 px-4 py-2 rounded-full shadow-md flex items-center gap-2 transition-all"
+                    >
+                      <FiMaximize2 size={16} />
+                      <span className="text-sm font-medium">View Full Size</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <button
+                onClick={handleCallSupport}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
+              >
+                <FiPhone size={18} />
+                <span className="font-medium">Call Support</span>
+              </button>
+
+              {selectedBooking.status === "Active" && (
+                <button
+                  onClick={() => handleCancelBooking(selectedBooking.id)}
+                  className="flex-1 bg-white border border-gray-300 hover:border-red-300 hover:bg-red-50 text-red-600 px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
+                >
+                  <FiXCircle size={18} />
+                  <span className="font-medium">Cancel Booking</span>
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 }
