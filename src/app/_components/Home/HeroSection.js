@@ -78,19 +78,13 @@ const HeroSection = () => {
     if (sectionId) {
       const section = document.getElementById(sectionId);
       if (section) {
-        // First scroll to the section
         section.scrollIntoView({ behavior: 'smooth' });
-        
-        // Add highlight class
         section.classList.add('highlight-section');
         
-        // Remove highlight after animation
         setTimeout(() => {
           section.classList.remove('highlight-section');
         }, 2000);
         
-        // Focus for accessibility
-     
         section.focus();
       }
     }
@@ -102,21 +96,25 @@ const HeroSection = () => {
   };
 
   const displayServices = loading || error ? [] : services;
+
   return (
     <section className="relative mt-0 pt-0">
       {/* Hero Section */}
       <div className="hero-section w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0">
         <div className="hero-section-container max-w-7xl mx-auto mt-5">
+          
           {/* Mobile Header - Hidden on mobile */}
           <header className="hidden">
-            <h1 className="text-base sm:text-lg  text[20px]font-bold leading-tight text-center text-gradient">
+            <h1 className="text-base sm:text-lg text[20px]font-bold leading-tight text-center text-gradient">
               Home services at your doorstep
             </h1>
           </header>
 
           <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-12">
+            
             {/* Left Content */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
+              
               {/* Desktop Header - Hidden on mobile */}
               <header className="hidden md:flex items-center gap-3 mb-6 lg:mb-8">
                 <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-gradient">
@@ -126,12 +124,13 @@ const HeroSection = () => {
 
               {/* Services Section */}
               <section className="services-part mb-6 lg:mb-8 mt-4 sm:mt-6 md:mt-0">
+                
                 {/* Mobile Only Heading */}
                 <div className="sm:hidden text-center mb-4">
-                 <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-5">
-                  <span>Our Services</span>
-                  <span>👨‍🔧</span>
-                </h2>
+                  <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-5">
+                    <span>Our Services</span>
+                    <span>👨‍🔧</span>
+                  </h2>
                 </div>
 
                 {/* Desktop Heading */}
@@ -141,6 +140,7 @@ const HeroSection = () => {
 
                 {/* Services Grid - Single Row Layout */}
                 <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 lg:p-5 shadow-sm mt-6 sm:mt-8 md:mt-0">
+                  
                   {/* Mobile: Single Row with 4 columns - INCREASED IMAGE SIZE */}
                   <div className="grid grid-cols-4 gap-2 sm:hidden">
                     {displayServices
@@ -262,14 +262,15 @@ const HeroSection = () => {
       
       {/* Swiper Section - Hidden on Mobile */}
       <div className="hidden sm:block w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-screen-2xl">
           <ServiceBannerSlider />
         </div>
       </div>
       
       {/* Banner below Swiper - Aligned to container */}
       <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-10xl mx-auto">
+          
           {/* Mobile Banner */}
           <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
             <Image
@@ -283,17 +284,16 @@ const HeroSection = () => {
           </div>
 
           {/* Desktop Banner */}
-         <div className="hidden sm:block mt-4 shadow-lg rounded-lg overflow-hidden">
-  <Image
-    src="/HomeBanner/appliance.webp"
-    alt="Desktop promotional banner"
-    width={1920}
-    height={400}
-    className="object-cover w-full h-auto"
-    priority
-  />
-</div>
-
+          <div className="hidden sm:block mt-4 shadow-lg rounded-lg overflow-hidden dark:shadow-xl dark:shadow-gray-800/50">
+            <Image
+              src="/HomeBanner/appliance.webp"
+              alt="Desktop promotional banner"
+              width={1820}
+              height={400}
+              className="object-cover w-full h-auto"
+              priority
+            />
+          </div>
         </div>
       </div>
     </section>

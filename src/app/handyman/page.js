@@ -25,15 +25,13 @@ const SERVICE_CONFIG = {
     default: "/BeautyCare/default.png"
   },
   banners: {
-    main: "/All Front Banners/HandymanServices.png",
+    main: "/All Front Banners/HandymanService.webp",
     promo: "/HomeBanner/handyman.webp"
   },
   sliderImages: [
     "/ServiceSlider/Electrician_banner.webp",
     "/ServiceSlider/refridgerator-service-banner.png",
     "/ServiceSlider/ro-service-banner.png",
-    "/ServiceSlider/plumber-banner.webp",
-    "/ServiceSlider/carpenter-banner.webp"
   ],
   serviceOrder: ["Painter", "Plumber", "Carpenter", "Electrician", "Masons"],
   serviceId: "4",
@@ -299,12 +297,12 @@ const HeroSection = ({ subServices, onServiceClick }) => (
         </div>
 
         <div className="hero-section-main-img flex-1 w-full order-1 lg:order-2 relative">
-          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
+          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[800px] border border-gray-200 rounded-xl overflow-hidden shadow-lg">
             <Image
               src={SERVICE_CONFIG.banners.main}
               alt="Professional handyman services"
               fill
-              className="object-cover hover:scale-105 transition-transform duration-500"
+              className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
               priority
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
             />

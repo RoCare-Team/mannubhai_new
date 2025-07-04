@@ -13,6 +13,7 @@ import PopularCities from './_components/Home/PopularCities';
 import ClientReviews from './_components/Home/ClientReviews';
 import FooterLinks from './_components/Home/FooterLinks';
 import { faL } from '@fortawesome/free-solid-svg-icons';
+import AppDownloadCard from './_components/Home/AppDownloadCard';
 
 // ✅ App Router metadata
 export const metadata = {
@@ -77,6 +78,7 @@ export default function Page() {
         <BeautyCare />
         <HomecareServcies />
         <HandymanServices />
+        <AppDownloadCard />
         <PopularCities />
         <AboutMannuBhai />
         <ClientReviews />

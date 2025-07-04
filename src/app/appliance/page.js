@@ -33,14 +33,42 @@ const SUBSERVICE_IMAGES = {
 
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default-service.png";
 const LOADER_LOGO = "/logo.png";
-const MAIN_BANNER = "/All Front Banners/HomeAppliancesService.png";
+const MAIN_BANNER = "/All Front Banners/HomeAppliancesService.webp";
 const PROMO_BANNER = "/HomeBanner/appliance.webp";
 
 const SLIDER_BANNERS = [
-  { src: "/ServiceSlider/Electrician_banner.webp", fallback: DEFAULT_SERVICE_IMAGE, alt: "Electrician service", title: "Electrician Service" },
-  { src: "/ServiceSlider/refridgerator-service-banner.png", fallback: DEFAULT_SERVICE_IMAGE, alt: "Refrigerator service", title: "Refrigerator Service" },
-  { src: "/ServiceSlider/ro-service-banner.png", fallback: DEFAULT_SERVICE_IMAGE, alt: "RO service", title: "RO Service" },
-  { src: "/ServiceSlider/washingBanner.webp", fallback: DEFAULT_SERVICE_IMAGE, alt: "Washing machine service", title: "Washing Machine Service" },
+  { 
+    src: "/ServiceSlider/Electrician_banner.webp", 
+    fallback: DEFAULT_SERVICE_IMAGE, 
+    alt: "Electrician service", 
+    title: "Electrician Service",
+    link: "/electrician",
+    description: "24/7 emergency electrical services"
+  },
+  { 
+    src: "/ServiceSlider/refridgerator-service-banner.png", 
+    fallback: DEFAULT_SERVICE_IMAGE, 
+    alt: "Refrigerator service", 
+    title: "Refrigerator Service",
+    link: "/refrigerator-repair-service",
+    description: "Expert repair for all fridge brands"
+  },
+  { 
+    src: "/ServiceSlider/ro-service-banner.png", 
+    fallback: DEFAULT_SERVICE_IMAGE, 
+    alt: "RO service", 
+    title: "RO Service",
+    link: "/water-purifier-service",
+    description: "Water purifier installation & maintenance"
+  },
+  { 
+    src: "/ServiceSlider/washingBanner.webp", 
+    fallback: DEFAULT_SERVICE_IMAGE, 
+    alt: "Washing machine service", 
+    title: "Washing Machine Service",
+    link: "washing-machine-repair",
+    description: "Complete washing machine solutions"
+  },
 ];
 
 const SERVICE_ORDER = [
@@ -85,20 +113,13 @@ const Appliance = () => {
   const [subServices, setSubServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [imageErrors, setImageErrors] = useState({});
   const [pageLoading, setPageLoading] = useState(true);
   const router = useRouter();
   const swiperRef = useRef(null);
 
-  // Memoized utility functions
-  const getSubServiceImage = useCallback((type) => SUBSERVICE_IMAGES[type] || DEFAULT_SERVICE_IMAGE, []);
-  const handleImageError = useCallback((index) => {
-    setImageErrors(prev => ({ ...prev, [index]: true }));
-  }, []);
-
   // Fetch data on mount
   useEffect(() => {
-    const timer = setTimeout(() => setPageLoading(false), 2000);
+    const timer = setTimeout(() => setPageLoading(false), 1500);
     
     const fetchSubServices = async () => {
       try {
@@ -109,7 +130,7 @@ const Appliance = () => {
           id: doc.id,
           ...doc.data(),
           ServiceName: doc.data().type,
-          ServiceIcon: getSubServiceImage(doc.data().type),
+          ServiceIcon: SUBSERVICE_IMAGES[doc.data().type] || DEFAULT_SERVICE_IMAGE,
         }));
 
         const sortedData = data.sort((a, b) => 
@@ -127,7 +148,7 @@ const Appliance = () => {
 
     fetchSubServices();
     return () => clearTimeout(timer);
-  }, [getSubServiceImage]);
+  }, []);
 
   const getCategoryUrlByLeadTypeId = useCallback(async (lead_type_id) => {
     const q = query(collection(db, "category_manage"), where("lead_type_id", "==", lead_type_id));
@@ -152,8 +173,11 @@ const Appliance = () => {
     }
   }, [getCategoryUrlByLeadTypeId, router]);
 
-  // Memoized components
-  const LoadingScreen = useMemo(() => (
+  const handleBannerClick = useCallback((link) => {
+    router.push(link);
+  }, [router]);
+
+  if (pageLoading) return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-4">
         <Image
@@ -167,9 +191,9 @@ const Appliance = () => {
         <div className="text-gray-600 font-medium animate-pulse text-sm">Loading...</div>
       </div>
     </div>
-  ), []);
+  );
 
-  const ErrorScreen = useMemo(() => (
+  if (error) return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <div className="text-center max-w-md mx-auto p-6">
         <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -183,64 +207,8 @@ const Appliance = () => {
         </button>
       </div>
     </div>
-  ), [error]);
-
-  const ServiceGrid = useMemo(() => (
-    <div className="grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 border border-gray-200 rounded-xl p-2 sm:p-4 bg-white shadow-sm">
-      {subServices.map(service => (
-        <article
-          key={service.id}
-          className="flex flex-col items-center p-2 sm:p-4 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
-          onClick={() => handleSubServiceClick(service)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSubServiceClick(service)}
-          tabIndex={0}
-          role="button"
-          aria-label={`Select ${service.ServiceName} service`}
-        >
-          <div className="relative w-8 h-8 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-1 sm:mb-3 transition-transform group-hover:scale-110">
-            <Image
-              src={service.ServiceIcon}
-              alt=""
-              fill
-              className="object-contain"
-              sizes="(max-width: 640px) 32px, (max-width: 1024px) 64px, 80px"
-              onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
-            />
-          </div>
-          <h3 className="text-[10px] sm:text-sm font-medium text-center text-gray-700 group-hover:text-blue-600 transition-colors leading-tight">
-            {service.ServiceName}
-          </h3>
-        </article>
-      ))}
-    </div>
-  ), [subServices, handleSubServiceClick]);
-
-  const StatsCard = ({ icon: Icon, value, label, color }) => (
-    <article className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-white hover:bg-gray-50 transition-colors shadow-sm border border-gray-100">
-      <Icon className={`text-${color}-500 text-2xl sm:text-3xl flex-shrink-0`} aria-hidden="true" />
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold text-gray-800">{value}</h3>
-        <p className="text-xs sm:text-sm text-gray-600">{label}</p>
-      </div>
-    </article>
   );
 
-  const BannerImage = ({ src, alt, className = "", fallback = DEFAULT_SERVICE_IMAGE, ...props }) => (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      className={`object-cover ${className}`}
-      onError={(e) => {
-        e.target.src = fallback;
-        console.warn(`Image failed to load: ${src}`);
-      }}
-      {...props}
-    />
-  );
-
-  if (pageLoading) return LoadingScreen;
-  if (error) return ErrorScreen;
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
@@ -250,7 +218,7 @@ const Appliance = () => {
         {/* Hero Section */}
         <section className="w-full px-4 sm:px-6 lg:px-8 pb-8 mt-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+            <div className="HeroSection flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
               {/* Left Content */}
               <div className="flex-1 w-full order-2 lg:order-1">
                 <header className="text-center lg:text-left mb-6 lg:mb-8 hidden md:block">
@@ -266,25 +234,64 @@ const Appliance = () => {
                   <h2 id="sub-services-heading" className="text-lg sm:text-xl font-semibold mb-4 text-center lg:text-left text-gray-800 hidden md:block">
                     What are you looking for?
                   </h2>
-                  {subServices.length > 0 ? ServiceGrid : (
-                    <div className="text-center py-8 text-gray-500">No services available</div>
-                  )}
+                  <div className="grid grid-cols-4 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 border border-gray-200 rounded-xl p-2 sm:p-4 bg-white shadow-sm">
+                    {subServices.map(service => (
+                      <article
+                        key={service.id}
+                        className="flex flex-col items-center p-2 sm:p-4 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+                        onClick={() => handleSubServiceClick(service)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSubServiceClick(service)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Select ${service.ServiceName} service`}
+                      >
+                        <div className="relative w-8 h-8 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-1 sm:mb-3 transition-transform group-hover:scale-110">
+                          <Image
+                            src={service.ServiceIcon}
+                            alt=""
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 640px) 32px, (max-width: 1024px) 64px, 80px"
+                            onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
+                          />
+                        </div>
+                        <h3 className="text-[10px] sm:text-sm font-medium text-center text-gray-700 group-hover:text-blue-600 transition-colors leading-tight">
+                          {service.ServiceName}
+                        </h3>
+                      </article>
+                    ))}
+                  </div>
                 </section>
 
                 <section className="flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 mb-6 lg:mb-0 hidden md:flex">
-                  <StatsCard icon={CiStar} value="4.5" label="Service Rating" color="yellow" />
-                  <StatsCard icon={PiUsersThree} value="30 Lacs+" label="Customers Globally" color="blue" />
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-white hover:bg-gray-50 transition-colors shadow-sm border border-gray-100">
+                    <CiStar className="text-yellow-500 text-2xl sm:text-3xl flex-shrink-0" aria-hidden="true" />
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-800">4.5</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Service Rating</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-white hover:bg-gray-50 transition-colors shadow-sm border border-gray-100">
+                    <PiUsersThree className="text-blue-500 text-2xl sm:text-3xl flex-shrink-0" aria-hidden="true" />
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-800">30 Lacs+</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Customers Globally</p>
+                    </div>
+                  </div>
                 </section>
               </div>
 
               {/* Main Banner */}
-              <div className="flex-1 w-full order-1 lg:order-2 relative hidden md:block">
-                <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] border border-gray-200 rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                  <BannerImage 
+              <div className="HeroBanner flex-1 w-full order-1 lg:order-2 relative hidden md:block">
+                <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[800px] border border-gray-200 rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                  <Image
                     src={MAIN_BANNER} 
                     alt="Professional home appliance services" 
-                    className="hover:scale-105 transition-transform duration-500"
+                    height={100}
+                    width={100}
+                    className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
                     priority
+                    onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
                   />
                 </div>
               </div>
@@ -317,16 +324,25 @@ const Appliance = () => {
               >
                 {SLIDER_BANNERS.map((banner, idx) => (
                   <SwiperSlide key={`banner-${idx}`}>
-                    <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 group cursor-pointer bg-gray-100 relative aspect-video">
-                      <BannerImage
-                        src={imageErrors[idx] ? banner.fallback : banner.src}
+                    <div 
+                      className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 group cursor-pointer bg-gray-100 relative aspect-video"
+                      onClick={() => handleBannerClick(banner.link)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === 'Enter' && handleBannerClick(banner.link)}
+                      aria-label={`View ${banner.title} service`}
+                    >
+                      <Image
+                        src={banner.src}
                         alt={banner.alt}
-                        className="group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => e.target.src = banner.fallback}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
                         <div className="w-full p-4 text-white">
                           <h3 className="text-lg font-semibold">{banner.title}</h3>
-                          <p className="text-sm opacity-90">Professional Service</p>
+                          <p className="text-sm opacity-90">{banner.description}</p>
                         </div>
                       </div>
                     </div>
@@ -341,9 +357,12 @@ const Appliance = () => {
         <section className="w-full px-4 sm:px-6 lg:px-8 my-8 sm:my-12">
           <div className="max-w-7xl mx-auto">
             <div className="relative w-full h-32 sm:h-48 md:h-64 lg:h-80 rounded-xl overflow-hidden shadow-lg bg-gray-100">
-              <BannerImage 
+              <Image 
                 src={PROMO_BANNER} 
                 alt="Special offers on appliance services" 
+                fill
+                className="object-cover"
+                onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
               />
             </div>
           </div>
