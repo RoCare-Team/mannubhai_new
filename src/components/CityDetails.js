@@ -1,5 +1,5 @@
 "use client";
-import React,{ useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AboutMannuBhaiExpert from "./AboutMannuBhaiExpert";
 import HeroSection from "@/app/_components/Home/HeroSection";
@@ -15,10 +15,8 @@ const CityDetails = ({ city }) => {
   const [selectedService, setSelectedService] = useState(null);
   const serviceRefs = useRef({});
 
-  // Modify service components to include city URL
- const ServiceWrapper = ({ children, categoryUrl }) => {
+  const ServiceWrapper = ({ children, categoryUrl }) => {
     const handleClick = (serviceUrl) => {
-      // Navigate directly to city/service (removed category segment)
       router.push(`/${city.city_url}/${serviceUrl}`);
     };
 
@@ -27,7 +25,6 @@ const CityDetails = ({ city }) => {
       cityUrl: city.city_url
     });
   };
-
 
   if (!city) {
     return (
@@ -43,7 +40,8 @@ const CityDetails = ({ city }) => {
 
   return (
     <>
-      <main className="w-full px-6 md:px-12 lg:px-20 py-12 mx-auto bg-white">
+      {/* Removed top padding (mt-0) and adjusted py for mobile only */}
+      <main className="w-full px-6 md:px-12 lg:px-20 py-0 md:py-12 mx-auto bg-white">
         <HeroSection />
         <ServiceWrapper categoryUrl="appliances">
           <Appliances />
@@ -54,10 +52,10 @@ const CityDetails = ({ city }) => {
         <ServiceWrapper categoryUrl="homecare-services">
           <HomecareServcies />
         </ServiceWrapper>
-        <ServiceWrapper categoryUrl="handyman-services">
+        <ServiceWrapper categoryUrl="handyman-services" className="mb-0">
           <HandymanServices />
         </ServiceWrapper>
-        <BrandsWeRepair />
+        <BrandsWeRepair className="mt-0"  />
         <section
           className="mt-8 px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24"
           aria-labelledby="expert-heading"

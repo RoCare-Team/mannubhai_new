@@ -349,7 +349,7 @@ const Beauty = () => {
           <h2 id="beauty-care-heading" className="sr-only">
             Beauty Care Services
           </h2>
-          <BeautyCare brightbanner={true} />
+          <BeautyCare hideBrightBanner={true} />
         </section>
 
         {/* Content Sections */}
