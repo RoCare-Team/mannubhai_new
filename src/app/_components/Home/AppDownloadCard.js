@@ -13,11 +13,13 @@ const MobileAppDownload = () => {
           </p>
         </div>
 
-        {/* Buttons - Different colors for both mobile and desktop */}
+        {/* Buttons with actual app store links */}
         <div className="flex justify-center gap-3">
-          {/* iOS Button - Always Black */}
+          {/* iOS Button */}
           <a
-            href="#"
+            href="https://apps.apple.com/in/app/mannu-bhai-service-expert/id6744962904"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center bg-black text-white px-4 py-2 rounded-lg text-xs w-full transition hover:bg-gray-800"
           >
             <FaApple className="mr-2 text-sm" />
@@ -27,9 +29,11 @@ const MobileAppDownload = () => {
             </div>
           </a>
 
-          {/* Android Button - Always Blue Gradient */}
+          {/* Android Button */}
           <a
-            href="#"
+            href="https://play.google.com/store/apps/details?id=com.mannubhai.customer&hl=en_IN&pli=1"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-xs w-full transition hover:from-blue-500 hover:to-indigo-500"
           >
             <FaGooglePlay className="mr-2 text-sm" />
