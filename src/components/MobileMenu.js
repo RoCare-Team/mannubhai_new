@@ -1,4 +1,3 @@
-
 "use client";
 import Link from "next/link";
 import { CiLocationOn } from "react-icons/ci";
@@ -23,14 +22,14 @@ export default function MobileMenu({
   return (
     <div className="lg:hidden fixed inset-0 z-[60] bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
       <div 
-        className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-lg transform transition-transform duration-300 ease-in-out"
+        className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Menu</h3>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-600"
             aria-label="Close menu"
           >
             <IoCloseOutline className="text-xl" />
@@ -56,7 +55,7 @@ export default function MobileMenu({
                 setShowLogin(true);
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             >
               Login / Sign Up
             </button>
