@@ -1,5 +1,5 @@
-import Head from 'next/head';
-import { toast, ToastContainer } from 'react-toastify';
+
+
 import 'react-toastify/dist/ReactToastify.css';
 import HeroSection from './_components/Home/HeroSection';
 import Appliances from './_components/Home/Appliances';
@@ -14,7 +14,8 @@ import ClientReviews from './_components/Home/ClientReviews';
 import FooterLinks from './_components/Home/FooterLinks';
 import { faL } from '@fortawesome/free-solid-svg-icons';
 import AppDownloadCard from './_components/Home/AppDownloadCard';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // ✅ App Router metadata
 export const metadata = {
   title: {
@@ -85,7 +86,18 @@ export default function Page() {
         <BrandsWeRepair />
         <Services />
         <FooterLinks />
-        <ToastContainer />
+ <ToastContainer 
+  position="top-right"
+  autoClose={5000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  theme="light"
+/>
       </main>
     </>
   );

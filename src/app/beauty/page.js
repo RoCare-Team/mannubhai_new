@@ -41,30 +41,30 @@ const DESIRED_ORDER = [
 
 const FEATURED_SERVICES = [
   {
-    src: "/BeautyCare/hairstudioforwomen.webp",
+    src: "/All Beauty Slider Banner/salon style haircuts.webp",
     alt: "hairstudio at home",
     link: "/hair-studio",
   },
   {
-    src: "/BeautyCare/haircutathome.webp",
+    src: "/All Beauty Slider Banner/men salon at home.webp",
     alt: "haircut at home",
     link: "/men-salon-at-home",
   },
   {
-    src: "/BeautyCare/massageforman.webp",
+    src: "/All Beauty Slider Banner/relax, recharge, repeat.webp",
     alt: "massage for man",
     link: "/men-massage-at-home",
   },
   {
-    src: "/BeautyCare/spaforwoman.webp",
+    src: "/All Beauty Slider Banner/glow at home.webp",
     alt: "spa for women",
     link: "/spa-for-women",
   },
   {
-    src: "/BeautyCare/waxing.webp",
+  src: "/All Beauty Slider Banner/waxing.webp",
     alt: "waxing and facials",
-    link: "/women-salon-at-home",
-  },
+    link: "/women-salon-at-home"
+  }
 ];
 
 
@@ -165,8 +165,10 @@ const Beauty = () => {
             width={100}
             height={100}
             className="animate-bounce"
-            priority
-            unoptimized // For animated images, unoptimized might be better
+          fetchPriority="high"  
+  loading="eager"     
+      
+  unoptimized={false}
           />
           <div className="text-gray-600 font-medium animate-pulse text-sm">Loading Mannubhai...</div>
         </div>
@@ -234,7 +236,11 @@ const Beauty = () => {
                             fill
                             className="object-contain"
                             sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
-                            loading="lazy"
+                          
+                             fetchPriority="high" 
+  loading="eager"    
+    
+  unoptimized={false}
                           />
                         </div>
                         <h3 className="text-xs sm:text-sm font-medium text-center text-gray-700 group-hover:text-pink-600 transition-colors duration-300 leading-tight">
@@ -273,10 +279,9 @@ const Beauty = () => {
                     alt="Professional home beauty services"
                     fill
                     className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                    fetchPriority="high"  // Explicit fetch priority
-  loading="eager"      // Force immediate loading
-  quality={80}         // Optimized quality for mobile
-     // Full viewport width on all devices
+                    fetchPriority="high" 
+  loading="eager"     
+       
   unoptimized={false}
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
                   />
@@ -320,11 +325,10 @@ const Beauty = () => {
           alt={banner.alt}
           width={300}
           height={200}
-            fetchPriority="high"  // Explicit fetch priority
-  loading="eager"      // Force immediate loading
-  quality={80}         // Optimized quality for mobile
-     // Full viewport width on all devices
-  unoptimized={false}
+            fetchPriority="high" 
+            loading="eager"      
+  
+            unoptimized={false}
           className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
        
         />

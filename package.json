@@ -30,6 +30,7 @@
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
+    "sweetalert2": "^11.22.2",
     "swiper": "^11.2.8"
   },
   "devDependencies": {
@@ -48,5 +49,4 @@
     "tailwindcss": "^4.1.5",
     "typescript": "^5.1.6"
   }
-
 }
