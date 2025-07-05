@@ -55,27 +55,23 @@ const Header = () => {
     permissionDenied: false,
   });
   const [showLogin, setShowLogin] = useState(false);
-  const dropdownTimeoutRef = useRef(null);
 
   useEffect(() => {
     const fetchCartCount = async () => {
       try {
         const snapshot = await getDocs(collection(db, "add_to_cart"));
-        console.log("🛒 Firestore cart data:", snapshot.docs.map(doc => doc.data()));
         setCartCount(snapshot.size);
       } catch (error) {
-        console.error("❌ Firestore error fetching add_to_cart:", error.message);
+        console.error("Error fetching cart count:", error);
       }
     };
 
     fetchCartCount();
-    checkLoginStatus(); // Check auth status on mount
+    checkLoginStatus();
   }, [checkLoginStatus]);
 
   const initializeLocation = useCallback(() => {
     async function run() {
-      console.log("📍 Initializing location...");
-
       const storedCity = localStorage.getItem("selectedCity");
       if (storedCity) {
         try {
@@ -88,7 +84,6 @@ const Header = () => {
             isCustomCity: true,
             permissionDenied: false,
           });
-          console.log("✅ Loaded custom city:", parsedCity);
           return;
         } catch {
           localStorage.removeItem("selectedCity");
@@ -100,7 +95,6 @@ const Header = () => {
         try {
           const parsed = JSON.parse(cached);
           setLocation({ ...parsed, isCustomCity: false, permissionDenied: false });
-          console.log("✅ Loaded cached location:", parsed);
           return;
         } catch {
           localStorage.removeItem("userLocation");
@@ -157,8 +151,6 @@ const Header = () => {
         setLocation(loc);
         localStorage.setItem("userLocation", JSON.stringify(loc));
       } catch (err) {
-        console.error("⚠️ Location error fallback:", err.message);
-
         if (err.message === "Permission denied") return;
 
         try {
@@ -173,7 +165,6 @@ const Header = () => {
             permissionDenied: false,
           });
         } catch (ipError) {
-          console.error("❌ IP fallback failed:", ipError);
           setLocation({
             address: "",
             state: "",
@@ -208,9 +199,9 @@ const Header = () => {
     if (city.city_url) router.push(city.city_url);
   };
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = () => {
     setShowLogin(false);
-    checkLoginStatus(); // Refresh auth state after login
+    checkLoginStatus();
   };
 
   const handleLogout = () => {

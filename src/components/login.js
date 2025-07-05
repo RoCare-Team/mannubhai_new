@@ -3,10 +3,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FaPhoneAlt, FaKey, FaArrowLeft, FaTimes } from "react-icons/fa";
 import BasicDetails from "./BasicDetails";
 import CongratsModal from "./CongratsModal";
-import Swal from "sweetalert2";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { toast } from 'react-toastify';
-import { FaCheckCircle } from 'react-icons/fa';
+
 const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
   // Use auth context
   const { handleLoginSuccess: contextLoginSuccess } = useAuth();
@@ -16,6 +14,7 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
   const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [step, setStep] = useState("mobile");
   const [resendTime, setResendTime] = useState(0);
   const [userData, setUserData] = useState(null);
@@ -33,6 +32,7 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
     setMobileNumber("");
     setOtpDigits(["", "", "", ""]);
     setError("");
+    setSuccessMessage("");
     setStep("mobile");
     setIsSubmitting(false);
     setResendTime(0);
@@ -65,6 +65,7 @@ const sendOTP = useCallback(async (resend = false) => {
 
   setIsSubmitting(true);
   setError("");
+  setSuccessMessage("");
 
   try {
     const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/roservice_sendotp.php", {
@@ -76,24 +77,7 @@ const sendOTP = useCallback(async (resend = false) => {
     const data = await response.json();
 
     if (data.error === false) {
-      // Custom toast notification
-      toast.success(
-        <div>
-          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>OTP Sent Successfully!</div>
-          <div style={{ fontSize: '14px' }}>Please wait while delivering.</div>
-        </div>, 
-        {
-          position: "top-right",
-          style: {
-            backgroundColor: '#f8f9fa',
-            color: '#212529',
-            border: '1px solid #dee2e6',
-            borderRadius: '8px',
-          },
-          icon: <FaCheckCircle style={{ color: '#28a745' }} />,
-        }
-      );
-      
+      setSuccessMessage("OTP sent successfully! Please check your messages.");
       if (!resend) setStep("otp");
       setResendTime(30);
     } else {
@@ -106,6 +90,7 @@ const sendOTP = useCallback(async (resend = false) => {
     setIsSubmitting(false);
   }
 }, [mobileNumber]);
+
   const handleOtpChange = useCallback((index, value) => {
     if (value.match(/^[0-9]?$/)) {
       const newOtpDigits = [...otpDigits];
@@ -155,6 +140,7 @@ const sendOTP = useCallback(async (resend = false) => {
 
   setIsSubmitting(true);
   setError("");
+  setSuccessMessage("");
 
   try {
     const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/service_otp_verify.php", {
@@ -166,25 +152,8 @@ const sendOTP = useCallback(async (resend = false) => {
     const data = await response.json();
 
     if (data.error === false) {
-      // Show custom toast notification
-      toast.success(
-        <div>
-          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>OTP Verified Successfully</div>
-          <div style={{ fontSize: '14px' }}>Thank you {data.name || 'Vishal'} for registering with us!</div>
-        </div>, 
-        {
-          position: "top-right",
-          style: {
-            backgroundColor: '#f8f9fa',
-            color: '#212529',
-            border: '1px solid #dee2e6',
-            borderRadius: '8px',
-          },
-          icon: <FaCheckCircle style={{ color: '#28a745' }} />,
-          autoClose: 5000,
-        }
-      );
-
+      setSuccessMessage(`Welcome back ${data.name || ''}! You've been successfully logged in.`);
+      
       // Store user data
       localStorage.setItem('userPhone', mobileNumber);
       localStorage.setItem('userToken', 'verified');
@@ -214,6 +183,7 @@ const sendOTP = useCallback(async (resend = false) => {
     setIsSubmitting(false);
   }
 }, [mobileNumber, otpDigits, handleLoginComplete]);
+
   const handleBasicDetailsSubmit = useCallback(async (details) => {
     try {
       const fullUserData = {
@@ -233,14 +203,7 @@ const sendOTP = useCallback(async (resend = false) => {
         localStorage.setItem('userName', details.name);
         if (details.email) localStorage.setItem('userEmail', details.email);
         
-        Swal.fire({
-          title: "Details Saved!",
-          text: "Your information has been updated successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#3085d6",
-        });
-        
+        setSuccessMessage("Your information has been updated successfully.");
         setOpenBasic(false);
         handleLoginComplete({ ...userData, ...details }, false);
         
@@ -258,6 +221,7 @@ const sendOTP = useCallback(async (resend = false) => {
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     step === "mobile" ? sendOTP() : verifyOTP();
   }, [step, sendOTP, verifyOTP]);
 
@@ -406,6 +370,12 @@ const sendOTP = useCallback(async (resend = false) => {
                 {error && (
                   <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                     <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                  </div>
+                )}
+
+                {successMessage && (
+                  <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <p className="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
                   </div>
                 )}
 

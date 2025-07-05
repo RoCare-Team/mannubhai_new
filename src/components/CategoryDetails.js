@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
-import { toast } from "react-toastify";
 import Image from "next/image";
 import LoginPopup from "./login";
 import Cart from "./cart/CartLogic";
@@ -38,10 +37,10 @@ function extractImagesAndContent(html) {
 
 // Service priority mapping
 const servicePriority = {
-  service: 1,       // "service"
-  repair: 2,        // "repair"
-  install: 3,       // "install" (not "installation")
-  uninstallation: 4, // "uninstallation" (not "uninstall")
+  service: 1,
+  repair: 2,
+  install: 3,
+  uninstallation: 4,
   amc: 5,
   foamjet: 6,
   gasfilling: 7,
@@ -71,7 +70,7 @@ const CategoryDetails = ({
   // Constants
   const defaultBanner = "/ApplianceBanner/appliancs.jpg";
 
-  // Effects - Fixed read more logic
+  // Effects
   useEffect(() => {
     if (!contentRef.current || !category?.category_content) return;
 
@@ -79,27 +78,20 @@ const CategoryDetails = ({
       const element = contentRef.current;
       if (!element) return;
       
-      // Temporarily remove height restriction to measure full content
       element.style.maxHeight = 'none';
       const fullHeight = element.scrollHeight;
-      
-      // Check if content needs truncation (384px = max-h-96 in Tailwind)
       const needsTruncation = fullHeight > 384;
       setShowReadMore(needsTruncation);
       
-      // Reset max height if content is collapsed
       if (!isExpanded && needsTruncation) {
-        element.style.maxHeight = '24rem'; // 384px
+        element.style.maxHeight = '24rem';
       }
     };
 
-    // Use setTimeout to ensure DOM has rendered
     const timer = setTimeout(checkHeight, 100);
-
     return () => clearTimeout(timer);
   }, [category?.category_content, isExpanded]);
 
-  // Reset expansion when category changes
   useEffect(() => {
     setIsExpanded(false);
     setShowReadMore(false);
@@ -134,25 +126,22 @@ const CategoryDetails = ({
         .replace(/^\d+\s*/, "")
         .trim();
 
-      const firstWordMatch = cleanedName.match(/^([a-zA-Z-]+)/);
-     let groupKey = firstWordMatch ? firstWordMatch[0].toLowerCase() : "other";
-if (cleanedName.toLowerCase().startsWith("installation")) {
-  groupKey = "install"; // Force "install" instead of "installation"
-} 
-else if (cleanedName.toLowerCase().startsWith("un-installation")) {
-  groupKey = "uninstallation";
-}
-else if (cleanedName.toLowerCase().startsWith("gas filling")) {
-  groupKey = "gasfilling";
-}
-else if (cleanedName.toLowerCase().startsWith("foam jet")) {
-  groupKey = "foamjet";
-}
-else {
-  groupKey = firstWordMatch ? firstWordMatch[0].toLowerCase() : "other";
-}
+      let groupKey = cleanedName.toLowerCase().match(/^([a-zA-Z-]+)/)?.[0] || "other";
+      
+      if (cleanedName.toLowerCase().startsWith("installation")) {
+        groupKey = "install";
+      } 
+      else if (cleanedName.toLowerCase().startsWith("un-installation")) {
+        groupKey = "uninstallation";
+      }
+      else if (cleanedName.toLowerCase().startsWith("gas filling")) {
+        groupKey = "gasfilling";
+      }
+      else if (cleanedName.toLowerCase().startsWith("foam jet")) {
+        groupKey = "foamjet";
+      }
 
-let priority = servicePriority[groupKey] || 99; // 99 will push to end
+      let priority = servicePriority[groupKey] || 99;
 
       if (!groups[groupKey]) {
         let displayName;
@@ -167,7 +156,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
             displayName = "Foam Jet";
             break;
           default:
-            displayName = firstWordMatch ? firstWordMatch[0] : "Other Services";
+            displayName = cleanedName.match(/^([a-zA-Z-]+)/)?.[0] || "Other Services";
         }
 
         groups[groupKey] = {
@@ -188,16 +177,16 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     return groups;
   }, [category]);
 
- const orderedServiceNames = useMemo(() => {
-  return Object.keys(serviceGroups).sort((a, b) => {
-    const pA = serviceGroups[a].priority || 99;
-    const pB = serviceGroups[b].priority || 99;
-    if (pA !== pB) return pA - pB;
-    return serviceGroups[a].displayName.localeCompare(
-      serviceGroups[b].displayName
-    );
-  });
-}, [serviceGroups]);
+  const orderedServiceNames = useMemo(() => {
+    return Object.keys(serviceGroups).sort((a, b) => {
+      const pA = serviceGroups[a].priority || 99;
+      const pB = serviceGroups[b].priority || 99;
+      if (pA !== pB) return pA - pB;
+      return serviceGroups[a].displayName.localeCompare(
+        serviceGroups[b].displayName
+      );
+    });
+  }, [serviceGroups]);
 
   // Helper functions
   const scrollToService = (serviceName) => {
@@ -208,7 +197,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     }, 100);
   };
 
-  const { content: contentWithoutImages, images: contentImages } = useMemo(
+  const { content: contentWithoutImages } = useMemo(
     () => extractImagesAndContent(category?.category_content || ""),
     [category]
   );
@@ -216,9 +205,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
   const isServiceInCart = (serviceId) => {
     const cartData = localStorage.getItem("checkoutState");
     if (!cartData) return false;
-
-    const cartItems = JSON.parse(cartData);
-    return cartItems.some((item) =>
+    return JSON.parse(cartData).some((item) =>
       item.cart_dtls?.some((dtl) => dtl.service_id === serviceId)
     );
   };
@@ -235,7 +222,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     return 0;
   };
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = () => {
     setShowLoginPopup(false);
     if (pendingCartAction) {
       setTimeout(() => {
@@ -249,11 +236,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     }
   };
 
-  const handleCartAction = async (
-    serviceId,
-    operation,
-    currentQuantity = 0
-  ) => {
+  const handleCartAction = async (serviceId, operation, currentQuantity = 0) => {
     const customerId = localStorage.getItem("customer_id");
     if (!customerId) {
       setPendingCartAction({ serviceId, operation, currentQuantity });
@@ -291,14 +274,9 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
           JSON.stringify(data.AllCartDetails)
         );
         localStorage.setItem("cart_total_price", data.total_main || 0);
-
         setCartLoaded((prev) => !prev);
-        toast.success(data.msg || "Cart updated successfully", {
-          autoClose: 1500,
-        });
       }
     } catch (error) {
-      toast.error("Failed to update cart. Please try again.");
       console.error("Cart update error:", error);
     }
   };
@@ -325,8 +303,6 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     );
   }
 
-  const totalItems = calculateTotalItems();
-
   return (
     <>
       <Head>
@@ -340,7 +316,6 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
           {/* Services Navigation Sidebar */}
           <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              {/* Header */}
               <div className="flex items-center gap-4 mb-6">
                 <div className="bg-blue-100 p-2 rounded-lg">
                   <FiCheck className="h-6 w-6 text-blue-600" />
@@ -351,7 +326,6 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                 </div>
               </div>
 
-              {/* Services Grid - 3 cols mobile, 4 cols desktop */}
               <div className="grid grid-cols-3 gap-2">
                 {orderedServiceNames.map((serviceName) => {
                   const group = serviceGroups[serviceName];
@@ -374,45 +348,32 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                           className="object-contain w-12 h-12 md:w-14 md:h-14"
                         />
                       </div>
-                  <span className="text-[10px] xs:text-[10px] sm:text-[10px] md:text-[10px] font-semibold text-center leading-tight px-1">
-  {group.displayName}
-</span>
+                      <span className="text-[10px] xs:text-[10px] sm:text-[10px] md:text-[10px] font-semibold text-center leading-tight px-1">
+                        {group.displayName}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
-
-            {/* Optional Category Image */}
-            {category.imageUrl && (
-              <div className="hidden lg:block relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-100 mt-6">
-                <Image
-                  src={category.imageUrl}
-                  alt={`${category.name} service illustration`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
           </aside>
+
           {/* Main Content Area */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
-              {/* Hero Section */}
-            <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
-              <Image
-                src={category.banner?.trim() ? category.banner : defaultBanner}
-                alt={`${category.category_name || "Category"} banner`}
-                fill
-                className="object-cover"
-                priority
-                onError={(e) => {
-                  e.currentTarget.src = defaultBanner;
-                }}
-              />
-            </div>
+              <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
+                <Image
+                  src={category.banner?.trim() ? category.banner : defaultBanner}
+                  alt={`${category.category_name || "Category"} banner`}
+                  fill
+                  className="object-cover"
+                  priority
+                  onError={(e) => {
+                    e.currentTarget.src = defaultBanner;
+                  }}
+                />
+              </div>
 
-              {/* Services List */}
               {orderedServiceNames.map((serviceName) => {
                 const { services, displayName } = serviceGroups[serviceName];
                 return (
@@ -494,7 +455,6 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                                 </button>
 
                                 <div className="text-center">
-                                
                                   <span className="text-sm font-semibold text-gray-900">
                                     ₹{service.price}
                                   </span>
@@ -517,7 +477,6 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                 cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
               />
 
-              {/* Service Features */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
                 <div className="bg-blue-50 rounded-xl p-6 mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -587,9 +546,11 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
             </aside>
           </main>
         </div> 
-           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-             <AwardCertifications />
-            </section>
+        
+        <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+          <AwardCertifications />
+        </section>
+        
         {category.category_content && (
           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -623,6 +584,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
           </section>
         )}
       </div>
+
       {/* Mobile Cart Panel */}
       <AnimatePresence>
         {isCartOpen && (
