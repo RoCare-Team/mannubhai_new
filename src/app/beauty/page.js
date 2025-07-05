@@ -273,7 +273,11 @@ const Beauty = () => {
                     alt="Professional home beauty services"
                     fill
                     className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                    priority
+                    fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
                   />
                 </div>
@@ -316,8 +320,13 @@ const Beauty = () => {
           alt={banner.alt}
           width={300}
           height={200}
+            fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
           className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
-          loading="lazy"
+       
         />
       </div>
     </Link>
@@ -338,7 +347,11 @@ const Beauty = () => {
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
-                priority
+               fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
               />
             </div>
           </div>

@@ -186,11 +186,15 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
               alt="Beauty services banner for mobile"
               width={768}
               height={300}
-              priority
               placeholder="blur"
               blurDataURL="/blur-banner.png"
               sizes="100vw"
               className="block md:hidden w-full h-auto"
+              priority={true}
+              fetchPriority="high"  
+              loading="eager"    
+              quality={80}       
+              unoptimized={false}
             />
 
             <Image
@@ -203,6 +207,12 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
               blurDataURL="/blur-banner.png"
               sizes="100vw"
               className="hidden md:block w-full h-auto"
+              
+  fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
             />
           </div>
         </section>

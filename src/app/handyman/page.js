@@ -222,7 +222,11 @@ const ServiceSlider = () => (
                   width={300}
                   height={200}
                   className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
+                  fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
                 />
               </div>
             </SwiperSlide>
@@ -243,7 +247,11 @@ const PromotionalBanner = () => (
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
-          priority
+  fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
         />
       </div>
     </div>
@@ -303,7 +311,11 @@ const HeroSection = ({ subServices, onServiceClick }) => (
               alt="Professional handyman services"
               fill
               className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-              priority
+           fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
             />
           </div>

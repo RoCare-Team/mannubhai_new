@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CiLocationOn } from "react-icons/ci";
-import { MdOutlineShoppingCart } from "react-icons/md";
+import { MdOutlineShoppingCart, MdPersonOutline } from "react-icons/md"; // Added user icon
 import DesktopNavigation from "./DesktopNavigation";
 import CategorySearch from "./CategorySearch";
 import UserDropdown from "./UserDropdown";
@@ -22,7 +22,7 @@ export default function DesktopHeader({
   const cartCount = useCartCount();
 
   return (
-    <header className="hidden lg:block sticky top-0 z-30 ">
+    <header className="hidden lg:block sticky top-0 z-30 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between py-3 lg:py-4 px-4">
         {/* ─── Logo + Primary Nav ────────────────────────────── */}
         <div className="flex items-center gap-10">
@@ -93,12 +93,21 @@ export default function DesktopHeader({
               )}
             </Link>
 
-            <UserDropdown
-              user={user}
-              setShowLogin={setShowLogin}
-              handleLogout={handleLogout}
-              getbookingdata={getbookingdata}
-            />
+            {user ? (
+              <UserDropdown
+                user={user}
+                handleLogout={handleLogout}
+                getbookingdata={getbookingdata}
+              />
+            ) : (
+              <button
+                onClick={() => setShowLogin(true)}
+                className="text-xl text-gray-700 hover:text-blue-500 transition-colors flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+                aria-label="Login"
+              >
+                <MdPersonOutline className="text-2xl" />
+              </button>
+            )}
           </div>
         </div>
       </div>
