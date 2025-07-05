@@ -202,26 +202,77 @@ const CategoryDetails = ({
     [category]
   );
 
-  const isServiceInCart = (serviceId) => {
+const isServiceInCart = (serviceId) => {
+  try {
     const cartData = localStorage.getItem("checkoutState");
     if (!cartData) return false;
-    return JSON.parse(cartData).some((item) =>
+    
+    // Check if the data is valid JSON
+    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+      return false;
+    }
+    
+    const parsedData = JSON.parse(cartData);
+    if (!Array.isArray(parsedData)) return false;
+    
+    return parsedData.some((item) =>
       item.cart_dtls?.some((dtl) => dtl.service_id === serviceId)
     );
-  };
+  } catch (error) {
+    console.error("Error reading cart data:", error);
+    return false;
+  }
+};
 
-  const getCartQuantity = (serviceId) => {
+const getCartQuantity = (serviceId) => {
+  try {
     const cartData = localStorage.getItem("checkoutState");
     if (!cartData) return 0;
-
+    
+    // Check if the data is valid JSON
+    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+      return 0;
+    }
+    
     const cartItems = JSON.parse(cartData);
+    if (!Array.isArray(cartItems)) return 0;
+
     for (const item of cartItems) {
+      if (!item || typeof item !== 'object') continue;
       const found = item.cart_dtls?.find((dtl) => dtl.service_id === serviceId);
       if (found) return found.quantity || 1;
     }
     return 0;
-  };
+  } catch (error) {
+    console.error("Error reading cart quantity:", error);
+    return 0;
+  }
+};
 
+const validateCartData = () => {
+  try {
+    const cartData = localStorage.getItem("checkoutState");
+    if (!cartData) return [];
+    
+    // If data exists but isn't valid JSON, reset it
+    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+      localStorage.setItem("checkoutState", JSON.stringify([]));
+      return [];
+    }
+    
+    const parsed = JSON.parse(cartData);
+    if (!Array.isArray(parsed)) {
+      localStorage.setItem("checkoutState", JSON.stringify([]));
+      return [];
+    }
+    
+    return parsed;
+  } catch (error) {
+    console.error("Error validating cart data:", error);
+    localStorage.setItem("checkoutState", JSON.stringify([]));
+    return [];
+  }
+};
   const handleLoginSuccess = () => {
     setShowLoginPopup(false);
     if (pendingCartAction) {

@@ -1,4 +1,4 @@
-// hooks/useCartCount.js
+
 "use client";
 import { useState, useEffect } from "react";
 
