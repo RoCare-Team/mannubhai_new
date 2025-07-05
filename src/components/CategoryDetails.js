@@ -374,9 +374,9 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                           className="object-contain w-12 h-12 md:w-14 md:h-14"
                         />
                       </div>
-                      <span className="text-[14px] md:text-[10px] font-semibold text-center leading-tight px-1">
-                        {group.displayName}
-                      </span>
+                  <span className="text-[10px] xs:text-[12px] sm:text-[14px] md:text-[16px] font-semibold text-center leading-tight px-1">
+  {group.displayName}
+</span>
                     </button>
                   );
                 })}
@@ -399,29 +399,18 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
               {/* Hero Section */}
-<div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
-  <Image
-    src={category.banner?.trim() ? category.banner : defaultBanner}
-    alt={`${category.category_name || "Category"} banner`}
-    fill
-    className="object-cover"
-    priority
-    onError={(e) => {
-      e.currentTarget.src = defaultBanner;
-    }}
-  />
-  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6 sm:p-8">
-    <div className="max-w-2xl">
-      <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
-        Premium {category.category_name} Services
-      </h1>
-      <p className="text-white/90 sm:text-lg">
-        Expert services at your doorstep
-      </p>
-    </div>
-  </div>
-</div>
-
+            <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
+              <Image
+                src={category.banner?.trim() ? category.banner : defaultBanner}
+                alt={`${category.category_name || "Category"} banner`}
+                fill
+                className="object-cover"
+                priority
+                onError={(e) => {
+                  e.currentTarget.src = defaultBanner;
+                }}
+              />
+            </div>
 
               {/* Services List */}
               {orderedServiceNames.map((serviceName) => {

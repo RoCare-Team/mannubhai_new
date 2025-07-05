@@ -290,7 +290,11 @@ const Appliance = () => {
                     height={100}
                     width={100}
                     className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                    priority
+                      fetchPriority="high"  // Explicit fetch priority
+                      loading="eager"      // Force immediate loading
+                      quality={80}         // Optimized quality for mobile
+                        // Full viewport width on all devices
+                      unoptimized={false}
                     onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
                   />
                 </div>
@@ -336,6 +340,11 @@ const Appliance = () => {
                         src={banner.src}
                         alt={banner.alt}
                         fill
+                          fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => e.target.src = banner.fallback}
                       />
@@ -363,6 +372,11 @@ const Appliance = () => {
                 fill
                 className="object-cover"
                 onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
+                  fetchPriority="high"  // Explicit fetch priority
+                loading="eager"      // Force immediate loading
+                quality={80}         // Optimized quality for mobile
+                  // Full viewport width on all devices
+                unoptimized={false}
               />
             </div>
           </div>

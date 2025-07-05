@@ -248,7 +248,11 @@ const HeroSection = () => {
                   alt="Professional home services"
                   fill
                   className="object-cover"
-                  priority
+                  unoptimized={false}  
+                priority={true}
+                    loading="eager"     
+            quality={80}      
+            fetchPriority="high"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
                   style={{
                     objectPosition: "center 30%",
@@ -273,14 +277,19 @@ const HeroSection = () => {
           
           {/* Mobile Banner */}
           <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
-            <Image
-              src="/HomeBanner/app_mob.webp"
-              alt="Mobile promotional banner"
-              width={768}
-              height={300}
-              className="object-contain w-full h-auto rounded-lg"
-              priority
-            />
+           <Image
+            src="/HomeBanner/app_mob.webp"
+            alt="Mobile promotional banner"
+            width={768}
+            height={300}
+            className="object-contain w-full h-auto rounded-lg"
+            priority={true}
+            fetchPriority="high"
+            loading="eager"     
+            quality={80}        
+            sizes="100vw"       
+            unoptimized={false}  
+          />
           </div>
 
           {/* Desktop Banner */}
@@ -291,7 +300,12 @@ const HeroSection = () => {
               width={1820}
               height={400}
               className="object-cover w-full h-auto"
-              priority
+               priority={true}
+              fetchPriority="high"  
+              loading="eager"      
+              quality={80}    
+              sizes="100vw"     
+              unoptimized={false}
             />
           </div>
         </div>

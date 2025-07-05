@@ -260,8 +260,11 @@ const LoadingScreen = () => (
         width={100}
         height={100}
         className="animate-bounce"
-        priority
-        unoptimized
+     fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
       />
       <div className="text-gray-600 font-medium animate-pulse text-sm">Loading Mannubhai...</div>
     </div>
@@ -357,7 +360,11 @@ const HeroSection = ({ subServices, handleSubServiceClick }) => (
               alt="Professional home care services"
               fill
               className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-              priority
+             fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
             />
           </div>
@@ -407,7 +414,11 @@ const ServicesSlider = () => (
                     width={300}
                     height={200}
                     className="object-cover w-full h-auto group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
+                   fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
                   />
                 </div>
               </Link>
@@ -430,7 +441,11 @@ const PromotionalBanner = () => (
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
-          priority
+          fetchPriority="high"  // Explicit fetch priority
+  loading="eager"      // Force immediate loading
+  quality={80}         // Optimized quality for mobile
+     // Full viewport width on all devices
+  unoptimized={false}
         />
       </div>
     </div>

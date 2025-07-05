@@ -54,7 +54,9 @@ const Header = () => {
   });
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(null);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const dropdownTimeoutRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -203,6 +205,19 @@ const Header = () => {
     run();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => { initializeLocation(); }, [initializeLocation]);
   useEffect(() => { const handleScroll = () => setIsScrolled(window.scrollY > 10); window.addEventListener("scroll", handleScroll); return () => window.removeEventListener("scroll", handleScroll); }, []);
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
@@ -236,12 +251,16 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-  setUser(null);
-  ["user", "userPhone", "userToken", "userName", "userEmail", "customer_id"].forEach(k => localStorage.removeItem(k));
-  setIsMobileMenuOpen(false);
-  router.push("/"); // Add this line to redirect to home page
-}
+    setUser(null);
+    ["user", "userPhone", "userToken", "userName", "userEmail", "customer_id"].forEach(k => localStorage.removeItem(k));
+    setIsMobileMenuOpen(false);
+    setIsUserDropdownOpen(false);
+    router.push("/");
+  };
 
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
 
   const locationText = location.loading
     ? "Detecting location..."
@@ -256,7 +275,22 @@ const Header = () => {
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
           <MobileHeader {...{ cartCount, locationText, setShowLocationSearch, location, setShowLogin, setIsMobileMenuOpen, user }} />
-          <DesktopHeader {...{ cartCount, locationText, setShowLocationSearch, setShowLogin, user, navigationItems, pathname, handleLogout, location }} />
+          <DesktopHeader 
+            {...{ 
+              cartCount, 
+              locationText, 
+              setShowLocationSearch, 
+              setShowLogin, 
+              user, 
+              navigationItems, 
+              pathname, 
+              handleLogout, 
+              location,
+              isUserDropdownOpen,
+              toggleUserDropdown,
+              userDropdownRef
+            }} 
+          />
         </div>
       </header>
 
