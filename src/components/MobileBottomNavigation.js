@@ -1,18 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import LoginPopup from "./login";
 import { toast } from "react-toastify";
+import { useAuth } from "@/app/contexts/AuthContext"; 
 
 const MobileBottomNavigation = ({ navigationItems, pathname }) => {
   const router = useRouter();
-  const [showLoginPopup, setShowLoginPopup] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Initialize auth state after component mounts
-  useEffect(() => {
-    setIsLoggedIn(typeof window !== 'undefined' && localStorage.getItem('userToken') !== null);
-  }, []);
+  const [showLoginPopup, setShowLoginPopup] = React.useState(false);
+  const { isLoggedIn, logout } = useAuth();
 
   const handleNavigation = (url, requiresAuth = false) => {
     if (requiresAuth && !isLoggedIn) {
@@ -23,21 +19,10 @@ const MobileBottomNavigation = ({ navigationItems, pathname }) => {
     router.push(url);
   };
 
-  const handleLoginSuccess = (userData) => {
-    setIsLoggedIn(true);
-    setShowLoginPopup(false);
-    toast.success(`Welcome back, ${userData.name || 'User'}!`);
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userPhone');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('customer_id');
-    setIsLoggedIn(false);
+    logout();
     toast.success("Logged out successfully");
-    router.push('/'); // Redirect to home after logout
+    router.push('/');
   };
 
   // Determine which items require authentication
@@ -110,7 +95,10 @@ const MobileBottomNavigation = ({ navigationItems, pathname }) => {
       <LoginPopup 
         show={showLoginPopup} 
         onClose={() => setShowLoginPopup(false)}
-        onLoginSuccess={handleLoginSuccess}
+        onLoginSuccess={() => {
+          setShowLoginPopup(false);
+          // The AuthContext will automatically update the state
+        }}
       />
     </>
   );

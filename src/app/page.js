@@ -86,18 +86,12 @@ export default function Page() {
         <BrandsWeRepair />
         <Services />
         <FooterLinks />
- <ToastContainer 
-  position="top-right"
-  autoClose={5000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  closeOnClick
-  rtl={false}
-  pauseOnFocusLoss
-  draggable
-  pauseOnHover
-  theme="light"
-/>
+        <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
+        bodyClassName="!text-sm"
+      />
       </main>
     </>
   );

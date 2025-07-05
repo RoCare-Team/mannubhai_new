@@ -13,7 +13,7 @@ import "swiper/css/navigation";
 import "../_components/Home/swiper-custom.css";
 import HandymanServics from "../_components/Home/HandymanServices";
 import Head from "./head";
-
+import Link from "next/link";
 // Constants
 const SERVICE_CONFIG = {
   images: {
@@ -28,15 +28,52 @@ const SERVICE_CONFIG = {
     main: "/All Front Banners/HandymanService.webp",
     promo: "/HomeBanner/handyman.webp"
   },
-  sliderImages: [
-    "/ServiceSlider/Electrician_banner.webp",
-    "/ServiceSlider/refridgerator-service-banner.png",
-    "/ServiceSlider/ro-service-banner.png",
+
+sliderImages: [
+    {
+      src: "/All Handyman Service Slider Banner/painter.webp",
+      link: "/painting-services",
+      alt: "painting servicess",
+      width: 800,
+      height: 450
+    },
+    {
+      src: "/All Handyman Service Slider Banner/plumber.webp",
+      link: "/plumber",
+      alt: "plumber",
+      width: 800,
+      height: 450
+    },
+    {
+      src: "/All Handyman Service Slider Banner/carpenter.webp",
+      link: "/carpenter",
+      alt: "carpenter",
+      width: 800,
+      height: 450
+    },
+    {
+      src: "/All Handyman Service Slider Banner/Electrician.webp",
+      link: "/electrician",
+      alt: "electrician",
+       width: 800,
+       height: 450
+    },
+      {
+      src: "/All Handyman Service Slider Banner/Masons.webp",
+      link: "/mason-service",
+      alt: "mason service",
+       width: 800,
+       height: 450
+    }
   ],
   serviceOrder: ["Painter", "Plumber", "Carpenter", "Electrician", "Masons"],
   serviceId: "4",
   loader: "/logo.png"
 };
+
+
+
+
 
 const CONTENT_SECTIONS = [
   {
@@ -213,24 +250,44 @@ const ServiceSlider = () => (
             1280: { slidesPerView: 3, spaceBetween: 32 },
           }}
         >
-          {SERVICE_CONFIG.sliderImages.map((src, idx) => (
-            <SwiperSlide key={idx}>
-              <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                <Image
-                  src={src}
-                  alt={`Handyman service ${idx + 1}`}
-                  width={300}
-                  height={200}
-                  className="object-cover w-full h-auto hover:scale-105 transition-transform duration-500"
-                  fetchPriority="high"  // Explicit fetch priority
-  loading="eager"      // Force immediate loading
-  quality={80}         // Optimized quality for mobile
-     // Full viewport width on all devices
-  unoptimized={false}
-                />
-              </div>
-            </SwiperSlide>
-          ))}
+          {SERVICE_CONFIG.sliderImages.map((item, idx) => {
+            const imageData = typeof item === 'string' 
+              ? { 
+                  src: item, 
+                  width: 800, 
+                  height: 450,
+                  alt: `Handyman service ${idx + 1}`
+                }
+              : {
+                  ...item,
+                  width: item.width || 800,
+                  height: item.height || 450
+                };
+              
+            const link = typeof item === 'object' ? item.link : [
+              "/electrician-services",
+              "/appliance-repair",
+              "/water-purifier-services"
+            ][idx];
+
+            return (
+              <SwiperSlide key={idx}>
+                <Link href={link} className="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                  <div className="relative aspect-video w-full h-auto">
+                    <Image
+                      src={imageData.src}
+                      alt={imageData.alt}
+                      width={imageData.width}
+                      height={imageData.height}
+                      className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                      priority={idx === 0}
+                      quality={80}
+                    />
+                  </div>
+                </Link>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
     </div>
