@@ -3,10 +3,14 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FaPhoneAlt, FaKey, FaArrowLeft, FaTimes } from "react-icons/fa";
 import BasicDetails from "./BasicDetails";
 import CongratsModal from "./CongratsModal";
-import { toast } from "react-toastify";
-
-
+import Swal from "sweetalert2";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { toast } from 'react-toastify';
+import { FaCheckCircle } from 'react-icons/fa';
 const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
+  // Use auth context
+  const { handleLoginSuccess: contextLoginSuccess } = useAuth();
+
   // State management
   const [mobileNumber, setMobileNumber] = useState("");
   const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
@@ -53,39 +57,55 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
     }
   }, []);
 
-  const sendOTP = useCallback(async (resend = false) => {
-    if (!mobileNumber || !/^\d{10}$/.test(mobileNumber)) {
-      setError("Please enter a valid 10-digit mobile number");
-      return;
+const sendOTP = useCallback(async (resend = false) => {
+  if (!mobileNumber || !/^\d{10}$/.test(mobileNumber)) {
+    setError("Please enter a valid 10-digit mobile number");
+    return;
+  }
+
+  setIsSubmitting(true);
+  setError("");
+
+  try {
+    const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/roservice_sendotp.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phoneNumber: mobileNumber }),
+    });
+
+    const data = await response.json();
+
+    if (data.error === false) {
+      // Custom toast notification
+      toast.success(
+        <div>
+          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>OTP Sent Successfully!</div>
+          <div style={{ fontSize: '14px' }}>Please wait while delivering.</div>
+        </div>, 
+        {
+          position: "top-right",
+          style: {
+            backgroundColor: '#f8f9fa',
+            color: '#212529',
+            border: '1px solid #dee2e6',
+            borderRadius: '8px',
+          },
+          icon: <FaCheckCircle style={{ color: '#28a745' }} />,
+        }
+      );
+      
+      if (!resend) setStep("otp");
+      setResendTime(30);
+    } else {
+      setError(data.msg || "Failed to send OTP");
     }
-
-    setIsSubmitting(true);
-    setError("");
-
-    try {
-      const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/roservice_sendotp.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: mobileNumber }),
-      });
-
-      const data = await response.json();
-
-      if (data.error === false) {
-        toast.success(data.msg);
-        if (!resend) setStep("otp");
-        setResendTime(30);
-      } else {
-        setError(data.msg || "Failed to send OTP");
-      }
-    } catch (err) {
-      console.error("Send OTP Error:", err);
-      setError("Failed to send OTP. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [mobileNumber]);
-
+  } catch (err) {
+    console.error("Send OTP Error:", err);
+    setError("Failed to send OTP. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+}, [mobileNumber]);
   const handleOtpChange = useCallback((index, value) => {
     if (value.match(/^[0-9]?$/)) {
       const newOtpDigits = [...otpDigits];
@@ -103,6 +123,7 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
       otpInputRefs.current[index - 1].focus();
     }
   }, [otpDigits]);
+
   const handleLoginComplete = useCallback((userData, skipCongrats = false) => {
     const user = {
       id: userData?.c_id || localStorage.getItem('customer_id'),
@@ -111,8 +132,9 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
       email: userData?.email || localStorage.getItem('userEmail') || "",
     };
     
-    // Call parent's login success handler
+    // Call both the local and context login success handlers
     onLoginSuccess?.(user);
+    contextLoginSuccess(user);
     
     // Reset and close
     resetForm();
@@ -122,63 +144,76 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
     if (!skipCongrats && (!userData?.name || userData?.name.trim() === "")) {
       setShowCongrats(true);
     }
-  }, [mobileNumber, onClose, onLoginSuccess, resetForm]);
-  const verifyOTP = useCallback(async () => {
-    const otp = otpDigits.join('');
-    if (!otp || !/^\d{4}$/.test(otp)) {
-      setError("Please enter a valid 4-digit OTP");
-      return;
-    }
+  }, [mobileNumber, onClose, onLoginSuccess, resetForm, contextLoginSuccess]);
 
-    setIsSubmitting(true);
-    setError("");
+ const verifyOTP = useCallback(async () => {
+  const otp = otpDigits.join('');
+  if (!otp || !/^\d{4}$/.test(otp)) {
+    setError("Please enter a valid 4-digit OTP");
+    return;
+  }
 
-    try {
-      const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/service_otp_verify.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: mobileNumber, newOtp: otp }),
-      });
+  setIsSubmitting(true);
+  setError("");
 
-      const data = await response.json();
+  try {
+    const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/service_otp_verify.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phoneNumber: mobileNumber, newOtp: otp }),
+    });
 
-      if (data.error === false) {
-        // Store user data
-        localStorage.setItem('userPhone', mobileNumber);
-        localStorage.setItem('userToken', 'verified');
-        if (data.name) localStorage.setItem('userName', data.name);
-        if (data.email) localStorage.setItem('userEmail', data.email);
-        if (data.c_id) localStorage.setItem('customer_id', data.c_id);
-        if (data.address) localStorage.setItem('RecentAddress', JSON.stringify(data.address));
-          localStorage.setItem('checkoutState', JSON.stringify(data.AllCartDetails || []));
-          localStorage.setItem('cart_total_price', data.total_price || 0);
+    const data = await response.json();
 
-        console.log("User Data:", data);
-        
-        
-        toast.success(data.msg);
-        setUserData(data);
-        
-        // Determine if user needs to complete profile
-        const needsProfileCompletion = !data.name || data.name.trim() === "";
-        if (needsProfileCompletion) {
-          setOpenBasic(true);
-        } else {
-          handleLoginComplete(data,true);
+    if (data.error === false) {
+      // Show custom toast notification
+      toast.success(
+        <div>
+          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>OTP Verified Successfully</div>
+          <div style={{ fontSize: '14px' }}>Thank you {data.name || 'Vishal'} for registering with us!</div>
+        </div>, 
+        {
+          position: "top-right",
+          style: {
+            backgroundColor: '#f8f9fa',
+            color: '#212529',
+            border: '1px solid #dee2e6',
+            borderRadius: '8px',
+          },
+          icon: <FaCheckCircle style={{ color: '#28a745' }} />,
+          autoClose: 5000,
         }
+      );
+
+      // Store user data
+      localStorage.setItem('userPhone', mobileNumber);
+      localStorage.setItem('userToken', 'verified');
+      if (data.name) localStorage.setItem('userName', data.name);
+      if (data.email) localStorage.setItem('userEmail', data.email);
+      if (data.c_id) localStorage.setItem('customer_id', data.c_id);
+      if (data.address) localStorage.setItem('RecentAddress', JSON.stringify(data.address));
+      localStorage.setItem('checkoutState', JSON.stringify(data.AllCartDetails || []));
+      localStorage.setItem('cart_total_price', data.total_price || 0);
+      
+      setUserData(data);
+      
+      // Determine if user needs to complete profile
+      const needsProfileCompletion = !data.name || data.name.trim() === "";
+      if (needsProfileCompletion) {
+        setOpenBasic(true);
       } else {
-        setError(data.msg || "OTP verification failed");
+        handleLoginComplete(data, true);
       }
-    } catch (err) {
-      console.error("Verify OTP Error:", err);
-      setError("OTP verification failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      setError(data.msg || "OTP verification failed");
     }
-  }, [mobileNumber, otpDigits, handleLoginComplete]);
-
-
-
+  } catch (err) {
+    console.error("Verify OTP Error:", err);
+    setError("OTP verification failed. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+}, [mobileNumber, otpDigits, handleLoginComplete]);
   const handleBasicDetailsSubmit = useCallback(async (details) => {
     try {
       const fullUserData = {
@@ -198,9 +233,16 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
         localStorage.setItem('userName', details.name);
         if (details.email) localStorage.setItem('userEmail', details.email);
         
-        toast.success("Details saved successfully!");
+        Swal.fire({
+          title: "Details Saved!",
+          text: "Your information has been updated successfully.",
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#3085d6",
+        });
+        
         setOpenBasic(false);
-        handleLoginComplete({ ...userData, ...details },false);
+        handleLoginComplete({ ...userData, ...details }, false);
         
         // Show congrats after profile completion
         setShowCongrats(true);
@@ -405,21 +447,24 @@ const LoginPopup = ({ show, onClose, onLoginSuccess }) => {
         onClose={() => setOpenBasic(false)}
       />
 
-     <CongratsModal
-  open={showCongrats}
-  setOpen={setShowCongrats}
-  onClose={() => {
-    const user = {
-      id: localStorage.getItem('customer_id'),
-      mobile: localStorage.getItem('userPhone'),
-      name: localStorage.getItem('userName') || "Customer",
-      email: localStorage.getItem('userEmail') || "",
-    };
-    onLoginSuccess?.(user);
-
-    setShowCongrats(false);
-  }}
-/>
+      <CongratsModal
+        open={showCongrats}
+        setOpen={setShowCongrats}
+        onClose={() => {
+          const user = {
+            id: localStorage.getItem('customer_id'),
+            mobile: localStorage.getItem('userPhone'),
+            name: localStorage.getItem('userName') || "Customer",
+            email: localStorage.getItem('userEmail') || "",
+          };
+          
+          // Ensure both login success handlers are called
+          onLoginSuccess?.(user);
+          contextLoginSuccess(user);
+          
+          setShowCongrats(false);
+        }}
+      />
     </>
   );
 };

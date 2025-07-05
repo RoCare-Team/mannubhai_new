@@ -12,6 +12,7 @@ import MobileMenu from "./MobileMenu";
 import LoginPopup from "./login";
 import MobileBottomNavigation from "./MobileBottomNavigation";
 import navigationItems from "./navigationItems";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 const AddToCart = dynamic(() => import("../app/checkout/page.js"), { ssr: false });
 
@@ -40,6 +41,7 @@ function fetchWithTimeout(url, options = {}, timeout = 5000) {
 const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { isLoggedIn, userInfo, checkLoginStatus, logout: contextLogout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -53,29 +55,9 @@ const Header = () => {
     permissionDenied: false,
   });
   const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const dropdownTimeoutRef = useRef(null);
-  const userDropdownRef = useRef(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const userPhone = localStorage.getItem("userPhone");
-
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser({
-          ...parsedUser,
-          name: parsedUser.name || parsedUser.user_name || "Customer",
-          mobile: userPhone || parsedUser.mobile,
-        });
-      } catch (e) {
-        console.error("Error parsing user data:", e);
-        localStorage.removeItem("user");
-      }
-    }
-
     const fetchCartCount = async () => {
       try {
         const snapshot = await getDocs(collection(db, "add_to_cart"));
@@ -87,7 +69,8 @@ const Header = () => {
     };
 
     fetchCartCount();
-  }, []);
+    checkLoginStatus(); // Check auth status on mount
+  }, [checkLoginStatus]);
 
   const initializeLocation = useCallback(() => {
     async function run() {
@@ -205,19 +188,6 @@ const Header = () => {
     run();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
-        setIsUserDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   useEffect(() => { initializeLocation(); }, [initializeLocation]);
   useEffect(() => { const handleScroll = () => setIsScrolled(window.scrollY > 10); window.addEventListener("scroll", handleScroll); return () => window.removeEventListener("scroll", handleScroll); }, []);
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
@@ -239,27 +209,14 @@ const Header = () => {
   };
 
   const handleLoginSuccess = (userData) => {
-    const storedUser = {
-      id: userData.id,
-      mobile: userData.mobile,
-      name: userData.name || "Customer",
-      email: userData.email || "",
-    };
-    setUser(storedUser);
-    localStorage.setItem("user", JSON.stringify(storedUser));
     setShowLogin(false);
+    checkLoginStatus(); // Refresh auth state after login
   };
 
   const handleLogout = () => {
-    setUser(null);
-    ["user", "userPhone", "userToken", "userName", "userEmail", "customer_id"].forEach(k => localStorage.removeItem(k));
+    contextLogout();
     setIsMobileMenuOpen(false);
-    setIsUserDropdownOpen(false);
     router.push("/");
-  };
-
-  const toggleUserDropdown = () => {
-    setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
   const locationText = location.loading
@@ -274,30 +231,46 @@ const Header = () => {
     <>
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
-          <MobileHeader {...{ cartCount, locationText, setShowLocationSearch, location, setShowLogin, setIsMobileMenuOpen, user }} />
-          <DesktopHeader 
-            {...{ 
-              cartCount, 
-              locationText, 
-              setShowLocationSearch, 
-              setShowLogin, 
-              user, 
-              navigationItems, 
-              pathname, 
-              handleLogout, 
-              location,
-              isUserDropdownOpen,
-              toggleUserDropdown,
-              userDropdownRef
-            }} 
-          />
+          <MobileHeader {...{ 
+            cartCount, 
+            locationText, 
+            setShowLocationSearch, 
+            location, 
+            setShowLogin, 
+            setIsMobileMenuOpen, 
+            user: userInfo 
+          }} />
+          <DesktopHeader {...{ 
+            cartCount, 
+            locationText, 
+            setShowLocationSearch, 
+            setShowLogin, 
+            user: userInfo, 
+            navigationItems, 
+            pathname, 
+            handleLogout, 
+            location 
+          }} />
         </div>
       </header>
 
       {showLocationSearch && <LocationSearch onClose={() => setShowLocationSearch(false)} onSelectCity={handleCitySelection} />}
-      <MobileMenu {...{ isMobileMenuOpen, setIsMobileMenuOpen, user, setShowLogin, navigationItems, locationText, setShowLocationSearch, handleLogout}} />
+      <MobileMenu {...{ 
+        isMobileMenuOpen, 
+        setIsMobileMenuOpen, 
+        user: userInfo, 
+        setShowLogin, 
+        navigationItems, 
+        locationText, 
+        setShowLocationSearch, 
+        handleLogout 
+      }} />
       <MobileBottomNavigation {...{ navigationItems, pathname }} />
-      <LoginPopup show={showLogin} onClose={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />
+      <LoginPopup 
+        show={showLogin} 
+        onClose={() => setShowLogin(false)} 
+        onLoginSuccess={handleLoginSuccess} 
+      />
 
       <style jsx global>{`
         body { padding-top: 75px; padding-bottom: 80px; }

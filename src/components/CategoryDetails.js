@@ -2,9 +2,11 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
-import { toast } from "react-toastify";
+
 import Image from "next/image";
 import LoginPopup from "./login";
+import { toast } from 'react-toastify';
+import { FaCheckCircle } from 'react-icons/fa';
 import Cart from "./cart/CartLogic";
 import {
   FiShoppingCart,
@@ -249,60 +251,92 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
     }
   };
 
-  const handleCartAction = async (
-    serviceId,
-    operation,
-    currentQuantity = 0
-  ) => {
-    const customerId = localStorage.getItem("customer_id");
-    if (!customerId) {
-      setPendingCartAction({ serviceId, operation, currentQuantity });
-      setShowLoginPopup(true);
-      return;
-    }
+const handleCartAction = async (
+  serviceId,
+  operation,
+  currentQuantity = 0
+) => {
+  const customerId = localStorage.getItem("customer_id");
+  if (!customerId) {
+    setPendingCartAction({ serviceId, operation, currentQuantity });
+    setShowLoginPopup(true);
+    return;
+  }
 
-    try {
-      const payload = {
-        service_id: serviceId,
-        type: operation === "remove" ? "delete" : operation,
-        cid: customerId,
-        quantity:
-          operation === "add"
-            ? currentQuantity + 1
-            : operation === "decrement"
-            ? currentQuantity - 1
-            : 0,
-      };
+  try {
+    const payload = {
+      service_id: serviceId,
+      type: operation === "remove" ? "delete" : operation,
+      cid: customerId,
+      quantity:
+        operation === "add"
+          ? currentQuantity + 1
+          : operation === "decrement"
+          ? currentQuantity - 1
+          : 0,
+    };
 
-      const res = await fetch(
-        "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
+    const res = await fetch(
+      "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.AllCartDetails) {
+      localStorage.setItem(
+        "checkoutState",
+        JSON.stringify(data.AllCartDetails)
+      );
+      localStorage.setItem("cart_total_price", data.total_main || 0);
+
+      setCartLoaded((prev) => !prev);
+      
+      // Custom success toast
+      toast.success(
+        <div>
+          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>Cart Updated</div>
+          <div style={{ fontSize: '14px' }}>{data.msg || "Your cart has been updated successfully"}</div>
+        </div>,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          position: "top-right",
+          style: {
+            backgroundColor: '#f8f9fa',
+            color: '#212529',
+            border: '1px solid #dee2e6',
+            borderRadius: '8px',
+          },
+          icon: <FaCheckCircle style={{ color: '#28a745' }} />,
+          autoClose: 1500,
         }
       );
-
-      const data = await res.json();
-
-      if (data.AllCartDetails) {
-        localStorage.setItem(
-          "checkoutState",
-          JSON.stringify(data.AllCartDetails)
-        );
-        localStorage.setItem("cart_total_price", data.total_main || 0);
-
-        setCartLoaded((prev) => !prev);
-        toast.success(data.msg || "Cart updated successfully", {
-          autoClose: 1500,
-        });
-      }
-    } catch (error) {
-      toast.error("Failed to update cart. Please try again.");
-      console.error("Cart update error:", error);
     }
-  };
-
+  } catch (error) {
+    // Custom error toast
+    toast.error(
+      <div>
+        <div style={{ fontWeight: 'bold', fontSize: '16px' }}>Update Failed</div>
+        <div style={{ fontSize: '14px' }}>Failed to update cart. Please try again.</div>
+      </div>,
+      {
+        position: "top-right",
+        style: {
+          backgroundColor: '#f8f9fa',
+          color: '#212529',
+          border: '1px solid #dee2e6',
+          borderRadius: '8px',
+        },
+        icon: <FaTimesCircle style={{ color: '#dc3545' }} />,
+        autoClose: 1500,
+      }
+    );
+    console.error("Cart update error:", error);
+  }
+};
   const calculateTotalItems = () => {
     const cartData = localStorage.getItem("checkoutState");
     if (!cartData) return 0;
@@ -374,7 +408,7 @@ let priority = servicePriority[groupKey] || 99; // 99 will push to end
                           className="object-contain w-12 h-12 md:w-14 md:h-14"
                         />
                       </div>
-                  <span className="text-[10px] xs:text-[12px] sm:text-[14px] md:text-[16px] font-semibold text-center leading-tight px-1">
+                  <span className="text-[10px] xs:text-[10px] sm:text-[10px] md:text-[10px] font-semibold text-center leading-tight px-1">
   {group.displayName}
 </span>
                     </button>

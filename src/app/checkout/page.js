@@ -12,15 +12,21 @@ import {
   FiClock, FiCheck, FiPlus, FiMinus, 
   FiShoppingCart, FiChevronRight, FiX 
 } from "react-icons/fi";
+import { useAuth } from "../contexts/AuthContext";
 
 const CheckOut = () => {
+  // Use auth context
+  const { 
+    isLoggedIn, 
+    userInfo, 
+    isLoading: authLoading,
+    handleLoginSuccess 
+  } = useAuth();
+
   // State management
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [cartDataArray, setCartDataArray] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [recentAddress, setRecentAddress] = useState(null);
   const [recentAddresses, setRecentAddresses] = useState([]);
   const [currentBookingItem, setCurrentBookingItem] = useState(null);
@@ -127,36 +133,6 @@ const CheckOut = () => {
     });
     setBookingCompleted(address && timeSlot && addressId);
   }, []);
-
-  const checkLoginStatus = () => {
-    if (typeof window !== "undefined") {
-      try {
-        const userToken = localStorage.getItem("userToken");
-        const userPhone = localStorage.getItem("userPhone");
-        const userName = localStorage.getItem("userName");
-        const userEmail = localStorage.getItem("userEmail");
-        const customerId = localStorage.getItem("customer_id");
-
-        const loggedIn = !!userToken;
-        setIsLoggedIn(loggedIn);
-        if (userPhone) setPhoneNumber(userPhone);
-
-        if (loggedIn && customerId) {
-          setUserInfo({
-            phone: userPhone,
-            name: userName || "Customer",
-            email: userEmail || "",
-            id: customerId,
-          });
-          fetchRecentAddress(customerId);
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-        setIsLoggedIn(false);
-        setUserInfo(null);
-      }
-    }
-  };
 
   // Cart operations
   const onIncrement = async (service_id, type, qunt) => {
@@ -347,15 +323,6 @@ const CheckOut = () => {
     }
   };
 
-  const handleLoginSuccess = (user) => {
-    setIsLoggedIn(true);
-    setUserInfo(user);
-    setPhoneNumber(user.mobile || user.phone || "");
-    displayCartData();
-    // toast.success(`Welcome ${user.name}!`);
-    if (user.id) fetchRecentAddress(user.id);
-  };
-
   const handleCloseModal = () => setShowModal(false);
   const handleCloseBookingModal = () => {
     setShowBookingModal(false);
@@ -364,17 +331,13 @@ const CheckOut = () => {
 
   // Effects
   useEffect(() => {
-    setIsLoading(true);
     displayCartData();
-    checkLoginStatus();
-    const storedAddresses = getLocalStorageItem("RecentAddress", []);
-    if (Array.isArray(storedAddresses) && storedAddresses.length > 0) {
-      setRecentAddresses(storedAddresses);
-      setRecentAddress(storedAddresses[0]);
+    if (isLoggedIn && userInfo?.id) {
+      fetchRecentAddress(userInfo.id);
+      setPhoneNumber(userInfo.phone || "");
     }
     refreshBookingData();
-    setIsLoading(false);
-  }, [refreshBookingData]);
+  }, [isLoggedIn, userInfo, refreshBookingData]);
 
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -395,7 +358,7 @@ const CheckOut = () => {
   }, [showBookingModal, refreshBookingData]);
 
   // Loading state
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
