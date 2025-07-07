@@ -106,7 +106,7 @@ const metadataCache = new Map();
 
 export async function generateMetadata({ params }) {
   const { slug = [] } = params;
-  const baseUrl = "hhttps://www.mannubhai.com/";
+  const baseUrl = "https://www.mannubhai.com";
   const cacheKey = slug.join('-') || 'home';
   
   if (metadataCache.has(cacheKey)) {
