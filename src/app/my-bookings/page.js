@@ -24,7 +24,8 @@ import {
   FiWifiOff,
   FiTool,
   FiTag,
-  FiUserCheck
+  FiUserCheck,
+  FiMaximize2
 } from "react-icons/fi";
 
 function Booking() {
@@ -455,185 +456,187 @@ function Booking() {
       </div>
 
       {viewModalOpen && selectedBooking && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
-    <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-xl">
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-5 sm:p-6 rounded-t-2xl sticky top-0 z-10">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-white">Booking Summary</h3>
-            <p className="text-indigo-100 mt-1">ID: #{selectedBooking.id}</p>
-          </div>
-          <button
-            onClick={() => setViewModalOpen(false)}
-            className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
-            aria-label="Close modal"
-          >
-            <FiX className="text-xl" />
-          </button>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="p-5 sm:p-6">
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-14 h-14 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : (
-          <>
-            {/* Two-column layout for booking info */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Left column - Customer details */}
-              <div className="space-y-5">
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <FiUser className="text-indigo-600" />
-                    Customer Information
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</p>
-                      <p className="font-medium text-gray-900 mt-1">{selectedBooking.name || "Not provided"}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</p>
-                      <p className="font-medium text-gray-900 mt-1">{selectedBooking.mobile || "Not provided"}</p>
-                      {selectedBooking.email && (
-                        <p className="text-sm text-gray-600 mt-1 break-all">{selectedBooking.email}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</p>
-                      <p className="font-medium text-gray-900 mt-1 whitespace-pre-line">
-                        {selectedBooking.address || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-xl">
+            {/* Header with gradient background */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-5 sm:p-6 rounded-t-2xl sticky top-0 z-10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white">Booking Summary</h3>
+                  <p className="text-indigo-100 mt-1">ID: #{selectedBooking.id}</p>
                 </div>
-              </div>
-
-              {/* Right column - Booking details */}
-              <div className="space-y-5">
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <FiCalendar className="text-indigo-600" />
-                    Appointment Details
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <div className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                          {selectedBooking.date || "Not set"}
-                        </div>
-                        {selectedBooking.time && (
-                          <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {selectedBooking.time}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <PaymentStatusBadge status={selectedBooking.payment_status} />
-                        <span className="font-bold text-gray-900">₹{selectedBooking.amount || "0"}</span>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
-                      <div className="mt-1">
-                        <StatusBadge status={selectedBooking.status} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Support contact card */}
-                <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
-                  <h4 className="text-lg font-semibold text-indigo-800 mb-3 flex items-center gap-2">
-                    <FiPhone className="text-indigo-600" />
-                    Need Help?
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Contact our support team for any assistance with your booking.
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <FiPhone className="text-indigo-600 flex-shrink-0" />
-                    <a 
-                      href={`tel:${selectedBooking.call_to_number}`}
-                      className="text-lg font-bold text-indigo-700 hover:text-indigo-800 transition-colors"
-                    >
-                      {selectedBooking.call_to_number}
-                    </a>
-                  </div>
-                </div>
+                <button
+                  onClick={() => setViewModalOpen(false)}
+                  className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+                  aria-label="Close modal"
+                >
+                  <FiX className="text-xl" />
+                </button>
               </div>
             </div>
 
-            {/* Service image section */}
-            {selectedBooking.image && (
-              <div className="mb-8">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <FiImage className="text-indigo-600" />
-                  Service Reference
-                </h4>
-                <div className="relative group">
-                  <img
-                    src={selectedBooking.image}
-                    alt="Service reference"
-                    className="w-full h-64 sm:h-72 object-cover rounded-xl border border-gray-200 shadow-sm transition-transform group-hover:shadow-md"
-                    onError={(e) => {
-                      e.target.src = 'https://www.waterpurifierservicecenter.in/customer_app_images/service_and_repair.jpg';
-                      e.target.className = 'w-full h-64 sm:h-72 object-contain rounded-xl border border-gray-200 bg-gray-100 p-4';
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => window.open(selectedBooking.image, '_blank')}
-                      className="bg-white/90 hover:bg-white text-indigo-600 px-4 py-2 rounded-full shadow-md flex items-center gap-2 transition-all"
-                    >
-                      <FiMaximize2 size={16} />
-                      <span className="text-sm font-medium">View Full Size</span>
-                    </button>
-                  </div>
+            {/* Main content */}
+            <div className="p-5 sm:p-6">
+              {loading ? (
+                <div className="flex justify-center py-16">
+                  <div className="w-14 h-14 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <>
+                  {/* Two-column layout for booking info */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {/* Left column - Customer details */}
+                    <div className="space-y-5">
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                          <FiUser className="text-indigo-600" />
+                          Customer Information
+                        </h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</p>
+                            <p className="font-medium text-gray-900 mt-1">{selectedBooking.name || "Not provided"}</p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</p>
+                            <p className="font-medium text-gray-900 mt-1">{selectedBooking.mobile || "Not provided"}</p>
+                            {selectedBooking.email && (
+                              <p className="text-sm text-gray-600 mt-1 break-all">{selectedBooking.email}</p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</p>
+                            <p className="font-medium text-gray-900 mt-1 whitespace-pre-line">
+                              {selectedBooking.address || "Not provided"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <button
-                onClick={handleCallSupport}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
-              >
-                <FiPhone size={18} />
-                <span className="font-medium">Call Support</span>
-              </button>
+                    {/* Right column - Booking details */}
+                    <div className="space-y-5">
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                          <FiCalendar className="text-indigo-600" />
+                          Appointment Details
+                        </h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <div className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {selectedBooking.date || "Not set"}
+                              </div>
+                              {selectedBooking.time && (
+                                <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                  {selectedBooking.time}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</p>
+                            <div className="flex items-center justify-between mt-1">
+                              <PaymentStatusBadge status={selectedBooking.payment_status} />
+                              <span className="font-bold text-gray-900">₹{selectedBooking.amount || "0"}</span>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
+                            <div className="mt-1">
+                              <StatusBadge status={selectedBooking.status} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-              {selectedBooking.status === "Active" && (
-                <button
-                  onClick={() => handleCancelBooking(selectedBooking.id)}
-                  className="flex-1 bg-white border border-gray-300 hover:border-red-300 hover:bg-red-50 text-red-600 px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
-                >
-                  <FiXCircle size={18} />
-                  <span className="font-medium">Cancel Booking</span>
-                </button>
+                      {/* Support contact card */}
+                      <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                        <h4 className="text-lg font-semibold text-indigo-800 mb-3 flex items-center gap-2">
+                          <FiPhone className="text-indigo-600" />
+                          Need Help?
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Contact our support team for any assistance with your booking.
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <FiPhone className="text-indigo-600 flex-shrink-0" />
+                          <a 
+                            href={`tel:${selectedBooking.call_to_number}`}
+                            className="text-lg font-bold text-indigo-700 hover:text-indigo-800 transition-colors"
+                          >
+                            {selectedBooking.call_to_number}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service image section */}
+                  {selectedBooking.image && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <FiImage className="text-indigo-600" />
+                        Service Reference
+                      </h4>
+                      <div className="relative group">
+                        <div className="w-full h-64 sm:h-72 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+                          <img
+                            src={selectedBooking.image}
+                            alt="Service reference"
+                            className="w-full h-full object-contain p-4"
+                            onError={(e) => {
+                              e.target.src = 'https://www.waterpurifierservicecenter.in/customer_app_images/service_and_repair.jpg';
+                              e.target.className = 'w-full h-full object-contain p-4';
+                            }}
+                          />
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => window.open(selectedBooking.image, '_blank')}
+                            className="bg-white/90 hover:bg-white text-indigo-600 px-4 py-2 rounded-full shadow-md flex items-center gap-2 transition-all"
+                          >
+                            <FiMaximize2 size={16} />
+                            <span className="text-sm font-medium">View Full Size</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                    <button
+                      onClick={handleCallSupport}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
+                    >
+                      <FiPhone size={18} />
+                      <span className="font-medium">Call Support</span>
+                    </button>
+
+                    {selectedBooking.status === "Active" && (
+                      <button
+                        onClick={() => handleCancelBooking(selectedBooking.id)}
+                        className="flex-1 bg-white border border-gray-300 hover:border-red-300 hover:bg-red-50 text-red-600 px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm hover:shadow-md"
+                      >
+                        <FiXCircle size={18} />
+                        <span className="font-medium">Cancel Booking</span>
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
             </div>
-          </>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+          </div>
+        </div>
+      )}
     </>
   );
 }
