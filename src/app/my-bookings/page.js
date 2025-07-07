@@ -31,16 +31,18 @@ import {
 function Booking() {
   const [activeTab, setActiveTab] = useState("Active");
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isOnline, setIsOnline] = useState(true);
   const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const router = useRouter();
 
   // Network status detection
   useEffect(() => {
+    setIsMounted(true);
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -55,13 +57,16 @@ function Booking() {
 
   // Fetch data when tab changes or component mounts
   useEffect(() => {
-    fetchBookings();
-  }, [activeTab]);
+    if (isMounted) {
+      fetchBookings();
+    }
+  }, [activeTab, isMounted]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
       setError(null);
+      setBookings([]);
       
       const phone = localStorage.getItem("userPhone");
       if (!phone) {
@@ -70,9 +75,9 @@ function Booking() {
       }
 
       const statusMap = {
-        "Active": 1,
-        "Completed": 2,
-        "Cancelled": 3
+        "Active": "1",
+        "Completed": "2",
+        "Cancelled": "3"
       };
 
       const response = await fetch('/api/bookings/', {
@@ -93,7 +98,8 @@ function Booking() {
       const data = await response.json();
       
       if (!data?.complainDetails?.length) {
-        throw new Error('No booking data received');
+        setBookings([]);
+        return;
       }
 
       setBookings(data.complainDetails.map(item => ({
@@ -114,6 +120,7 @@ function Booking() {
           ? "Network error. Please check your connection."
           : err.message || "Failed to load bookings. Please try again."
       );
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -182,7 +189,9 @@ function Booking() {
   };
 
   const handleTabClick = (tab) => {
-    setActiveTab(tab);
+    if (activeTab !== tab) {
+      setActiveTab(tab);
+    }
   };
 
   const StatusBadge = ({ status }) => {
