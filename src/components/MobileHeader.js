@@ -16,7 +16,7 @@ export default function MobileHeader({
       <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
         {/* Left side: Menu + Logo */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <button 
+          {/* <button 
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-1 text-gray-700"
             aria-label="Open menu"
@@ -24,7 +24,7 @@ export default function MobileHeader({
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-          </button>
+          </button> */}
           <Link href="/" className="block shrink-0 max-w-[120px] sm:max-w-[160px]">
             <Image
               src="/logo.png"
