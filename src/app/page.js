@@ -23,7 +23,7 @@ export const metadata = {
     template: "%s | Mannubhai Services",
   },
       alternates: {
-    canonical: "hhttps://www.mannubhai.com/", 
+    canonical: "https://www.mannubhai.com", 
   },
   robots: {
     index: true,
