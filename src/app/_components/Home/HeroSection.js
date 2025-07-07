@@ -266,14 +266,14 @@ const HeroSection = () => {
       
       {/* Swiper Section - Hidden on Mobile */}
       <div className="hidden sm:block w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="max-w-screen-2xl">
+        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
           <ServiceBannerSlider />
         </div>
       </div>
       
       {/* Banner below Swiper - Aligned to container */}
-      <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="max-w-10xl mx-auto">
+      <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5 mt-0 md:mt-10 mb-0">
+        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
           
           {/* Mobile Banner */}
           <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
