@@ -106,7 +106,7 @@ const metadataCache = new Map();
 
 export async function generateMetadata({ params }) {
   const { slug = [] } = params;
-  const baseUrl = "https://www.mannubhai.com/";
+  const baseUrl = "https://vercel.com/mannubhais-projects/manuubhai";
   const cacheKey = slug.join('-') || 'home';
   
   if (metadataCache.has(cacheKey)) {
@@ -116,7 +116,7 @@ export async function generateMetadata({ params }) {
   const defaultMetadata = {
     title: "Home Services | Mannu Bhai",
     description: "Find trusted home service professionals near you",
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 
   if (slug.length === 0) {
@@ -145,7 +145,7 @@ export async function generateMetadata({ params }) {
           description: cityDoc.meta_description,
           keywords: cityDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: cityDoc.meta_title,
             description: cityDoc.meta_description,
@@ -174,7 +174,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services | Mannu Bhai`,
             description: `Professional ${catDoc.category_name} services nationwide.`,
@@ -213,7 +213,7 @@ export async function generateMetadata({ params }) {
           description: catDoc.meta_description,
           keywords: catDoc.meta_keywords,
           alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
+          robots: { index: false, follow: false },
           openGraph: {
             title: `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`,
             description: `Top-rated ${catDoc.category_name} services in ${cityDoc.city_name}.`,
@@ -285,32 +285,32 @@ export default async function DynamicRouteHandler({ params }) {
       notFound();
     }
     
-  if (slug.length === 2) {
-  const [citySeg, catSeg] = slug;
-  
-  const [cityDoc, catDoc, cities] = await Promise.all([
-    fetchDoc("city_tb", "city_url", citySeg),
-    fetchDoc("category_manage", "category_url", catSeg),
-    citiesPromise,
-  ]);
-  
-  if (!cityDoc || !catDoc) notFound();
-  
-  const services = await fetchServices(catDoc.lead_type_id);
-  return (
-    <>
-      <CityDetails city={cityDoc} showServices={cityDoc.status === 1} />
-      <CategoryDetails 
-        category={{ ...catDoc, services }} 
-        city={cityDoc} 
-        meta_title={catDoc.meta_title}
-        meta_description={catDoc.meta_description}
-        meta_keywords={catDoc.meta_keywords}
-      />
-      <CityAccordion cities={cities} currentCity={cityDoc} />
-    </>
-  );
-}
+    if (slug.length === 2) {
+      const [citySeg, catSeg] = slug;
+      
+      const [cityDoc, catDoc, cities] = await Promise.all([
+        fetchDoc("city_tb", "city_url", citySeg),
+        fetchDoc("category_manage", "category_url", catSeg),
+        citiesPromise,
+      ]);
+      
+      if (!cityDoc || !catDoc) notFound();
+      
+      const services = await fetchServices(catDoc.lead_type_id);
+      return (
+        <>
+          <CategoryDetails 
+            category={{ ...catDoc, services}} 
+            city={cityDoc} 
+            meta_title={catDoc.meta_title}
+            meta_description={catDoc.meta_description}
+            meta_keywords={catDoc.meta_keywords}
+          />
+          <CityAccordion cities={cities} currentCity={cityDoc} />
+        </>
+      );
+    }
+    
     notFound();
     
   } catch (error) {
