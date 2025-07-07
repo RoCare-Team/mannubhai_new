@@ -372,7 +372,7 @@ const validateCartData = () => {
                   <FiCheck className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg md:text-xl font-semibold text-gray-800">Services</h2>
+                  <h1 className="text-lg md:text-xl font-semibold text-gray-800">Services</h1>
                   <p className="text-sm text-gray-500">{category.category_name}</p>
                 </div>
               </div>
@@ -478,32 +478,27 @@ const validateCartData = () => {
                                   />
                                 </div>
 
-                                <button
-                                  onClick={() =>
-                                    handleCartAction(
-                                      service.service_id,
-                                      "add",
-                                      quantity
-                                    )
-                                  }
-                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${
-                                    isAdded
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-blue-600 text-white hover:bg-blue-700"
-                                  }`}
-                                >
-                                  {isAdded ? (
-                                    <>
-                                      <FiCheck className="h-4 w-4" />
-                                      Added
-                                    </>
-                                  ) : (
-                                    <>
-                                      <FiShoppingCart className="h-4 w-4" />
-                                      Add
-                                    </>
-                                  )}
-                                </button>
+                             <button
+                                onClick={() => handleCartAction(service.service_id, "add", quantity)}
+                                className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${
+                                  isAdded
+                                    ? "bg-green-100 text-green-800 cursor-not-allowed"
+                                    : "bg-blue-600 text-white hover:bg-blue-700"
+                                }`}
+                                disabled={isAdded}
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <FiCheck className="h-4 w-4" />
+                                    Added
+                                  </>
+                                ) : (
+                                  <>
+                                    <FiShoppingCart className="h-4 w-4" />
+                                    Add
+                                  </>
+                                )}
+                              </button>
 
                                 <div className="text-center">
                                   <span className="text-sm font-semibold text-gray-900">
@@ -605,7 +600,7 @@ const validateCartData = () => {
         {category.category_content && (
           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              About Our {category.category_name}  Services  in  {city.city_name}
+              About Our {category.category_name}  Services   {city.city_name}
             </h2>
             <div className="relative">
               <div
