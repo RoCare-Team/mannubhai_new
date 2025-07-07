@@ -285,32 +285,32 @@ export default async function DynamicRouteHandler({ params }) {
       notFound();
     }
     
-  if (slug.length === 2) {
-  const [citySeg, catSeg] = slug;
-  
-  const [cityDoc, catDoc, cities] = await Promise.all([
-    fetchDoc("city_tb", "city_url", citySeg),
-    fetchDoc("category_manage", "category_url", catSeg),
-    citiesPromise,
-  ]);
-  
-  if (!cityDoc || !catDoc) notFound();
-  
-  const services = await fetchServices(catDoc.lead_type_id);
-  return (
-    <>
-      <CityDetails city={cityDoc} showServices={cityDoc.status === 1} />
-      <CategoryDetails 
-        category={{ ...catDoc, services }} 
-        city={cityDoc} 
-        meta_title={catDoc.meta_title}
-        meta_description={catDoc.meta_description}
-        meta_keywords={catDoc.meta_keywords}
-      />
-      <CityAccordion cities={cities} currentCity={cityDoc} />
-    </>
-  );
-}
+    if (slug.length === 2) {
+      const [citySeg, catSeg] = slug;
+      
+      const [cityDoc, catDoc, cities] = await Promise.all([
+        fetchDoc("city_tb", "city_url", citySeg),
+        fetchDoc("category_manage", "category_url", catSeg),
+        citiesPromise,
+      ]);
+      
+      if (!cityDoc || !catDoc) notFound();
+      
+      const services = await fetchServices(catDoc.lead_type_id);
+      return (
+        <>
+          <CategoryDetails 
+            category={{ ...catDoc, services}} 
+            city={cityDoc} 
+            meta_title={catDoc.meta_title}
+            meta_description={catDoc.meta_description}
+            meta_keywords={catDoc.meta_keywords}
+          />
+          <CityAccordion cities={cities} currentCity={cityDoc} />
+        </>
+      );
+    }
+    
     notFound();
     
   } catch (error) {
