@@ -39,7 +39,7 @@ export const metadata = {
     "home care",
     "handyman services",
   ],
-  metadataBase: new URL('https://www.mannubhai.com/'),
+  metadataBase: new URL('https://www.mannubhai.com'),
   openGraph: {
     title: "Mannubhai - Professional Home Services",
     description: "Book trusted professionals for all your home service needs",
