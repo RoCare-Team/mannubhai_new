@@ -605,7 +605,7 @@ const validateCartData = () => {
         {category.category_content && (
           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              About Our {category.category_name} Services
+              About Our {category.category_name}  Services  in    {city.city_name}
             </h2>
             <div className="relative">
               <div
