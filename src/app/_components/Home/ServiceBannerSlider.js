@@ -11,10 +11,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 const serviceBannerData = [
-  { ServiceIcon: "/ServiceSlider/Electrician_banner.webp", link: "electrician" },
-  { ServiceIcon: "/ServiceSlider/Massage_banner.webp", link: "men-massage-at-home" },
-  { ServiceIcon: "/ServiceSlider/refridgerator-service-banner.png", link: "refrigerator-repair-service" },
-  { ServiceIcon: "/ServiceSlider/ro-service-banner.png", link: "water-purifier-service" },
+  { ServiceIcon: "/Appliance Slider Banner/AC Repair.webp", link: "ac-service" },
+    { ServiceIcon: "/Appliance Slider Banner/fridge repair.webp", link: "refrigerator-repair-service" },
+  { ServiceIcon: "/Appliance Slider Banner/RO Repair.webp", link: "water-purifier-service" },
+  { ServiceIcon: "/Appliance Slider Banner/washing machine repair.webp", link: "washing-machine-repair" },
+    { ServiceIcon:"/Appliance Slider Banner/all repairs.webp", link: "appliance" },
 ];
 
 export default function ServiceBannerSlider() {

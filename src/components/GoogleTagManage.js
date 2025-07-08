@@ -1,6 +1,10 @@
 'use client'
 
+<<<<<<< HEAD
 import Script from 'next/script'
+=======
+
+>>>>>>> fixCityContent
 
 export const GoogleTagManager = () => {
   return (
