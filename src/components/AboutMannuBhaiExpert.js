@@ -1,100 +1,302 @@
-    "use client";
-    import React from "react";
-    import { usePathname } from "next/navigation";
-    import { FaCheckCircle } from "react-icons/fa";
+"use client";
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
+import { 
+  FaHome, 
+  FaRegSmile, 
+  FaBroom, 
+  FaTools, 
+  FaCheckCircle,
+  FaChevronDown,
+  FaChevronUp,
+  FaTint,
+  FaSnowflake,
+  FaTshirt,
+  FaIceCream,
+  FaCut,
+  FaMale,
+  FaPalette,
+  FaBath,
+  FaBug,
+  FaWater,
+  FaPaintRoller,
+  FaWrench,
+  FaPlug,
+  FaHammer
+} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
-    function AboutMannuBhaiExpert() {
-        const urlPath = usePathname();
-        const city = urlPath.split("/")[1] || ""; // Gets the city from the URL path
-        const formattedCity = city.charAt(0).toUpperCase() + city.slice(1);
+function AboutMannuBhaiExpert() {
+    const urlPath = usePathname();
+    const city = urlPath.split("/")[1] || "Gurgaon";
+    const formattedCity = city.charAt(0).toUpperCase() + city.slice(1);
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [showFullDescription, setShowFullDescription] = useState({});
 
-        return (
-        <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 2xl:px-28 py-12 bg-gradient-to-br from-purple-50 via-white to-indigo-50 border border-gray-200 rounded-2xl shadow-lg my-10">
+    const toggleCategory = (categoryId) => {
+        setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+    };
 
-                {/* Heading */}
-                <h2
-                    className="text-3xl md:text-4xl font-extrabold mb-6 text-center tracking-tight"
-                    style={{
-                        background: "linear-gradient(to right, #e7516c, #21679c)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                        color: "transparent",
-                    }}
+    const toggleDescription = (categoryId) => {
+        setShowFullDescription(prev => ({
+            ...prev,
+            [categoryId]: !prev[categoryId]
+        }));
+    };
+
+  const serviceCategories = [
+      {
+        id: "appliances",
+        title: "Home Appliances Care",
+        icon: <FaHome className="text-blue-500" />,
+        description: `Home appliances are now a basic need in every ${formattedCity} home. They make life easy and smooth. But with the fast lifestyle and traffic in ${formattedCity}, it's tough to take time out for service. That's why Mannu Bhai brings appliance care directly to your home in ${formattedCity}.`,
+        services: [
+          {
+            name: "Water Purifier",
+            icon: <FaTint className="text-blue-400" />,
+            description: `We offer water purifier installation, repair, and regular servicing for all brands in ${formattedCity}. Our trained technicians come to your home and ensure clean and safe drinking water at a fair price.`
+          },
+          {
+            name: "Air Conditioner",
+            icon: <FaSnowflake className="text-blue-400" />,
+            description: `Need AC service in ${formattedCity}? Mannu Bhai provides trusted and affordable AC repair and maintenance for both window and split ACs. Our experts come to your home with proper tools and experience.`
+          },
+          {
+            name: "Washing Machine",
+            icon: <FaTshirt className="text-blue-400" />,
+            description: `We offer washing machine service in ${formattedCity} for all brands and models. Whether it's a front load or top load, our expert technician will fix the problem and check everything before leaving.`
+          },
+          {
+            name: "Refrigerator",
+            icon: <FaIceCream className="text-blue-400" />,
+            description: `From gas refilling to regular checkups, Mannu Bhai offers fridge service at home in ${formattedCity}. Just book with us and get quick, reliable service without stepping out.`
+          }
+        ]
+      },
+      {
+        id: "beauty",
+        title: "Beauty Care Services",
+        icon: <FaRegSmile className="text-pink-500" />,
+        description: `We believe beauty and self-care should be simple. That's why Mannu Bhai offers beauty and grooming services at home in ${formattedCity}. Whether you want to relax, look good, or get ready for an event—we come to you.`,
+        services: [
+          {
+            name: "Women Salon",
+            icon: <FaCut className="text-pink-400" />,
+            description: `No need to visit the salon. Get haircuts, facials, waxing, threading, and more at home in ${formattedCity}. Our beauticians are trained, friendly, and follow proper hygiene.`
+          },
+          {
+            name: "Men Salon",
+            icon: <FaMale className="text-pink-400" />,
+            description: `Men in ${formattedCity} can now enjoy haircuts, beard grooming, facials, and head massages at home. Our team brings everything needed and gives you a clean and stylish look.`
+          },
+          {
+            name: "Makeup Service",
+            icon: <FaPalette className="text-pink-400" />,
+            description: `Have a wedding or party? Book our makeup artists at home in ${formattedCity}. We do bridal, party, or simple makeup using top-quality products to give you the perfect look.`
+          },
+          {
+            name: "Spa Services",
+            icon: <FaBath className="text-pink-400" />,
+            description: `Relax at home with our spa service in ${formattedCity}. We offer body massage, aromatherapy, scrubs, and more—done by trained professionals to help you feel fresh and relaxed.`
+          }
+        ]
+      },
+      {
+        id: "homecare",
+        title: "Home Care Services",
+        icon: <FaBroom className="text-green-500" />,
+        description: `Mannu Bhai is a trusted name for home cleaning and repair services in ${formattedCity}. Since 2018, we've been helping homes stay clean, safe, and well-maintained—right at your doorstep.`,
+        services: [
+          {
+            name: "Sofa Cleaning",
+            icon: <FaBroom className="text-green-400" />,
+            description: `Book expert sofa cleaning in ${formattedCity}. We remove dirt and stains to make your sofa look and feel fresh.`
+          },
+          {
+            name: "Bathroom Cleaning",
+            icon: <FaBath className="text-green-400" />,
+            description: `Our team offers deep bathroom cleaning in ${formattedCity} using high-grade equipment and safe products. Get a sparkling bathroom in just one visit.`
+          },
+          {
+            name: "Pest Control",
+            icon: <FaBug className="text-green-400" />,
+            description: `Say goodbye to pests with our safe and effective pest control in ${formattedCity}. Our experts use modern sprays that give better and longer-lasting results.`
+          },
+          {
+            name: "Tank Cleaning",
+            icon: <FaWater className="text-green-400" />,
+            description: `Book water tank cleaning in ${formattedCity} with us. We use modern tools and safe methods to keep your tank clean and healthy.`
+          }
+        ]
+      },
+      {
+        id: "handyman",
+        title: "Handyman Services",
+        icon: <FaTools className="text-orange-500" />,
+        description: `Got something broken or loose at home? No worries. Mannu Bhai's handyman in ${formattedCity} is just a call away. Whether it's a small repair or a quick fix, we'll send the right person to take care of it—no delays, no hassle. Just honest help, right when you need it.`,
+        services: [
+          {
+            name: "Painter Service",
+            icon: <FaPaintRoller className="text-orange-400" />,
+            description: `Give your home a new look with our painting service in ${formattedCity}. We offer both interior and exterior painting with smooth finish and neat work.`
+          },
+          {
+            name: "Plumber Service",
+            icon: <FaWrench className="text-orange-400" />,
+            description: `Got a leaking tap or a blocked drain? Don't worry. Mannu Bhai's plumbers in ${formattedCity} are ready to help. They'll come to your home on time, fix the issue properly, and leave everything clean.`
+          },
+          {
+            name: "Electrician Service",
+            icon: <FaPlug className="text-orange-400" />,
+            description: `From light fittings to wiring problems—our electricians in ${formattedCity} are trained to solve it safely and quickly.`
+          },
+          {
+            name: "Mason Service",
+            icon: <FaHammer className="text-orange-400" />,
+            description: `Planning to build something new? Or need a solid repair? Our mason team in ${formattedCity} is experienced in all types of construction work. From walls to flooring, we use the latest tools and strong materials to build it right.`
+          }
+        ]
+      }
+    ];
+    return (
+        <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50 sm:py-20 w-full">
+            <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto"> {/* Full width container */}
+
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-16"
                 >
-                    ABOUT Mannubhai SERVICE EXPERT {formattedCity}
-                </h2>
-
-                {/* Main Content */}
-                <div className="space-y-6 text-gray-800 text-base md:text-lg leading-relaxed">
-                    <p className="text-center text-xl font-semibold text-indigo-700">
-                        Best Home Appliance Repair Services in {formattedCity} – Mannu Bhai SERVICE EXPERT
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+                        Complete Home Services in {formattedCity}
+                    </h2>
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Premium services delivered to your doorstep with professionalism and care
                     </p>
+                </motion.div>
 
-                    <p>
-                        Are you tired of your home appliances working erratically or suddenly malfunctioning in {formattedCity}? No worries!{" "}
-                        <span className="font-medium text-purple-700">Mannu Bhai SERVICE EXPERT</span>{" "}
-                        offers the most trusted home appliance repair services in {formattedCity}. Whether it&apos;s an RO water purifier, air conditioner, washing machine, refrigerator, geyser, microwave oven, dishwasher, or LED TV, our skilled and trained technicians will handle your repair needs with care and efficiency across {formattedCity}.
-                    </p>
-
-                    <p>
-                        We specialize in delivering on-time service with unmatched transparency and trust.{" "}
-                        <span className="font-medium text-purple-700">100% service satisfaction</span>{" "}
-                        is our goal. Experience the difference why many happy customers in {formattedCity} rely on us for thousands of repair jobs.
-                    </p>
-
-                    {/* Services Section */}
-                    <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-md border border-gray-100">
-                        <h3 className="text-2xl font-semibold mb-4 text-indigo-700">
-                            Our Home Appliance Repair Services in {formattedCity}
-                        </h3>
-                        <ul className="list-disc list-inside space-y-2 text-gray-700">
-                            <li>RO Water Purifier Repair & Service</li>
-                            <li>AC Repair & Maintenance</li>
-                            <li>Washing Machine Repair</li>
-                            <li>Geyser Repair & Installation</li>
-                            <li>Microwave Oven Repair</li>
-                            <li>Refrigerator Repair</li>
-                            <li>LED TV Repair</li>
-                            <li>Vacuum Cleaner Repair</li>
-                        </ul>
-                    </div>
-
-                    {/* Why Choose Section */}
-                    <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl p-6 shadow-md border border-purple-200 transition hover:scale-[1.02] hover:shadow-lg duration-300 ease-in-out">
-                        <h3 className="text-2xl font-semibold mb-4 text-purple-800">
-                            Why Choose Mannu Bhai SERVICE EXPERT in {formattedCity}?
-                        </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-start space-x-3">
-                                <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                                <p>
-                                    <strong>High Demand for Services:</strong> {formattedCity} is experiencing a surge in demand for home appliance repair, deep cleaning, and handyman services.
-                                </p>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                                <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                                <p>
-                                    <strong>Rapid Urban Growth:</strong> With ongoing urbanization and high-rise development, the need for reliable home services continues to grow.
-                                </p>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                                <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                                <p>
-                                    <strong>Tech-Savvy Consumer Base:</strong> {formattedCity}&apos;s digitally active population prefers trusted, app-based service providers like Mannu Bhai SERVICE EXPERT.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Conclusion */}
-                    <p className="text-center text-lg font-medium text-indigo-800 mt-6">
-                        So, if you are looking for reliable, expert, and affordable home appliance repair services in {formattedCity}, look no further than{" "}
-                        <span className="font-bold text-purple-700">Mannu Bhai SERVICE EXPERT</span>. Book your service today and experience the difference!
-                    </p>
+                <div className="grid md:grid-cols-2 gap-6 mb-16 w-full">
+                    {serviceCategories.map((category) => (
+                        <motion.div
+                            key={category.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            viewport={{ once: true }}
+                            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 w-full"
+                        >
+                            <button
+                                onClick={() => toggleCategory(category.id)}
+                                className="w-full flex justify-between items-center p-6 text-left focus:outline-none group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors">
+                                        {category.icon}
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                                            {category.title}
+                                        </h3>
+                                        <p className="text-gray-500">
+                                            {showFullDescription[category.id] 
+                                                ? category.description 
+                                                : `${category.description.substring(0, 100)}...`}
+                                        </p>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleDescription(category.id);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2"
+                                        >
+                                            {showFullDescription[category.id] ? "Read Less" : "Read More"}
+                                        </button>
+                                    </div>
+                                </div>
+                                {expandedCategory === category.id ? (
+                                    <FaChevronUp className="text-blue-600 text-lg" />
+                                ) : (
+                                    <FaChevronDown className="text-gray-500 text-lg group-hover:text-blue-600 transition-colors" />
+                                )}
+                            </button>
+                            
+                            <AnimatePresence>
+                                {expandedCategory === category.id && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="overflow-hidden w-full"
+                                    >
+                                        <div className="px-6 pb-6 grid gap-4 w-full">
+                                            {category.services.map((service, index) => (
+                                                <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-lg w-full">
+                                                    <div className="p-3 bg-white rounded-lg shadow-sm">
+                                                        {service.icon}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <h4 className="font-semibold text-gray-800">{service.name}</h4>
+                                                        <p className="text-gray-600 text-sm">{service.description}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                    ))}
                 </div>
-            </div>
-        );
-    }
 
-    export default AboutMannuBhaiExpert;
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 w-full"
+                >
+                    <h3 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-900">
+                        Why Choose Mannu Bhai in {formattedCity}?
+                    </h3>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                           <div className="text-center p-4">
+                                               <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center">
+                                                   <FaCheckCircle className="text-blue-600 text-xl" />
+                                               </div>
+                                               <h4 className="font-bold text-lg text-gray-800 mb-2">All-in-One Solution</h4>
+                                               <p className="text-gray-600">From appliance repair to beauty services, we cover all home needs</p>
+                                           </div>
+                                           <div className="text-center p-4">
+                                               <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center">
+                                                   <FaTools className="text-blue-600 text-xl" />
+                                               </div>
+                                               <h4 className="font-bold text-lg text-gray-800 mb-2">Verified Experts</h4>
+                                               <p className="text-gray-600">Trained, background-checked professionals for quality service</p>
+                                           </div>
+                                           <div className="text-center p-4">
+                                               <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center">
+                                                   <FaHome className="text-blue-600 text-xl" />
+                                               </div>
+                                               <h4 className="font-bold text-lg text-gray-800 mb-2">Doorstep Convenience</h4>
+                                               <p className="text-gray-600">Get services at home without the hassle of traveling</p>
+                                           </div>
+                                           <div className="text-center p-4">
+                                               <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center">
+                                                   <FaCheckCircle className="text-blue-600 text-xl" />
+                                               </div>
+                                               <h4 className="font-bold text-lg text-gray-800 mb-2">Fair Pricing</h4>
+                                               <p className="text-gray-600">Transparent costs with no hidden charges</p>
+                                           </div>
+                                       </div>
+                   
+                                     
+                                   </motion.div>
+                               </div>
+                           </div>
+                       );
+                   }
+                   
+                   export default AboutMannuBhaiExpert;

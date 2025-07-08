@@ -352,7 +352,7 @@ export default async function DynamicRouteHandler({ params }) {
 {pageMasterDoc?.page_content && (
   <div className="page-content my-8 px-4 max-w-6xl mx-auto">
     <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-      About {cityDoc.city_name} - {catDoc.category_name}
+      About  {cityDoc.city_name} - {catDoc.category_name}
     </h2>
     <div 
       className="prose max-w-none

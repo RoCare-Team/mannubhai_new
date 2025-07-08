@@ -1,5 +1,3 @@
-
-
 import 'react-toastify/dist/ReactToastify.css';
 import HeroSection from './_components/Home/HeroSection';
 import Appliances from './_components/Home/Appliances';
@@ -16,13 +14,13 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
 import AppDownloadCard from './_components/Home/AppDownloadCard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// ✅ App Router metadata
+
 export const metadata = {
   title: {
     default: "Mannubhai - Get Expert Professional Services at Home",
     template: "%s | Mannubhai Services",
   },
-      alternates: {
+  alternates: {
     canonical: "https://www.mannubhai.com", 
   },
   robots: {
@@ -68,6 +66,9 @@ export const metadata = {
     ],
   },
   manifest: '/site.webmanifest',
+  verification: {
+    google: 'IaTaWIzhmYLa4xubMA-U595_5CX8O-zVfP_Y69z2Wss',
+  },
 };
 
 export default function Page() {
@@ -87,11 +88,11 @@ export default function Page() {
         <Services />
         <FooterLinks />
         <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
-        bodyClassName="!text-sm"
-      />
+          position="top-right"
+          autoClose={3000}
+          toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
+          bodyClassName="!text-sm"
+        />
       </main>
     </>
   );
