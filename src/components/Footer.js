@@ -31,9 +31,9 @@ const Footer = () => {
               For Customers
             </h4>
             <ul className="text-sm space-y-2">
-              <li><Link href="#">Categories Near You</Link></li>
+              {/* <li><Link href="#">Categories Near You</Link></li> */}
               <li><Link href="#">Blog</Link></li>
-              <li><Link href="#">Contact Us</Link></li>
+              <li><Link href="/contact-us">Contact Us</Link></li>
             </ul>
           </div>
 

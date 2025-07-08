@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { db } from "../app/firebaseConfig";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import FooterLinks from "@/app/_components/Home/FooterLinks";
-
+import { usePathname } from "next/navigation";
 export default function CityAccordion({ cities, currentCity }) {
   const [nearbyCities, setNearbyCities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function CityAccordion({ cities, currentCity }) {
   const [stores, setStores] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
   const [showAllStores, setShowAllStores] = useState(false);
-
+ const pathname = usePathname();
   // Safeguard for undefined currentCity
   const safeCity = currentCity || { 
     city_name: "Unknown City", 
@@ -138,6 +138,19 @@ export default function CityAccordion({ cities, currentCity }) {
     ? stores
     : stores.slice(0, initialStoresDisplayCount);
   
+
+
+
+     const getCategoryFromUrl = () => {
+    if (!pathname) return '';
+    const parts = pathname.split('/');
+    if (parts.length >= 3) {
+      return parts[2];
+    }
+    return '';
+  };
+
+  const currentCategory = getCategoryFromUrl();
   return (
     <div className="mt-16 w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
       {/* Nearby Service Areas Section */}
@@ -176,55 +189,60 @@ export default function CityAccordion({ cities, currentCity }) {
           </div>
         ) : nearbyCities.length > 0 ? (
           <>
-            <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-1">
-              {citiesToShow.map((city) => {
-                const slug = city.slug
-                  ? city.slug
-                  : city.city_name
-                      .toLowerCase()
-                      .replace(/,/g, "")
-                      .replace(/[^a-z0-9]+/g, "-")
-                      .replace(/^-+|-+$/g, "");
+           <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-1">
+            {citiesToShow.map((city) => {
+              const slug = city.slug
+                ? city.slug
+                : city.city_name
+                    .toLowerCase()
+                    .replace(/,/g, "")
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, "");
 
-                return (
-                  <Link
-                    key={city.id}
-                    href={`/${slug}`}
-                    className="group relative block overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    <div className="p-5">
-                      <div className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-indigo-500 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        <span className="text-gray-800 font-medium group-hover:text-indigo-600 transition-colors">
-                          {city.city_name}
-                        </span>
-                      </div>
+              // Construct the href - keep the category if it exists
+              const href = currentCategory 
+                ? `/${slug}/${currentCategory}`
+                : `/${slug}`;
+
+              return (
+                <Link
+                  key={city.id}
+                  href={href}
+                  className="group relative block overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-indigo-500 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <span className="text-gray-800 font-medium group-hover:text-indigo-600 transition-colors">
+                        {city.city_name}
+                      </span>
                     </div>
+                  </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </Link>
-                );
-              })}
-            </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Link>
+              );
+            })}
+          </div>
 
             {nearbyCities.length > initialDisplayCount && (
               <div className="text-center mt-6">

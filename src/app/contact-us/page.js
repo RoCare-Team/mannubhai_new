@@ -1,8 +1,117 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../../app/firebaseConfig";
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    countryCode: "+91",
+    phone: "",
+    message: ""
+  });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{10,11}$/; // 10 to 11 digits only
+    const nameRegex = /^[a-zA-Z\s]+$/; // Only letters and spaces
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (!nameRegex.test(formData.name)) {
+      newErrors.name = "Name should only contain letters and spaces";
+    }
+
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-11 digit phone number";
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // For phone field, only allow numeric input
+    if (name === "phone") {
+      if (!/^\d*$/.test(value)) return; // Only allow numbers
+      if (value.length > 11) return; // Max 11 digits
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+    
+    // Reset success message if editing after submission
+    if (submitSuccess) {
+      setSubmitSuccess(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Add document to Firestore
+      await addDoc(collection(db, "enquireOptions"), {
+        ...formData,
+        createdAt: serverTimestamp(),
+        status: "new",
+        ipAddress: "", // You might want to add this server-side for security
+        userAgent: navigator.userAgent
+      });
+
+      // Show success message in form
+      setSubmitSuccess(true);
+      
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        countryCode: "+91",
+        phone: "",
+        message: ""
+      });
+    } catch (error) {
+      console.error("Error submitting form: ", error);
+      setErrors({
+        submit: "An error occurred. Please try again later."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -34,20 +143,49 @@ export default function ContactPage() {
                   <h2 className="text-2xl font-bold text-gray-800">Send us a Message</h2>
                 </div>
 
-                <form className="space-y-6" method="post">
+                {submitSuccess && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-green-700 font-medium">Your enquiry has been sent successfully! We'll get back to you soon.</p>
+                    </div>
+                  </div>
+                )}
+
+                {errors.submit && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                      <p className="text-red-700 font-medium">{errors.submit}</p>
+                    </div>
+                  </div>
+                )}
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="group">
-                      <label htmlFor="full-name" className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
                         Full Name
                       </label>
                       <input
-                        id="full-name"
-                        name="full-name"
+                        id="name"
+                        name="name"
                         type="text"
                         placeholder="Enter your full name"
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300"
+                        className={`w-full border-2 ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300`}
+                        value={formData.name}
+                        onChange={handleChange}
                         required
                       />
+                      {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                     </div>
 
                     <div className="group">
@@ -59,9 +197,12 @@ export default function ContactPage() {
                         name="email"
                         type="email"
                         placeholder="Enter your email address"
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300"
+                        className={`w-full border-2 ${errors.email ? 'border-red-500' : 'border-gray-200'} rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300`}
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                       />
+                      {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                     </div>
                   </div>
 
@@ -71,10 +212,11 @@ export default function ContactPage() {
                     </label>
                     <div className="flex gap-3">
                       <select
-                        name="country-code"
-                        id="country-code"
+                        name="countryCode"
+                        id="countryCode"
                         className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300"
-                        defaultValue="+91"
+                        value={formData.countryCode}
+                        onChange={handleChange}
                       >
                         <option value="+91">🇮🇳 +91</option>
                         <option value="+1">🇺🇸 +1</option>
@@ -85,11 +227,16 @@ export default function ContactPage() {
                         id="phone"
                         name="phone"
                         type="tel"
-                        placeholder="Phone Number"
-                        className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Phone Number (10-11 digits)"
+                        className={`flex-1 border-2 ${errors.phone ? 'border-red-500' : 'border-gray-200'} rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300`}
+                        value={formData.phone}
+                        onChange={handleChange}
                         required
                       />
                     </div>
+                    {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                   </div>
 
                   <div className="group">
@@ -101,26 +248,40 @@ export default function ContactPage() {
                       name="message"
                       rows="6"
                       placeholder="Tell us how we can help you..."
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300 resize-none"
+                      className={`w-full border-2 ${errors.message ? 'border-red-500' : 'border-gray-200'} rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 bg-white/50 backdrop-blur-sm group-hover:border-gray-300 resize-none`}
+                      value={formData.message}
+                      onChange={handleChange}
                       required
                     ></textarea>
+                    {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
                   </div>
 
                   <div className="pt-4">
                     <button
                       type="submit"
-                      className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/25"
+                      disabled={isSubmitting}
+                      className={`w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/25 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                      Send Message
-                      <span className="ml-2">→</span>
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          Send Message
+                          <span className="ml-2">→</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
               </div>
             </section>
-
-            {/* Help & Info Cards Section */}
-            <aside className="space-y-6" aria-label="Contact Information">
+   <aside className="space-y-6" aria-label="Contact Information">
               <article className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 group">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
