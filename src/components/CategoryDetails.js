@@ -577,7 +577,97 @@ const CategoryDetails = ({
             </aside>
           </main>
         </div>
+        
+     <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+          <AwardCertifications />
+        </section>
+
+        {category.category_content && (
+          <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              About Our {category.category_name} Services {city.city_name}
+            </h2>
+            <div className="relative">
+              <div
+                ref={contentRef}
+                className={`prose max-w-none transition-all duration-500 ease-in-out ${
+                  !isExpanded && showReadMore ? "max-h-96 overflow-hidden" : "overflow-visible"
+                }`}
+                dangerouslySetInnerHTML={{ __html: category.category_content }}
+              />
+              {showReadMore && !isExpanded && (
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+              )}
+              {showReadMore && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                >
+                  {isExpanded ? "Show Less" : "Read More"}
+                  {isExpanded ? (
+                    <FiChevronUp className="h-5 w-5 transition-transform duration-200" />
+                  ) : (
+                    <FiChevronDown className="h-5 w-5 transition-transform duration-200" />
+                  )}
+                </button>
+              )}
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* Mobile Cart Panel */}
+      <AnimatePresence>
+        {isCartOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50"
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30 }}
+              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl"
+            >
+              <div className="h-full flex flex-col">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <FiShoppingCart className="h-6 w-6 text-blue-600" />
+                    Your Order
+                  </h2>
+                  <button
+                    onClick={() => setIsCartOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <FiX className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto">
+                  <Cart
+                    cartLoaded={cartLoaded}
+                    cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Login Popup */}
+      <AnimatePresence>
+        {showLoginPopup && (
+          <LoginPopup
+            show={showLoginPopup}
+            onClose={() => setShowLoginPopup(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
