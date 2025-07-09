@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
@@ -9,7 +9,6 @@ import {
   FiShoppingCart,
   FiX,
   FiCheck,
-  FiStar,
   FiClock,
   FiShield,
   FiTruck,
@@ -20,12 +19,12 @@ import {
 import AwardCertifications from "./AwardCertifications";
 
 // Utility function to extract images from HTML content
-function extractImagesAndContent(html) {
+const extractImagesAndContent = (html) => {
   if (!html) return { content: "", images: [] };
   const imgRegex = /<img[^>]+src="([^">]+)"[^>]*>/g;
   const images = [];
-  let match;
   let content = html;
+  let match;
 
   while ((match = imgRegex.exec(html)) !== null) {
     images.push(match[1]);
@@ -33,10 +32,10 @@ function extractImagesAndContent(html) {
 
   content = html.replace(imgRegex, "");
   return { content, images };
-}
+};
 
 // Service priority mapping
-const servicePriority = {
+const SERVICE_PRIORITY = {
   service: 1,
   repair: 2,
   install: 3,
@@ -51,7 +50,7 @@ const CategoryDetails = ({
   meta_description,
   meta_keywords,
   category,
- city = {},
+  city = {},
 }) => {
   // State management
   const [selectedService, setSelectedService] = useState(null);
@@ -65,10 +64,11 @@ const CategoryDetails = ({
 
   // Refs
   const serviceRefs = useRef({});
+  const groupRefs = useRef({});
   const contentRef = useRef(null);
 
   // Constants
-  const defaultBanner = "/ApplianceBanner/appliancs.jpg";
+  const DEFAULT_BANNER = "/ApplianceBanner/appliancs.jpg";
 
   // Effects
   useEffect(() => {
@@ -77,12 +77,12 @@ const CategoryDetails = ({
     const checkHeight = () => {
       const element = contentRef.current;
       if (!element) return;
-      
+
       element.style.maxHeight = 'none';
       const fullHeight = element.scrollHeight;
       const needsTruncation = fullHeight > 384;
       setShowReadMore(needsTruncation);
-      
+
       if (!isExpanded && needsTruncation) {
         element.style.maxHeight = '24rem';
       }
@@ -120,45 +120,42 @@ const CategoryDetails = ({
     if (!category?.services) return {};
 
     const groups = {};
+    const displayNameMap = new Map();
 
     category.services.forEach((service) => {
-      let cleanedName = service.service_name
-        .replace(/^\d+\s*/, "")
-        .trim();
+      let cleanedName = service.service_name.replace(/^\d+\s*/, "").trim();
+      const firstWordsMatch = cleanedName.match(/^([\w'-]+(?:\s+[\w'-]+)*)/i);
+      let firstWords = firstWordsMatch ? firstWordsMatch[0] : "other";
 
-      let groupKey = cleanedName.toLowerCase().match(/^([a-zA-Z-]+)/)?.[0] || "other";
-      
+      // Handle special cases
       if (cleanedName.toLowerCase().startsWith("installation")) {
-        groupKey = "install";
-      } 
-      else if (cleanedName.toLowerCase().startsWith("un-installation")) {
-        groupKey = "uninstallation";
-      }
-      else if (cleanedName.toLowerCase().startsWith("gas filling")) {
-        groupKey = "gasfilling";
-      }
-      else if (cleanedName.toLowerCase().startsWith("foam jet")) {
-        groupKey = "foamjet";
+        firstWords = "Installation";
+      } else if (cleanedName.toLowerCase().startsWith("un-installation")) {
+        firstWords = "Un-installation";
+      } else if (cleanedName.toLowerCase().includes("amc")) {
+        firstWords = "AMC";
+      } else if (cleanedName.toLowerCase().startsWith("gas filling")) {
+        firstWords = "Gas Filling";
+      } else if (cleanedName.toLowerCase().startsWith("foam jet")) {
+        firstWords = "Foam Jet";
+      } else if (cleanedName.toLowerCase().startsWith("l'oréal")) {
+        firstWords = "L'Oréal";
       }
 
-      let priority = servicePriority[groupKey] || 99;
+      let groupKey = firstWords.toLowerCase().replace(/\s+/g, '_');
+      let displayName = firstWords;
+
+      if (displayNameMap.has(displayName)) {
+        const count = displayNameMap.get(displayName) + 1;
+        displayNameMap.set(displayName, count);
+        groupKey = `${groupKey}_${count}`;
+      } else {
+        displayNameMap.set(displayName, 1);
+      }
+
+      const priority = SERVICE_PRIORITY[groupKey.split('_')[0]] || 99;
 
       if (!groups[groupKey]) {
-        let displayName;
-        switch (groupKey) {
-          case "uninstallation":
-            displayName = "Un-installation";
-            break;
-          case "gasfilling":
-            displayName = "Gas Filling";
-            break;
-          case "foamjet":
-            displayName = "Foam Jet";
-            break;
-          default:
-            displayName = cleanedName.match(/^([a-zA-Z-]+)/)?.[0] || "Other Services";
-        }
-
         groups[groupKey] = {
           displayName,
           services: [],
@@ -168,6 +165,7 @@ const CategoryDetails = ({
               ? service.image_icon
               : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`
             : "/placeholder-service.png",
+          id: `service-group-${groupKey}`
         };
       }
 
@@ -181,98 +179,92 @@ const CategoryDetails = ({
     return Object.keys(serviceGroups).sort((a, b) => {
       const pA = serviceGroups[a].priority || 99;
       const pB = serviceGroups[b].priority || 99;
-      if (pA !== pB) return pA - pB;
-      return serviceGroups[a].displayName.localeCompare(
-        serviceGroups[b].displayName
-      );
+      return pA !== pB ? pA - pB : serviceGroups[a].displayName.localeCompare(serviceGroups[b].displayName);
     });
   }, [serviceGroups]);
 
-  // Helper functions
-  const scrollToService = (serviceName) => {
-    setSelectedService((prev) => (prev === serviceName ? null : serviceName));
+  // Scroll to all matching service groups
+const scrollToServiceGroup = useCallback((displayName) => {
+  setSelectedService(displayName);
+
+  const matchingGroups = Object.entries(serviceGroups)
+    .filter(([_, group]) => group.displayName === displayName)
+    .map(([key]) => key);
+
+  if (matchingGroups.length > 0) {
     setTimeout(() => {
-      const ref = serviceRefs.current[serviceName];
-      ref?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const firstGroupKey = matchingGroups[0];
+      if (groupRefs.current[firstGroupKey]) {
+        const element = groupRefs.current[firstGroupKey];
+        const headerHeight = 100; // Adjust based on your actual header height
+        const yOffset = -headerHeight - 16; // Additional 16px padding
+        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+        
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
     }, 100);
-  };
+  }
+}, [serviceGroups]);
 
-  const { content: contentWithoutImages } = useMemo(
-    () => extractImagesAndContent(category?.category_content || ""),
-    [category]
-  );
+  // Get unique groups for filter display
+  const uniqueServiceGroups = useMemo(() => {
+    const seen = new Set();
+    return Object.values(serviceGroups)
+      .filter(group => {
+        if (seen.has(group.displayName)) return false;
+        seen.add(group.displayName);
+        return true;
+      })
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return a.displayName.localeCompare(b.displayName);
+      });
+  }, [serviceGroups]);
+  const isServiceInCart = (serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return false;
 
-const isServiceInCart = (serviceId) => {
-  try {
-    const cartData = localStorage.getItem("checkoutState");
-    if (!cartData) return false;
-    
-    // Check if the data is valid JSON
-    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+      if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+        return false;
+      }
+
+      const parsedData = JSON.parse(cartData);
+      if (!Array.isArray(parsedData)) return false;
+
+      return parsedData.some((item) =>
+        item.cart_dtls?.some((dtl) => dtl.service_id === serviceId)
+      );
+    } catch (error) {
+      console.error("Error reading cart data:", error);
       return false;
     }
-    
-    const parsedData = JSON.parse(cartData);
-    if (!Array.isArray(parsedData)) return false;
-    
-    return parsedData.some((item) =>
-      item.cart_dtls?.some((dtl) => dtl.service_id === serviceId)
-    );
-  } catch (error) {
-    console.error("Error reading cart data:", error);
-    return false;
-  }
-};
+  };
 
-const getCartQuantity = (serviceId) => {
-  try {
-    const cartData = localStorage.getItem("checkoutState");
-    if (!cartData) return 0;
-    
-    // Check if the data is valid JSON
-    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+  const getCartQuantity = (serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return 0;
+
+      if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
+        return 0;
+      }
+
+      const cartItems = JSON.parse(cartData);
+      if (!Array.isArray(cartItems)) return 0;
+
+      for (const item of cartItems) {
+        if (!item || typeof item !== 'object') continue;
+        const found = item.cart_dtls?.find((dtl) => dtl.service_id === serviceId);
+        if (found) return found.quantity || 1;
+      }
+      return 0;
+    } catch (error) {
+      console.error("Error reading cart quantity:", error);
       return 0;
     }
-    
-    const cartItems = JSON.parse(cartData);
-    if (!Array.isArray(cartItems)) return 0;
+  };
 
-    for (const item of cartItems) {
-      if (!item || typeof item !== 'object') continue;
-      const found = item.cart_dtls?.find((dtl) => dtl.service_id === serviceId);
-      if (found) return found.quantity || 1;
-    }
-    return 0;
-  } catch (error) {
-    console.error("Error reading cart quantity:", error);
-    return 0;
-  }
-};
-
-const validateCartData = () => {
-  try {
-    const cartData = localStorage.getItem("checkoutState");
-    if (!cartData) return [];
-    
-    // If data exists but isn't valid JSON, reset it
-    if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
-      localStorage.setItem("checkoutState", JSON.stringify([]));
-      return [];
-    }
-    
-    const parsed = JSON.parse(cartData);
-    if (!Array.isArray(parsed)) {
-      localStorage.setItem("checkoutState", JSON.stringify([]));
-      return [];
-    }
-    
-    return parsed;
-  } catch (error) {
-    console.error("Error validating cart data:", error);
-    localStorage.setItem("checkoutState", JSON.stringify([]));
-    return [];
-  }
-};
   const handleLoginSuccess = () => {
     setShowLoginPopup(false);
     if (pendingCartAction) {
@@ -304,8 +296,8 @@ const validateCartData = () => {
           operation === "add"
             ? currentQuantity + 1
             : operation === "decrement"
-            ? currentQuantity - 1
-            : 0,
+              ? currentQuantity - 1
+              : 0,
       };
 
       const res = await fetch(
@@ -364,81 +356,90 @@ const validateCartData = () => {
 
       <div className="mx-auto px-4 sm:px-6 py-8">
         <div className="w-full flex flex-col lg:flex-row gap-8">
-          {/* Services Navigation Sidebar */}
+          {/* Filter Sidebar */}
           <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <FiCheck className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-lg md:text-xl font-semibold text-gray-800">Services</h1>
-                  <p className="text-sm text-gray-500">{category.category_name}</p>
-                </div>
-              </div>
+             <div className="flex items-center gap-4 mb-6">
+  <div className="bg-blue-100 p-2 rounded-lg">
+    <FiCheck className="h-6 w-6 text-blue-600" />
+  </div>
+  <div>
+   <h1 className="text-lg md:text-xl font-semibold text-gray-800 text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
+      {city?.city_name 
+        ? `${category.category_name} Services in ${city.city_name}  @7065012902`
+        : `${category.category_name} Services @7065012902`}
+    </h1>
+   
+  </div>
+</div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {orderedServiceNames.map((serviceName) => {
-                  const group = serviceGroups[serviceName];
-                  return (
-                    <button
-                      key={serviceName}
-                      onClick={() => scrollToService(serviceName)}
-                      className={`flex flex-col items-center rounded-lg transition-all border p-1 ${
-                        selectedService === serviceName
-                          ? "bg-blue-50 border-blue-200 text-blue-700 font-semibold"
-                          : "hover:bg-gray-50 border-gray-200 text-gray-700"
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
+                {uniqueServiceGroups.map((group) => (
+                  <button
+                    key={group.displayName}
+                    onClick={() => scrollToServiceGroup(group.displayName)}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all ${selectedService === group.displayName
+                        ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
+                        : "hover:bg-gray-50 text-gray-700 border border-gray-200"
                       }`}
-                    >
-                      <div className="w-full flex items-center justify-center mb-1 bg-white rounded-lg h-16 md:h-20">
-                        <Image
-                          src={group.image}
-                          alt={serviceName}
-                          width={56}
-                          height={56}
-                          className="object-contain w-12 h-12 md:w-14 md:h-14"
-                        />
-                      </div>
-                      <span className="text-[10px] xs:text-[10px] sm:text-[10px] md:text-[10px] font-semibold text-center leading-tight px-1">
-                        {group.displayName}
-                      </span>
-                    </button>
-                  );
-                })}
+                  >
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
+                      <Image
+                        src={group.image}
+                        alt={group.displayName}
+                        width={32}
+                        height={32}
+                        className="object-contain w-8 h-8"
+                      />
+                    </div>
+                    <span className="font-bold text-center  text-[10px]">
+                      {group.displayName}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <main className="w-full flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <main className="w-full flex flex-col lg:flex-row gap-8 pt-[120px]">
             <div className="w-full md:w-[52%]">
               <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
                 <Image
-                  src={category.banner?.trim() ? category.banner : defaultBanner}
+                  src={category.banner?.trim() ? category.banner : DEFAULT_BANNER}
                   alt={`${category.category_name || "Category"} banner`}
                   fill
                   className="object-cover"
                   priority
                   onError={(e) => {
-                    e.currentTarget.src = defaultBanner;
+                    e.currentTarget.src = DEFAULT_BANNER;
                   }}
                 />
               </div>
 
               {orderedServiceNames.map((serviceName) => {
-                const { services, displayName } = serviceGroups[serviceName];
+                const group = serviceGroups[serviceName];
+                const isHighlighted = selectedService === group.displayName;
+
                 return (
-                  <section
-                    key={serviceName}
-                    ref={(el) => (serviceRefs.current[serviceName] = el)}
-                    className="space-y-6 mb-8"
-                  >
+                <section
+  key={serviceName}
+  ref={(el) => (groupRefs.current[serviceName] = el)}
+  id={`service-group-${serviceName}`}
+  className={`relative space-y-6 mb-8 transition-all duration-300 ${isHighlighted
+    ? 'ring-2 ring-blue-500 rounded-lg p-4 bg-blue-50'
+    : ''
+  }`}
+  style={{
+    scrollMarginTop: '120px' // This should match your header height + some padding
+  }}
+>
                     <h2 className="text-xl font-semibold text-gray-800 px-2">
-                      {displayName}
+                      {group.displayName}
                     </h2>
 
                     <div className="grid grid-cols-1 gap-4">
-                      {services.map((service) => {
+                      {group.services.map((service) => {
                         const quantity = getCartQuantity(service.service_id);
                         const isAdded = isServiceInCart(service.service_id);
 
@@ -455,9 +456,7 @@ const validateCartData = () => {
                                 <div
                                   className="text-gray-600 text-sm mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-1"
                                   dangerouslySetInnerHTML={{
-                                    __html:
-                                      service.description ||
-                                      "<ul><li>Professional service with expert technicians</li></ul>",
+                                    __html: service.description || "<ul><li>Professional service with expert technicians</li></ul>",
                                   }}
                                 />
                               </div>
@@ -478,27 +477,26 @@ const validateCartData = () => {
                                   />
                                 </div>
 
-                             <button
-                                onClick={() => handleCartAction(service.service_id, "add", quantity)}
-                                className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${
-                                  isAdded
-                                    ? "bg-green-100 text-green-800 cursor-not-allowed"
-                                    : "bg-blue-600 text-white hover:bg-blue-700"
-                                }`}
-                                disabled={isAdded}
-                              >
-                                {isAdded ? (
-                                  <>
-                                    <FiCheck className="h-4 w-4" />
-                                    Added
-                                  </>
-                                ) : (
-                                  <>
-                                    <FiShoppingCart className="h-4 w-4" />
-                                    Add
-                                  </>
-                                )}
-                              </button>
+                                <button
+                                  onClick={() => handleCartAction(service.service_id, "add", quantity)}
+                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${isAdded
+                                      ? "bg-green-100 text-green-800 cursor-not-allowed"
+                                      : "bg-blue-600 text-white hover:bg-blue-700"
+                                    }`}
+                                  disabled={isAdded}
+                                >
+                                  {isAdded ? (
+                                    <>
+                                      <FiCheck className="h-4 w-4" />
+                                      Added
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FiShoppingCart className="h-4 w-4" />
+                                      Add
+                                    </>
+                                  )}
+                                </button>
 
                                 <div className="text-center">
                                   <span className="text-sm font-semibold text-gray-900">
@@ -516,173 +514,69 @@ const validateCartData = () => {
               })}
             </div>
 
-            {/* Cart Sidebar */}
-            <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
-              <Cart
-                cartLoaded={cartLoaded}
-                cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
-              />
-
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
-                <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <FiShield className="text-blue-600" />
-                    Why Choose Us
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <FiUserCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">
-                          Expert Professionals
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          Certified technicians with years of experience
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FiTruck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">
-                          Doorstep Service
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          We come to you at your convenience
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FiClock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">
-                          Quick Service
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          Same day or next day service available
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Our Service Process
-                  </h3>
-                  <div className="space-y-4">
-                    {[
-                      { icon: <FiCheck />, text: "Choose Your Service" },
-                      { icon: <FiCheck />, text: "Expert Consultation" },
-                      { icon: <FiCheck />, text: "Schedule Appointment" },
-                      { icon: <FiCheck />, text: "Professional Service" },
-                      { icon: <FiCheck />, text: "Quality Check" },
-                      { icon: <FiCheck />, text: "Secure Payment" },
-                    ].map((step, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
-                          {step.icon}
+                      {/* Cart Sidebar */}
+                      <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
+                        <Cart
+                          cartLoaded={cartLoaded}
+                          cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
+                        />
+          
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
+                          <div className="bg-blue-50 rounded-xl p-6 mb-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                              <FiShield className="text-blue-600" />
+                              Why Choose Us
+                            </h3>
+                            <div className="space-y-4">
+                              <div className="flex items-start gap-3">
+                                <FiUserCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <h4 className="font-medium text-gray-800">Expert Professionals</h4>
+                                  <p className="text-sm text-gray-600">Certified technicians with years of experience</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <FiTruck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <h4 className="font-medium text-gray-800">Doorstep Service</h4>
+                                  <p className="text-sm text-gray-600">We come to you at your convenience</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <FiClock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <h4 className="font-medium text-gray-800">Quick Service</h4>
+                                  <p className="text-sm text-gray-600">Same day or next day service available</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+          
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Our Service Process</h3>
+                            <div className="space-y-4">
+                              {[
+                                { icon: <FiCheck />, text: "Choose Your Service" },
+                                { icon: <FiCheck />, text: "Expert Consultation" },
+                                { icon: <FiCheck />, text: "Schedule Appointment" },
+                                { icon: <FiCheck />, text: "Professional Service" },
+                                { icon: <FiCheck />, text: "Quality Check" },
+                                { icon: <FiCheck />, text: "Secure Payment" },
+                              ].map((step, index) => (
+                                <div key={index} className="flex items-start gap-3">
+                                  <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
+                                    {step.icon}
+                                  </div>
+                                  <span className="text-gray-700">{step.text}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-gray-700">{step.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </aside>
+                      </aside>
           </main>
-        </div> 
-        
-        <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-          <AwardCertifications />
-        </section>
-        
-        {category.category_content && (
-          <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              About Our {category.category_name}  Services   {city.city_name}
-            </h2>
-            <div className="relative">
-              <div
-                ref={contentRef}
-                className={`prose max-w-none transition-all duration-500 ease-in-out ${
-                  !isExpanded && showReadMore ? "max-h-96 overflow-hidden" : "overflow-visible"
-                }`}
-                dangerouslySetInnerHTML={{ __html: category.category_content }}
-              />
-              {showReadMore && !isExpanded && (
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-              )}
-              {showReadMore && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
-                >
-                  {isExpanded ? "Show Less" : "Read More"}
-                  {isExpanded ? (
-                    <FiChevronUp className="h-5 w-5 transition-transform duration-200" />
-                  ) : (
-                    <FiChevronDown className="h-5 w-5 transition-transform duration-200" />
-                  )}
-                </button>
-              )}
-            </div>
-          </section>
-        )}
+        </div>
       </div>
-
-      {/* Mobile Cart Panel */}
-      <AnimatePresence>
-        {isCartOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50"
-          >
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30 }}
-              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl"
-            >
-              <div className="h-full flex flex-col">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <FiShoppingCart className="h-6 w-6 text-blue-600" />
-                    Your Order
-                  </h2>
-                  <button
-                    onClick={() => setIsCartOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <FiX className="h-6 w-6" />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto">
-                  <Cart
-                    cartLoaded={cartLoaded}
-                    cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Login Popup */}
-      <AnimatePresence>
-        {showLoginPopup && (
-          <LoginPopup
-            show={showLoginPopup}
-            onClose={() => setShowLoginPopup(false)}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };

@@ -11,15 +11,15 @@ const navigationItems = [
 export default function DesktopNavigation({ pathname }) {
   return (
     <nav>
-      <ul className="flex gap-8 text-sm font-medium">
+      <ul className="flex space-x-8 text-sm font-medium">
         {navigationItems.map((item) => (
           <li key={item.name}>
             <Link
               href={item.href}
-              className={`capitalize hover:text-blue-500 transition-colors ${
+              className={`capitalize transition-colors px-1 py-2 ${
                 pathname === item.href
                   ? "text-blue-600 font-semibold"
-                  : "text-gray-700"
+                  : "text-gray-700 hover:text-blue-500"
               }`}
             >
               {item.name}

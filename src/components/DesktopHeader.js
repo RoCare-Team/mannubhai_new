@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CiLocationOn } from "react-icons/ci";
 import { MdOutlineShoppingCart } from "react-icons/md";
+import { FaWhatsapp, FaPhone } from "react-icons/fa";
 import DesktopNavigation from "./DesktopNavigation";
 import CategorySearch from "./CategorySearch";
 import UserDropdown from "./UserDropdown";
@@ -18,13 +19,16 @@ export default function DesktopHeader({
   handleLogout,
   getbookingdata,
   location = {},
+whatsappNumber = "+919319404430",
+phoneNumber = "+917065129020"
+
 }) {
   const cartCount = useCartCount();
 
   return (
-    <header className="hidden lg:block sticky top-0 z-30 ">
-      <div className="max-w-7xl mx-auto flex items-center justify-between py-3 lg:py-4 px-4">
-        {/* ─── Logo + Primary Nav ────────────────────────────── */}
+    <header className="hidden lg:block sticky top-0 z-30">
+      <div className="max-w-8xl mx-auto flex items-center gap-4 justify-between py-3 lg:py-4 px-4">
+        {/* Logo + Primary Nav */}
         <div className="flex items-center gap-10">
           <Link href="/" className="shrink-0" aria-label="Go to home page">
             <div className="relative w-[140px] h-[50px]">
@@ -45,7 +49,7 @@ export default function DesktopHeader({
           />
         </div>
 
-        {/* ─── Search, Location, Cart, User ─────────────────── */}
+        {/* Search, Location, Cart, User */}
         <div className="flex items-center gap-6">
           {/* Location + Search */}
           <div className="flex items-center gap-4 mr-5">
@@ -76,6 +80,33 @@ export default function DesktopHeader({
             </div>
 
             <CategorySearch isDesktop className="w-56" />
+          </div>
+
+          {/* WhatsApp + Phone */}
+          <div className="flex items-center gap-4 ml-2">
+            {/* WhatsApp */}
+            <a
+              href={`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=Hi!%20I%20would%20like%20to%20book%20your%20services.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+              aria-label="Contact us on WhatsApp"
+            >
+              <FaWhatsapp className="text-5xl" />
+            </a>
+
+            {/* Phone with border and padding */}
+       <a
+  href={`tel:${phoneNumber}`}
+  className="flex items-center gap-3 text-blue-700 hover:text-white transition-colors bg-blue-50 hover:bg-blue-600 px-5 py-2 rounded-full shadow-sm hover:shadow-md duration-300 group"
+  aria-label="Call us"
+>
+  <FaPhone className="text-xl group-hover:text-white" />
+  <span className="text-sm font-semibold hidden xl:block group-hover:text-white">
+    {phoneNumber}
+  </span>
+</a>
+
           </div>
 
           {/* Cart + User */}

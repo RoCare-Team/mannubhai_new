@@ -301,7 +301,7 @@ export default async function DynamicRouteHandler({ params }) {
       
       if (catDoc) {
         const services = await fetchServices(catDoc.lead_type_id);
-        return <CategoryDetails category={{ ...catDoc, services }} />;
+        return <CategoryDetails category={{ ...catDoc,  services }} />;
       }
       
       notFound();
@@ -340,6 +340,8 @@ export default async function DynamicRouteHandler({ params }) {
             category={{ 
               ...(pageMasterDoc || catDoc),
               services,
+                category_name: catDoc.category_name,
+              cityDoc,
               meta_title: pageMasterDoc?.meta_title || catDoc.meta_title,
               meta_description: pageMasterDoc?.meta_description || catDoc.meta_description,
               meta_keywords: pageMasterDoc?.meta_keywords || catDoc.meta_keywords,
