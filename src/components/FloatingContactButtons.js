@@ -5,8 +5,8 @@ import { FaWhatsapp, FaCommentDots } from 'react-icons/fa';
 import { FiPhone } from 'react-icons/fi';
 
 export default function FloatingContactButtons() {
-  const whatsappNumber = "+919876543210"; // Replace with your WhatsApp number
-  const phoneNumber = "+919876543210"; // Replace with your phone number
+  const whatsappNumber = "+919319408930"; // Replace with your WhatsApp number
+  const phoneNumber = "+917065012902"; // Replace with your phone number
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
