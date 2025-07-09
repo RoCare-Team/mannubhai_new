@@ -184,27 +184,27 @@ const CategoryDetails = ({
   }, [serviceGroups]);
 
   // Scroll to all matching service groups
-const scrollToServiceGroup = useCallback((displayName) => {
-  setSelectedService(displayName);
+  const scrollToServiceGroup = useCallback((displayName) => {
+    setSelectedService(displayName);
 
-  const matchingGroups = Object.entries(serviceGroups)
-    .filter(([_, group]) => group.displayName === displayName)
-    .map(([key]) => key);
+    const matchingGroups = Object.entries(serviceGroups)
+      .filter(([_, group]) => group.displayName === displayName)
+      .map(([key]) => key);
 
-  if (matchingGroups.length > 0) {
-    setTimeout(() => {
-      const firstGroupKey = matchingGroups[0];
-      if (groupRefs.current[firstGroupKey]) {
-        const element = groupRefs.current[firstGroupKey];
-        const headerHeight = 100; // Adjust based on your actual header height
-        const yOffset = -headerHeight - 16; // Additional 16px padding
-        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-        
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-    }, 100);
-  }
-}, [serviceGroups]);
+    if (matchingGroups.length > 0) {
+      setTimeout(() => {
+        const firstGroupKey = matchingGroups[0];
+        if (groupRefs.current[firstGroupKey]) {
+          const element = groupRefs.current[firstGroupKey];
+          const headerHeight = 100; // Adjust based on your actual header height
+          const yOffset = -headerHeight - 16; // Additional 16px padding
+          const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [serviceGroups]);
 
   // Get unique groups for filter display
   const uniqueServiceGroups = useMemo(() => {
@@ -359,28 +359,28 @@ const scrollToServiceGroup = useCallback((displayName) => {
           {/* Filter Sidebar */}
           <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-             <div className="flex items-center gap-4 mb-6">
-  <div className="bg-blue-100 p-2 rounded-lg">
-    <FiCheck className="h-6 w-6 text-blue-600" />
-  </div>
-  <div>
-   <h1 className="text-lg md:text-xl font-semibold text-gray-800 text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
-      {city?.city_name 
-        ? `${category.category_name} Services in ${city.city_name}  @7065012902`
-        : `${category.category_name} Services @7065012902`}
-    </h1>
-   
-  </div>
-</div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <FiCheck className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h1 className="text-lg md:text-xl font-semibold text-gray-800 text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
+                    {city?.city_name
+                      ? `${category.category_name} Services in ${city.city_name}  @7065012902`
+                      : `${category.category_name} Services @7065012902`}
+                  </h1>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
+                </div>
+              </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3">
                 {uniqueServiceGroups.map((group) => (
                   <button
                     key={group.displayName}
                     onClick={() => scrollToServiceGroup(group.displayName)}
                     className={`flex flex-col items-center p-3 rounded-lg transition-all ${selectedService === group.displayName
-                        ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
-                        : "hover:bg-gray-50 text-gray-700 border border-gray-200"
+                      ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
+                      : "hover:bg-gray-50 text-gray-700 border border-gray-200"
                       }`}
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
@@ -392,9 +392,10 @@ const scrollToServiceGroup = useCallback((displayName) => {
                         className="object-contain w-8 h-8"
                       />
                     </div>
-                    <span className="font-bold text-center  text-[10px]">
-                      {group.displayName}
-                    </span>
+                   <span className="font-bold text-[8px] sm:text-[10px] text-center">
+  {group.displayName}
+</span>
+
                   </button>
                 ))}
               </div>
@@ -402,7 +403,7 @@ const scrollToServiceGroup = useCallback((displayName) => {
           </aside>
 
           {/* Main Content */}
-          <main className="w-full flex flex-col lg:flex-row gap-8 pt-[120px]">
+          <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
               <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
                 <Image
@@ -422,21 +423,21 @@ const scrollToServiceGroup = useCallback((displayName) => {
                 const isHighlighted = selectedService === group.displayName;
 
                 return (
-                <section
-  key={serviceName}
-  ref={(el) => (groupRefs.current[serviceName] = el)}
-  id={`service-group-${serviceName}`}
-  className={`relative space-y-6 mb-8 transition-all duration-300 ${isHighlighted
-    ? 'ring-2 ring-blue-500 rounded-lg p-4 bg-blue-50'
-    : ''
-  }`}
-  style={{
-    scrollMarginTop: '120px' // This should match your header height + some padding
-  }}
->
-                    <h2 className="text-xl font-semibold text-gray-800 px-2">
+                  <section
+                    key={serviceName}
+                    ref={(el) => (groupRefs.current[serviceName] = el)}
+                    id={`service-group-${serviceName}`}
+                    className={`relative space-y-6 mb-8 transition-all duration-300 ${isHighlighted
+                      ? 'ring-2 ring-blue-500 rounded-lg p-4 bg-blue-50'
+                      : ''
+                      }`}
+                    style={{
+                      scrollMarginTop: '120px'
+                    }}
+                  >
+                    <h3 className="text-xl font-semibold text-gray-800 px-2">
                       {group.displayName}
-                    </h2>
+                    </h3>
 
                     <div className="grid grid-cols-1 gap-4">
                       {group.services.map((service) => {
@@ -480,8 +481,8 @@ const scrollToServiceGroup = useCallback((displayName) => {
                                 <button
                                   onClick={() => handleCartAction(service.service_id, "add", quantity)}
                                   className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${isAdded
-                                      ? "bg-green-100 text-green-800 cursor-not-allowed"
-                                      : "bg-blue-600 text-white hover:bg-blue-700"
+                                    ? "bg-green-100 text-green-800 cursor-not-allowed"
+                                    : "bg-blue-600 text-white hover:bg-blue-700"
                                     }`}
                                   disabled={isAdded}
                                 >
@@ -514,66 +515,66 @@ const scrollToServiceGroup = useCallback((displayName) => {
               })}
             </div>
 
-                      {/* Cart Sidebar */}
-                      <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
-                        <Cart
-                          cartLoaded={cartLoaded}
-                          cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
-                        />
-          
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
-                          <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                              <FiShield className="text-blue-600" />
-                              Why Choose Us
-                            </h3>
-                            <div className="space-y-4">
-                              <div className="flex items-start gap-3">
-                                <FiUserCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h4 className="font-medium text-gray-800">Expert Professionals</h4>
-                                  <p className="text-sm text-gray-600">Certified technicians with years of experience</p>
-                                </div>
-                              </div>
-                              <div className="flex items-start gap-3">
-                                <FiTruck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h4 className="font-medium text-gray-800">Doorstep Service</h4>
-                                  <p className="text-sm text-gray-600">We come to you at your convenience</p>
-                                </div>
-                              </div>
-                              <div className="flex items-start gap-3">
-                                <FiClock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h4 className="font-medium text-gray-800">Quick Service</h4>
-                                  <p className="text-sm text-gray-600">Same day or next day service available</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-          
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Our Service Process</h3>
-                            <div className="space-y-4">
-                              {[
-                                { icon: <FiCheck />, text: "Choose Your Service" },
-                                { icon: <FiCheck />, text: "Expert Consultation" },
-                                { icon: <FiCheck />, text: "Schedule Appointment" },
-                                { icon: <FiCheck />, text: "Professional Service" },
-                                { icon: <FiCheck />, text: "Quality Check" },
-                                { icon: <FiCheck />, text: "Secure Payment" },
-                              ].map((step, index) => (
-                                <div key={index} className="flex items-start gap-3">
-                                  <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
-                                    {step.icon}
-                                  </div>
-                                  <span className="text-gray-700">{step.text}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+            {/* Cart Sidebar */}
+            <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
+              <Cart
+                cartLoaded={cartLoaded}
+                cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
+              />
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
+                <div className="bg-blue-50 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <FiShield className="text-blue-600" />
+                    Why Choose Us
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <FiUserCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-gray-800">Expert Professionals</h4>
+                        <p className="text-sm text-gray-600">Certified technicians with years of experience</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <FiTruck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-gray-800">Doorstep Service</h4>
+                        <p className="text-sm text-gray-600">We come to you at your convenience</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <FiClock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-gray-800">Quick Service</h4>
+                        <p className="text-sm text-gray-600">Same day or next day service available</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Our Service Process</h3>
+                  <div className="space-y-4">
+                    {[
+                      { icon: <FiCheck />, text: "Choose Your Service" },
+                      { icon: <FiCheck />, text: "Expert Consultation" },
+                      { icon: <FiCheck />, text: "Schedule Appointment" },
+                      { icon: <FiCheck />, text: "Professional Service" },
+                      { icon: <FiCheck />, text: "Quality Check" },
+                      { icon: <FiCheck />, text: "Secure Payment" },
+                    ].map((step, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
+                          {step.icon}
                         </div>
-                      </aside>
+                        <span className="text-gray-700">{step.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </aside>
           </main>
         </div>
       </div>

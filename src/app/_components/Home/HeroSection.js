@@ -76,19 +76,29 @@ const HeroSection = () => {
     
     const sectionId = sectionMap[serviceName];
     if (sectionId) {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
-        section.classList.add('highlight-section');
-        
-        setTimeout(() => {
-          section.classList.remove('highlight-section');
-        }, 2000);
-        
-        section.focus();
-      }
+    const section = document.getElementById(sectionId);
+    if (section) {
+      // Calculate the position considering any fixed headers
+      const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+      const offsetPosition = section.offsetTop - headerHeight - 20; // 20px extra padding
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+
+      // Highlight effect
+      section.classList.add('highlight-section');
+      setTimeout(() => {
+        section.classList.remove('highlight-section');
+      }, 2000);
+
+      // Focus for accessibility
+      section.setAttribute('tabindex', '-1');
+      section.focus();
     }
-  };
+  }
+};
 
   const handleServiceClick = (service, e) => {
     if (e) e.preventDefault();

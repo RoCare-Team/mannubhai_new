@@ -318,9 +318,38 @@ html {
     font-size: 0.9rem;
   }
 }
+
+
+
+
+
+
+
+
+
+
 .highlight-section {
-  animation: highlight-pulse 2s;
- 
+  animation: highlight-fade 2s ease-out;
+  outline: 2px solid transparent;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: rgba(99, 102, 241, 0.1);
+    outline-color: rgba(99, 102, 241, 0.5);
+  }
+  100% {
+    background-color: transparent;
+    outline-color: transparent;
+  }
+}
+
+/* Ensure sections have proper scroll-margin */
+[id^="appliances-care"],
+[id^="home-care"], 
+[id^="beauty-care"],
+[id^="handyman"] {
+  scroll-margin-top: 100px; 
 }
 
 @keyframes highlight-pulse {
