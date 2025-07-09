@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /*/cart
+Disallow: /*/checkout
+Disallow: /*/account
+Disallow: /*/my-bookings
+
+Allow: /
+
+Sitemap: https://www.mannubhai.com/sitemap.xml

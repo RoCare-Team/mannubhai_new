@@ -3,7 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { CiLocationOn } from "react-icons/ci";
 import { MdOutlineShoppingCart } from "react-icons/md";
-import { FaWhatsapp, FaPhone } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa";
+import { FiPhone } from "react-icons/fi";
 import DesktopNavigation from "./DesktopNavigation";
 import CategorySearch from "./CategorySearch";
 import UserDropdown from "./UserDropdown";
@@ -19,26 +20,25 @@ export default function DesktopHeader({
   handleLogout,
   getbookingdata,
   location = {},
-whatsappNumber = "+919319404430",
-phoneNumber = "+917065129020"
-
+  whatsappNumber = "+919319404430",
+  phoneNumber = "+917065129020"
 }) {
   const cartCount = useCartCount();
 
   return (
-    <header className="hidden lg:block sticky top-0 z-30">
-      <div className="max-w-8xl mx-auto flex items-center gap-4 justify-between py-3 lg:py-4 px-4">
-        {/* Logo + Primary Nav */}
-        <div className="flex items-center gap-10">
+    <header className="hidden lg:block sticky top-0 z-30 bg-white ">
+      <div className="mx-auto w-full max-w-screen-2xl flex flex-wrap items-center justify-between gap-4 px-4 py-3 lg:py-4">
+        {/* Logo + Nav */}
+        <div className="flex items-center gap-6 min-w-[250px]">
           <Link href="/" className="shrink-0" aria-label="Go to home page">
-            <div className="relative w-[140px] h-[50px]">
+            <div className="relative w-[120px] h-[40px] sm:w-[140px] sm:h-[50px]">
               <Image
                 src="/logo.png"
                 alt="Company logo"
                 fill
                 className="object-contain"
                 priority
-                sizes="140px"
+                sizes="(min-width: 1024px) 140px, 120px"
               />
             </div>
           </Link>
@@ -49,10 +49,10 @@ phoneNumber = "+917065129020"
           />
         </div>
 
-        {/* Search, Location, Cart, User */}
-        <div className="flex items-center gap-6">
+        {/* Search + Location + WhatsApp + Phone + Cart + User */}
+        <div className="flex flex-wrap items-center justify-end gap-6 flex-1">
           {/* Location + Search */}
-          <div className="flex items-center gap-4 mr-5">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 h-10 min-w-[200px] max-w-[240px]">
               <CiLocationOn className="text-lg shrink-0" />
               <span
@@ -83,34 +83,10 @@ phoneNumber = "+917065129020"
           </div>
 
           {/* WhatsApp + Phone */}
-          <div className="flex items-center gap-4 ml-2">
-            {/* WhatsApp */}
-            <a
-              href={`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=Hi!%20I%20would%20like%20to%20book%20your%20services.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
-              aria-label="Contact us on WhatsApp"
-            >
-              <FaWhatsapp className="text-5xl" />
-            </a>
-
-            {/* Phone with border and padding */}
-       <a
-  href={`tel:${phoneNumber}`}
-  className="flex items-center gap-3 text-blue-700 hover:text-white transition-colors bg-blue-50 hover:bg-blue-600 px-5 py-2 rounded-full shadow-sm hover:shadow-md duration-300 group"
-  aria-label="Call us"
->
-  <FaPhone className="text-xl group-hover:text-white" />
-  <span className="text-sm font-semibold hidden xl:block group-hover:text-white">
-    {phoneNumber}
-  </span>
-</a>
-
-          </div>
+        
 
           {/* Cart + User */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-4">
             <Link
               href="/checkout"
               className="relative text-xl text-gray-700 hover:text-blue-500 transition-colors"
