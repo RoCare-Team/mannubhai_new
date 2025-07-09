@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
@@ -38,6 +37,87 @@ function fetchWithTimeout(url, options = {}, timeout = 5000) {
   });
 }
 
+// Function to search for places with proper encoding
+async function searchPlaces(query) {
+  try {
+    // Encode the query to handle special characters and case
+    const encodedQuery = encodeURIComponent(query.trim());
+    
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedQuery}&key=${GOOGLE_API_KEY}&language=en&region=IN`;
+    
+    console.log('Searching for:', query);
+    console.log('Encoded query:', encodedQuery);
+    console.log('Request URL:', url);
+    
+    const response = await fetchWithTimeout(url);
+    const data = await response.json();
+    
+    console.log('API Response:', data);
+    
+    if (data.status === 'OK') {
+      return data.results;
+    } else {
+      console.error('Geocoding API error:', data.status, data.error_message);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error searching places:', error);
+    return [];
+  }
+}
+
+// Function to get location from coordinates with better handling
+async function getLocationFromCoords(latitude, longitude) {
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}&language=en&region=IN&result_type=locality|administrative_area_level_1|administrative_area_level_2`;
+    
+    console.log('Reverse geocoding URL:', url);
+    
+    const response = await fetchWithTimeout(url);
+    const data = await response.json();
+    
+    console.log('Reverse geocoding response:', data);
+    
+    if (data.status === 'OK' && data.results.length > 0) {
+      const result = data.results[0];
+      const formattedAddress = result.formatted_address || "";
+      let city = "", state = "";
+
+      // Extract city and state from address components
+      for (const component of result.address_components) {
+        if (component.types.includes("locality")) {
+          city = component.long_name;
+        }
+        if (component.types.includes("administrative_area_level_1")) {
+          state = component.long_name;
+        }
+        // Fallback to administrative_area_level_2 if locality not found
+        if (!city && component.types.includes("administrative_area_level_2")) {
+          city = component.long_name;
+        }
+      }
+
+      // If no city found, try to extract from formatted address
+      if (!city && formattedAddress) {
+        city = formattedAddress.split(",")[0].trim();
+      }
+
+      return {
+        address: city || formattedAddress,
+        state: state || "",
+        formatted_address: formattedAddress,
+        success: true
+      };
+    } else {
+      console.error('Reverse geocoding failed:', data.status, data.error_message);
+      return { success: false, error: data.status };
+    }
+  } catch (error) {
+    console.error('Error in reverse geocoding:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -72,6 +152,7 @@ const Header = () => {
 
   const initializeLocation = useCallback(() => {
     async function run() {
+      // Check for stored custom city first
       const storedCity = localStorage.getItem("selectedCity");
       if (storedCity) {
         try {
@@ -85,77 +166,114 @@ const Header = () => {
             permissionDenied: false,
           });
           return;
-        } catch {
+        } catch (error) {
+          console.error('Error parsing stored city:', error);
           localStorage.removeItem("selectedCity");
         }
       }
 
+      // Check for cached location
       const cached = localStorage.getItem("userLocation");
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          setLocation({ ...parsed, isCustomCity: false, permissionDenied: false });
-          return;
-        } catch {
+          // Check if cached location is not too old (e.g., 1 hour)
+          const cacheTime = parsed.timestamp || 0;
+          const now = Date.now();
+          const oneHour = 60 * 60 * 1000;
+          
+          if (now - cacheTime < oneHour) {
+            setLocation({ 
+              ...parsed, 
+              isCustomCity: false, 
+              permissionDenied: false 
+            });
+            return;
+          } else {
+            localStorage.removeItem("userLocation");
+          }
+        } catch (error) {
+          console.error('Error parsing cached location:', error);
           localStorage.removeItem("userLocation");
         }
       }
 
+      // Check geolocation support
       if (!navigator.geolocation) {
-        setLocation({ address: "", state: "", loading: false, error: "Geolocation not supported", isCustomCity: false, permissionDenied: false });
+        setLocation({ 
+          address: "", 
+          state: "", 
+          loading: false, 
+          error: "Geolocation not supported", 
+          isCustomCity: false, 
+          permissionDenied: false 
+        });
         return;
       }
 
-      setLocation((prev) => ({ ...prev, loading: true }));
+      setLocation(prev => ({ ...prev, loading: true }));
 
       try {
         const position = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
             resolve,
             (error) => {
+              console.error('Geolocation error:', error);
               if (error.code === error.PERMISSION_DENIED) {
-                setLocation((prev) => ({ ...prev, permissionDenied: true, loading: false }));
+                setLocation(prev => ({ 
+                  ...prev, 
+                  permissionDenied: true, 
+                  loading: false 
+                }));
                 reject(new Error("Permission denied"));
               } else {
-                reject(new Error("Geolocation error"));
+                reject(new Error(`Geolocation error: ${error.message}`));
               }
             },
-            { enableHighAccuracy: true, timeout: 8000, maximumAge: 600000 }
+            { 
+              enableHighAccuracy: true, 
+              timeout: 10000, 
+              maximumAge: 300000 // 5 minutes
+            }
           );
         });
 
         const { latitude, longitude } = position.coords;
-        const res = await fetchWithTimeout(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`);
+        console.log('Got coordinates:', latitude, longitude);
+        
+        const locationData = await getLocationFromCoords(latitude, longitude);
+        
+        if (locationData.success) {
+          const loc = {
+            address: locationData.address,
+            state: locationData.state,
+            loading: false,
+            error: null,
+            isCustomCity: false,
+            permissionDenied: false,
+            timestamp: Date.now()
+          };
 
-        const data = await res.json();
-        const result = data.results?.[0];
-        const formattedAddress = result?.formatted_address || "";
-        let city = "", state = "";
-
-        for (const component of result.address_components) {
-          if (component.types.includes("locality")) city = component.long_name;
-          if (component.types.includes("administrative_area_level_1")) state = component.long_name;
+          setLocation(loc);
+          localStorage.setItem("userLocation", JSON.stringify(loc));
+        } else {
+          throw new Error(locationData.error || 'Failed to get location');
+        }
+      } catch (err) {
+        console.error('Primary location fetch failed:', err);
+        
+        if (err.message === "Permission denied") {
+          return; // Already handled above
         }
 
-        if (!city && formattedAddress) city = formattedAddress.split(",")[0].trim();
-
-        const loc = {
-          address: city || formattedAddress,
-          state,
-          loading: false,
-          error: null,
-          isCustomCity: false,
-          permissionDenied: false,
-        };
-
-        setLocation(loc);
-        localStorage.setItem("userLocation", JSON.stringify(loc));
-      } catch (err) {
-        if (err.message === "Permission denied") return;
-
+        // Fallback to IP-based location
         try {
-          const ipRes = await fetchWithTimeout("https://ipapi.co/json/");
-          const ipData = await ipRes.json();
+          console.log('Trying IP-based location fallback...');
+          const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
+          const ipData = await ipResponse.json();
+          
+          console.log('IP location data:', ipData);
+          
           setLocation({
             address: ipData.city || "",
             state: ipData.region || "",
@@ -163,8 +281,10 @@ const Header = () => {
             error: null,
             isCustomCity: false,
             permissionDenied: false,
+            timestamp: Date.now()
           });
         } catch (ipError) {
+          console.error('IP location fallback failed:', ipError);
           setLocation({
             address: "",
             state: "",
@@ -176,15 +296,78 @@ const Header = () => {
         }
       }
     }
+    
     run();
   }, []);
 
-  useEffect(() => { initializeLocation(); }, [initializeLocation]);
-  useEffect(() => { const handleScroll = () => setIsScrolled(window.scrollY > 10); window.addEventListener("scroll", handleScroll); return () => window.removeEventListener("scroll", handleScroll); }, []);
-  useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
-  useEffect(() => { document.body.style.overflow = (isMobileMenuOpen || showLocationSearch) ? "hidden" : "unset"; return () => { document.body.style.overflow = "unset"; }; }, [isMobileMenuOpen, showLocationSearch]);
+  useEffect(() => { 
+    initializeLocation(); 
+  }, [initializeLocation]);
+  
+  useEffect(() => { 
+    const handleScroll = () => setIsScrolled(window.scrollY > 10); 
+    window.addEventListener("scroll", handleScroll); 
+    return () => window.removeEventListener("scroll", handleScroll); 
+  }, []);
+  
+  useEffect(() => { 
+    setIsMobileMenuOpen(false); 
+  }, [pathname]);
+  
+  useEffect(() => { 
+    document.body.style.overflow = (isMobileMenuOpen || showLocationSearch) ? "hidden" : "unset"; 
+    return () => { 
+      document.body.style.overflow = "unset"; 
+    }; 
+  }, [isMobileMenuOpen, showLocationSearch]);
 
-  const handleCitySelection = (city) => {
+  const handleCitySelection = async (city) => {
+  
+    if (typeof city === 'string') {
+      try {
+        const searchResults = await searchPlaces(city);
+        if (searchResults.length > 0) {
+          const result = searchResults[0];
+          let cityName = "", stateName = "";
+          
+          // Extract city and state from the result
+          for (const component of result.address_components) {
+            if (component.types.includes("locality")) {
+              cityName = component.long_name;
+            }
+            if (component.types.includes("administrative_area_level_1")) {
+              stateName = component.long_name;
+            }
+          }
+          
+          if (!cityName && result.formatted_address) {
+            cityName = result.formatted_address.split(",")[0].trim();
+          }
+          
+          city = {
+            city_name: cityName || city,
+            state: stateName || "",
+            formatted_address: result.formatted_address,
+            place_id: result.place_id
+          };
+        } else {
+          // If no results found, create a basic city object
+          city = {
+            city_name: city,
+            state: "",
+            formatted_address: city
+          };
+        }
+      } catch (error) {
+        console.error('Error searching for city:', error);
+        city = {
+          city_name: city,
+          state: "",
+          formatted_address: city
+        };
+      }
+    }
+
     localStorage.setItem("selectedCity", JSON.stringify(city));
     setLocation({
       address: city.city_name,
@@ -208,6 +391,28 @@ const Header = () => {
     contextLogout();
     setIsMobileMenuOpen(false);
     router.push("/");
+  };
+
+  // Function to handle manual location search (for debugging)
+  const handleLocationSearch = async (searchQuery) => {
+    if (!searchQuery.trim()) return [];
+    
+    try {
+      const results = await searchPlaces(searchQuery);
+      return results.map(result => ({
+        city_name: result.address_components.find(comp => 
+          comp.types.includes('locality')
+        )?.long_name || result.formatted_address.split(',')[0],
+        state: result.address_components.find(comp => 
+          comp.types.includes('administrative_area_level_1')
+        )?.long_name || '',
+        formatted_address: result.formatted_address,
+        place_id: result.place_id
+      }));
+    } catch (error) {
+      console.error('Location search failed:', error);
+      return [];
+    }
   };
 
   const locationText = location.loading
@@ -245,7 +450,13 @@ const Header = () => {
         </div>
       </header>
 
-      {showLocationSearch && <LocationSearch onClose={() => setShowLocationSearch(false)} onSelectCity={handleCitySelection} />}
+      {showLocationSearch && (
+        <LocationSearch 
+          onClose={() => setShowLocationSearch(false)} 
+          onSelectCity={handleCitySelection}
+          searchFunction={handleLocationSearch}
+        />
+      )}
       <MobileMenu {...{ 
         isMobileMenuOpen, 
         setIsMobileMenuOpen, 

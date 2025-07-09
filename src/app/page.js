@@ -41,29 +41,11 @@ export const metadata = {
   openGraph: {
     title: "Mannubhai - Professional Home Services",
     description: "Book trusted professionals for all your home service needs",
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-      },
-    ],
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/favicon/MB-Favicon.png',
-    other: [
-      {
-        rel: 'apple-touch-icon-precomposed',
-        url: '/favicon/MB-Favicon.png',
-      },
-      {
-        rel: 'mask-icon',
-        url: '/favicon/safari-pinned-tab.svg',
-        color: '#5bbad5',
-      },
-    ],
+    icon: 'favicon/MB Favicon.png',
+
+   
   },
   manifest: '/site.webmanifest',
   verification: {
