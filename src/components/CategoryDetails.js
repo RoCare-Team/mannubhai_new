@@ -386,7 +386,7 @@ const handleSelectCity = (selectedCity) => {
                   <button
                     key={group.displayName}
                     onClick={() => scrollToServiceGroup(group.displayName)}
-                    className={`flex flex-col items-center p-3 rounded-lg transition-all ${selectedService === group.displayName
+                    className={`flex flex-col items-center p-5 rounded-lg transition-all ${selectedService === group.displayName
                       ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
                       : "hover:bg-gray-50 text-gray-700 border border-gray-200"
                       }`}
@@ -397,12 +397,12 @@ const handleSelectCity = (selectedCity) => {
                         alt={group.displayName}
                         width={32}
                         height={32}
-                        className="object-contain w-8 h-8"
+                        className="object-cover w-14 h-14"
                       />
                     </div>
                    <span className="font-bold text-[8px] sm:text-[10px] text-center">
-  {group.displayName}
-</span>
+    {group.displayName}
+  </span>
 
                   </button>
                 ))}

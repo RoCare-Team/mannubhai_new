@@ -13,8 +13,7 @@ export default function MobileHeader({
   setShowLocationSearch,
   location,
   setIsMobileMenuOpen,
-  whatsappNumber = "+919319408430",
-  phoneNumber = "+917065012902",
+ 
 }) {
   const [showContactOptions, setShowContactOptions] = useState(false);
 

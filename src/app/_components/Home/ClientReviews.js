@@ -57,14 +57,6 @@ export default function ClientReviews() {
     return () => clearInterval(interval);
   }, []);
 
-  const nextReview = () => {
-    setCurrentReview((prev) => (prev + 1) % reviews.length);
-  };
-
-  const prevReview = () => {
-    setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
-
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -138,20 +130,6 @@ export default function ClientReviews() {
                   </p>
                 </div>
               </div>
-
-              {/* Navigation Buttons */}
-              <button
-                onClick={prevReview}
-                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 sm:w-12 h-10 sm:h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
-              >
-                <ChevronLeft className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
-              </button>
-              <button
-                onClick={nextReview}
-                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 sm:w-12 h-10 sm:h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
-              >
-                <ChevronRight className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
-              </button>
 
               {/* Dots Indicator */}
               <div className="flex justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-6">
