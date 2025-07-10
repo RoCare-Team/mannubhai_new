@@ -11,6 +11,7 @@ import BrandsWeRepair from "./BrandsWeRepair";
 import ClientReviews from "@/app/_components/Home/ClientReviews";
 
 const CityDetails = ({ city }) => {
+   const [showCitySearch, setShowCitySearch] = useState(false);
   const router = useRouter();
   const [selectedService, setSelectedService] = useState(null);
   const serviceRefs = useRef({});
@@ -25,7 +26,23 @@ const CityDetails = ({ city }) => {
       cityUrl: city.city_url
     });
   };
-
+ const handleSelectCity = (selectedCity) => {
+    const segments = pathname.split('/').filter(Boolean); // ['delhi'] or ['delhi', 'air-purifier-repair-service']
+    
+    // Case 1: On a city page (/delhi)
+    if (segments.length === 1) {
+      window.location.href = `/${selectedCity.city_url}`;
+    }
+    // Case 2: On a category page (/air-purifier-repair-service)
+    else if (segments.length === 1 && segments[0] === selectedCity.city_url) {
+      // Optional: Handle same city selection
+      setShowCitySearch(false);
+    }
+    // Case 3: On city+category page (/delhi/air-purifier-repair-service)
+    else if (segments.length === 2) {
+      window.location.href = `/${selectedCity.city_url}/${segments[1]}`;
+    }
+  };
   if (!city) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">

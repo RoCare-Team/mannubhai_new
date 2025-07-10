@@ -42,47 +42,48 @@ export default function Services() {
   ];
 
   return (
-    <main className="py-3">
-      <div className="w-full px-6 sm:px-8 md:px-16 lg:px-24 xl:px-32 2xl:px-40">
-        <h2 className="text-[20px] font-semibold sm:text-4xl sm:font-bold text-center text-gray-800 leading-tight mb-4 sm:mb-6">
-          Get Professional Services at Home with{" "}
-          <span className="text-blue-600">MannuBhai</span>
-        </h2>
+<main className="py-8 px-4 sm:px-6 lg:px-12">
+  <div className="max-w-7xl mx-auto">
+    <h2 className="text-xl sm:text-3xl font-bold text-center text-gray-800 mb-8">
+      Get Professional Services at Home with{" "}
+      <span className="text-blue-600">MannuBhai</span>
+    </h2>
 
-        <div className="grid gap-10">
-          {sections.map(({ title, paragraphs }) => (
-            <article
-              key={title}
-              className="bg-white rounded-3xl p-6 sm:p-10 shadow-md hover:shadow-lg transition-shadow duration-300"
-            >
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                {title}
-              </h2>
+    <div className="grid gap-4">
+      {sections.map(({ title, paragraphs }) => (
+        <article
+          key={title}
+          className="bg-white rounded-2xl p-5 sm:p-8 shadow-md hover:shadow-lg transition-shadow"
+        >
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">
+            {title}
+          </h3>
 
-              {paragraphs.map((text, idx) => {
-                const isExpanded = expanded[title];
-                const previewText =
-                  text.length > 300 ? text.slice(0, 300) + "..." : text;
-                return (
-                  <div key={idx}>
-                    <p className="text-gray-600 leading-relaxed mb-2">
-                      {isExpanded ? text : previewText}
-                    </p>
-                    {text.length > 300 && (
-                      <button
-                        onClick={() => toggleExpand(title)}
-                        className="text-blue-600 font-medium hover:underline"
-                      >
-                        {isExpanded ? "Read less" : "Read more"}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </article>
-          ))}
-        </div>
-      </div>
-    </main>
+          {paragraphs.map((text, idx) => {
+            const isExpanded = expanded[title];
+            const previewText =
+              text.length > 300 ? text.slice(0, 300) + "..." : text;
+            return (
+              <div key={idx}>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-2">
+                  {isExpanded ? text : previewText}
+                </p>
+                {text.length > 300 && (
+                  <button
+                    onClick={() => toggleExpand(title)}
+                    className="text-blue-600 text-sm font-medium hover:underline"
+                  >
+                    {isExpanded ? "Read less ▲" : "Read more ▼"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </article>
+      ))}
+    </div>
+  </div>
+</main>
+
   );
 }
