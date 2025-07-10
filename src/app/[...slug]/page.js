@@ -271,15 +271,28 @@ export async function generateMetadata({ params }) {
   return result;
 }
 
-export default async function DynamicRouteHandler({ params }) {
+export default async function DynamicRouteHandler({ params ,searchParams  }) {
   const { slug = [] } = params;
-  
+   const { city: cityQueryParam } = searchParams; 
   if (slug.length === 0) notFound();
 
   try {
+      const cities = await fetchCities();
     // Start fetching cities immediately as they're needed in most cases
     const citiesPromise = fetchCities();
-    
+     
+    // Handle city query param (from LocationSearch)
+    if (cityQueryParam) {
+      const selectedCity = cities.find(c => 
+        c.city_name.toLowerCase() === decodeURIComponent(cityQueryParam).toLowerCase()
+      );
+      
+      if (selectedCity) {
+        // Redirect to proper city URL format
+        const redirectUrl = `/${selectedCity.city_url}`;
+        return <Redirect to={redirectUrl} />; // Or use Next.js redirect
+      }
+    }
     if (slug.length === 1) {
       const [segment] = slug;
       
@@ -288,9 +301,8 @@ export default async function DynamicRouteHandler({ params }) {
         fetchDoc("category_manage", "category_url", segment),
       ]);
       
-      const cities = await citiesPromise;
-      
-      if (cityDoc) {
+      //  const cities = await citiesPromise;
+    if (cityDoc) {
         return (
           <>
             <CityDetails city={cityDoc} />

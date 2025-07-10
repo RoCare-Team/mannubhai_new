@@ -12,6 +12,7 @@ import LoginPopup from "./login";
 import MobileBottomNavigation from "./MobileBottomNavigation";
 import navigationItems from "./navigationItems";
 import { useAuth } from "@/app/contexts/AuthContext";
+import FloatingContactButtons from "./FloatingContactButtons";
 
 const AddToCart = dynamic(() => import("../app/checkout/page.js"), { ssr: false });
 
@@ -125,7 +126,13 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [currentCity, setCurrentCity] = useState("")
+
+   const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({
+    name: "Detecting location...",
+    url: ""
+  });
   const [location, setLocation] = useState({
     address: "",
     state: "",
@@ -436,7 +443,8 @@ const Header = () => {
             setIsMobileMenuOpen, 
             user: userInfo 
           }} />
-          <DesktopHeader {...{ 
+          <DesktopHeader    locationText={currentLocation.name}setShowLocationSearch={setShowLocationSearch}{...{ 
+            
             cartCount, 
             locationText, 
             setShowLocationSearch, 
@@ -450,13 +458,37 @@ const Header = () => {
         </div>
       </header>
 
-      {showLocationSearch && (
-        <LocationSearch 
-          onClose={() => setShowLocationSearch(false)} 
-          onSelectCity={handleCitySelection}
-          searchFunction={handleLocationSearch}
-        />
-      )}
+{showLocationSearch && (
+  <LocationSearch 
+    onClose={() => setShowLocationSearch(false)}
+    onSelectCity={(selectedCity) => {
+      if (!selectedCity || !selectedCity.city_name) {
+        // If no valid city selected, redirect to home
+        router.push("/");
+        return;
+      }
+
+      // Update current city in state and localStorage
+      setCurrentCity(selectedCity.city_name);
+      localStorage.setItem('currentCity', selectedCity.city_name);
+
+      // Get current path segments
+      const segments = window.location.pathname.split('/').filter(Boolean);
+      
+      // Generate URL-safe city slug (fallback if city_url missing)
+      const citySlug = selectedCity.city_url || 
+                      selectedCity.city_name.toLowerCase().replace(/\s+/g, '-');
+
+      // Preserve service if on service page, otherwise go to city page
+      if (segments.length === 2 && segments[0] !== 'undefined') {
+        router.push(`/${citySlug}/${segments[1]}`);
+      } else {
+        router.push(`/${citySlug}`);
+      }
+    }}
+    currentCity={currentCity}
+  />
+)}
       <MobileMenu {...{ 
         isMobileMenuOpen, 
         setIsMobileMenuOpen, 
@@ -473,7 +505,7 @@ const Header = () => {
         onClose={() => setShowLogin(false)} 
         onLoginSuccess={handleLoginSuccess} 
       />
-
+<FloatingContactButtons />
       <style jsx global>{`
         body { padding-top: 75px; padding-bottom: 80px; }
         @media (min-width: 1024px) {

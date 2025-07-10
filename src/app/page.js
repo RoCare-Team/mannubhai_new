@@ -76,7 +76,7 @@ export default function Page() {
           toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
           bodyClassName="!text-sm"
         />
-          <FloatingContactButtons />
+       
       </main>
     </>
   );

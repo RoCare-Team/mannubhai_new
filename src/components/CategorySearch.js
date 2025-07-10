@@ -1,12 +1,9 @@
+'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
 import { IoSearchOutline } from "react-icons/io5";
-
-const CategorySearch = ({ isDesktop, className }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const dropdownRef = useRef(null);
 
  const SERVICES = [
     { name: "Air Conditioner", slug: "ac-service", image: "/HomeIcons/AIR-CONDITIONAR.png" },
@@ -39,6 +36,32 @@ const CategorySearch = ({ isDesktop, className }) => {
     { name: "Water Purifier", slug: "water-purifier-service", image: "/HomeIcons/RO.png" },
     { name: "Women Salon At Home", slug: "women-salon-at-home", image: "/BeautyCare/women salon at home.png" }
   ];
+
+const CategorySearch = ({ isDesktop, className }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef(null);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Extract segments from current URL
+  const segments = pathname.split('/').filter(Boolean);
+  
+  const getServiceUrl = (serviceSlug) => {
+    if (segments.length === 1) {
+      // Check if the segment is a city (not a service)
+      const isCity = !SERVICES.some(service => service.slug === segments[0]);
+      if (isCity) {
+        return `/${segments[0]}/${serviceSlug}`;
+      }
+      return `/${serviceSlug}`;
+    } else if (segments.length === 2) {
+      // Preserve the city segment when changing categories
+      return `/${segments[0]}/${serviceSlug}`;
+    }
+    return `/${serviceSlug}`;
+  };
+
   const filteredServices = SERVICES.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -54,12 +77,17 @@ const CategorySearch = ({ isDesktop, className }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleServiceClick = (slug) => {
+    setIsOpen(false);
+    router.push(getServiceUrl(slug));
+  };
+
   return (
     <div 
       className={`relative ${isDesktop ? 'w-[200px]' : 'w-full'} ${className || ''}`} 
       ref={dropdownRef}
     >
-      {/* Search Input - Different styling for desktop/mobile */}
+      {/* Search Input */}
       {isDesktop ? (
         <input
           type="text"
@@ -88,11 +116,10 @@ const CategorySearch = ({ isDesktop, className }) => {
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {filteredServices.length > 0 ? (
             filteredServices.map((service) => (
-              <Link
+              <div
                 key={service.name}
-                href={`/${service.slug}`}
-                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleServiceClick(service.slug)}
+                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 <Image 
                   src={service.image} 
@@ -102,7 +129,7 @@ const CategorySearch = ({ isDesktop, className }) => {
                   className="w-6 h-6 mr-3 object-contain"
                 />
                 <span className="text-sm">{service.name}</span>
-              </Link>
+              </div>
             ))
           ) : (
             <div className="px-4 py-3 text-gray-500 text-center text-sm">

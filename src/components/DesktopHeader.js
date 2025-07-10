@@ -20,8 +20,7 @@ export default function DesktopHeader({
   handleLogout,
   getbookingdata,
   location = {},
-  whatsappNumber = "+919319404430",
-  phoneNumber = "+917065129020"
+
 }) {
   const cartCount = useCartCount();
 
@@ -61,14 +60,14 @@ export default function DesktopHeader({
               >
                 {locationText || "Select location"}
               </span>
-              <button
-                type="button"
-                onClick={() => setShowLocationSearch(true)}
-                className="ml-1 text-xs text-blue-500 underline focus:outline-none hover:text-blue-600 transition-colors"
-                aria-label="Change location"
-              >
-                Change
-              </button>
+             <button
+    type="button"
+    onClick={() => setShowLocationSearch(true)}
+    className="ml-1 text-xs text-blue-500 underline focus:outline-none hover:text-blue-600 transition-colors"
+    aria-label="Change location"
+  >
+    Change
+  </button>
               {location?.error && (
                 <span
                   className="ml-1 text-red-500 text-xs"

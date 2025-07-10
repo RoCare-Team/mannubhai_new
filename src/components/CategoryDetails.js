@@ -345,7 +345,15 @@ const CategoryDetails = ({
       </div>
     );
   }
-
+const handleSelectCity = (selectedCity) => {
+    const segments = pathname.split('/').filter(Boolean);
+    
+    // On category page (/air-purifier-repair-service)
+    if (segments.length === 1) {
+      // Redirect to city+category page
+      window.location.href = `/${selectedCity.city_url}/${segments[0]}`;
+    }
+  };
   return (
     <>
       <Head>
@@ -668,6 +676,7 @@ const CategoryDetails = ({
           />
         )}
       </AnimatePresence>
+  
     </>
   );
 };
