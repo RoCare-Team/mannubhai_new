@@ -127,7 +127,7 @@ const Header = () => {
   const [cartCount, setCartCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentCity, setCurrentCity] = useState("")
-
+  const [initialLocationChecked, setInitialLocationChecked] = useState(false);
    const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({
     name: "Detecting location...",
@@ -157,6 +157,30 @@ const Header = () => {
     checkLoginStatus();
   }, [checkLoginStatus]);
 
+
+  const checkAndRedirectToCity = useCallback(async (locationName) => {
+    if (!locationName || initialLocationChecked) return;
+    
+    try {
+      const matchingCity = await findMatchingCity(locationName);
+      if (matchingCity) {
+        // Store the matched city
+        localStorage.setItem("selectedCity", JSON.stringify(matchingCity));
+        setCurrentCity(matchingCity.city_name);
+        
+        // Redirect to city page
+        const cityUrl = matchingCity.city_url || 
+                       matchingCity.city_name.toLowerCase().replace(/\s+/g, '-');
+        router.push(`/${cityUrl}`);
+      }
+    } catch (error) {
+      console.error("Error in city matching:", error);
+    } finally {
+      setInitialLocationChecked(true);
+    }
+  }, [initialLocationChecked, router]);
+
+  
   const initializeLocation = useCallback(() => {
     async function run() {
       // Check for stored custom city first
@@ -458,28 +482,23 @@ const Header = () => {
         </div>
       </header>
 
+
 {showLocationSearch && (
   <LocationSearch 
     onClose={() => setShowLocationSearch(false)}
     onSelectCity={(selectedCity) => {
       if (!selectedCity || !selectedCity.city_name) {
-        // If no valid city selected, redirect to home
         router.push("/");
         return;
       }
 
-      // Update current city in state and localStorage
       setCurrentCity(selectedCity.city_name);
       localStorage.setItem('currentCity', selectedCity.city_name);
 
-      // Get current path segments
       const segments = window.location.pathname.split('/').filter(Boolean);
-      
-      // Generate URL-safe city slug (fallback if city_url missing)
       const citySlug = selectedCity.city_url || 
                       selectedCity.city_name.toLowerCase().replace(/\s+/g, '-');
 
-      // Preserve service if on service page, otherwise go to city page
       if (segments.length === 2 && segments[0] !== 'undefined') {
         router.push(`/${citySlug}/${segments[1]}`);
       } else {
@@ -487,6 +506,7 @@ const Header = () => {
       }
     }}
     currentCity={currentCity}
+    autoSelect={!initialLocationChecked} // Pass this prop for initial auto-selection
   />
 )}
       <MobileMenu {...{ 
@@ -507,11 +527,11 @@ const Header = () => {
       />
 <FloatingContactButtons />
       <style jsx global>{`
-        body { padding-top: 75px; padding-bottom: 80px; }
+        body { padding-top:40px; padding-bottom: 40px; }
         @media (min-width: 1024px) {
-          body { padding-top: 80px; padding-bottom: 0; }
+          body { padding-top: 50px; padding-bottom: 0; }
         }
-        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
+      
       `}</style>
     </>
   );

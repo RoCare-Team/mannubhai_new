@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CiLocationOn } from "react-icons/ci";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
-import { usePathname ,useRouter  } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   collection,
   getDocs,
@@ -128,10 +128,11 @@ async function searchFirestoreCities(term) {
   }
 }
 
-const LocationSearch = ({ onClose, onSelectCity, currentCity }) => {
+const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSelected, setAutoSelected] = useState(false);
   const inputRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -140,11 +141,61 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity }) => {
     inputRef.current?.focus();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (currentCity) {
       setSearchTerm(currentCity);
+      if (autoSelect && !autoSelected) {
+        handleAutoSelect(currentCity);
+      }
     }
-  }, [currentCity]);
+  }, [currentCity, autoSelect, autoSelected]);
+
+  const handleAutoSelect = async (cityName) => {
+    setIsLoading(true);
+    try {
+      const [googleResults, firestoreResults] = await Promise.all([
+        searchPlacesWithGoogle(cityName),
+        searchFirestoreCities(cityName)
+      ]);
+      
+      // First try to find an exact match in Firestore
+      const exactFirestoreMatch = firestoreResults.find(
+        city => city.city_name.toLowerCase() === cityName.toLowerCase()
+      );
+      
+      if (exactFirestoreMatch) {
+        handleCitySelection(exactFirestoreMatch, true);
+        return;
+      }
+      
+      // Then try to find an exact match in Google results
+      const exactGoogleMatch = googleResults.find(
+        city => city.city_name.toLowerCase() === cityName.toLowerCase()
+      );
+      
+      if (exactGoogleMatch) {
+        handleCitySelection(exactGoogleMatch, true);
+        return;
+      }
+      
+      // If no exact match, show suggestions
+      const combinedResults = [...firestoreResults, ...googleResults];
+      const uniqueResults = combinedResults.filter(
+        (city, index, self) => 
+          index === self.findIndex(c => 
+            c.city_name.toLowerCase() === city.city_name.toLowerCase()
+          )
+      );
+      
+      setResults(uniqueResults.slice(0, 10));
+      setAutoSelected(true);
+    } catch (error) {
+      console.error("Error in auto-selecting city:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchCities = async (term) => {
     if (!term.trim()) {
       setResults([]);
@@ -198,26 +249,31 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity }) => {
     }
   };
 
-const handleCitySelection = (city) => {
+  const handleCitySelection = (city, isAutoSelect = false) => {
     if (!city || !city.city_name) {
-      router.push("/");
-      onClose();
+      if (!isAutoSelect) {
+        router.push("/");
+        onClose();
+      }
       return;
     }
+    
     const cityUrl = city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-');
     const segments = pathname.split('/').filter(Boolean);
+    
     if (segments.length === 2) {
-      // Preserve service when changing cities
       router.push(`/${cityUrl}/${segments[1]}`);
     } else {
-      // Go to city page
       router.push(`/${cityUrl}`);
     }
     
-    // Update the search term to show selected city
     setSearchTerm(city.city_name);
-    onClose();
+    
+    if (!isAutoSelect) {
+      onClose();
+    }
   };
+
   const handleInputKey = (e) => {
     if (e.key === "Escape") onClose();
     if (e.key === "ArrowDown" && searchResults.length) {
@@ -269,7 +325,7 @@ const handleCitySelection = (city) => {
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
             <IoSearchOutline className="text-gray-500 text-lg shrink-0" />
-           <input
+            <input
               ref={inputRef}
               type="text"
               placeholder="Search for your city..."
