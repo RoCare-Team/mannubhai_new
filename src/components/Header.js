@@ -13,7 +13,10 @@ import MobileBottomNavigation from "./MobileBottomNavigation";
 import navigationItems from "./navigationItems";
 import { useAuth } from "@/app/contexts/AuthContext";
 import FloatingContactButtons from "./FloatingContactButtons";
+// In your Header component
+import { findExactMatch } from "@/app/utils/locationUtils"; 
 
+// Remove the duplicate searchPlacesWithGoogle and fetchWithTimeout functions
 const AddToCart = dynamic(() => import("../app/checkout/page.js"), { ssr: false });
 
 const GOOGLE_API_KEY = "AIzaSyCFsdnyczEGJ1qOYxUvkS6blm5Fiph5u2o";
