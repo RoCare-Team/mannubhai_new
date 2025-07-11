@@ -115,7 +115,7 @@ const HeroSection = () => {
           
           {/* Mobile Header - Hidden on mobile */}
           <header className="hidden">
-            <h1 className="text-base sm:text-lg text[20px]font-bold leading-tight text-center text-gradient">
+            <h1 className="text-base sm:text-lg text[20px]font-bold leading-tight text-center text-gradient mt-4">
               Home services at your doorstep
             </h1>
           </header>

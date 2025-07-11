@@ -82,7 +82,74 @@ async function searchPlacesWithGoogle(query) {
     return [];
   }
 }
+// Add this new function to your LocationSearch component
+const findExactMatch = async (cityName) => {
+  try {
+    // First try exact match in Firestore
+    const exactQuery = query(
+      collection(db, "city_tb"),
+      where("city_name", "==", cityName)
+    );
+    const snapshot = await getDocs(exactQuery);
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return {
+        id: doc.id,
+        city_name: doc.data().city_name,
+        city_url: doc.data().city_url || doc.data().city_name.toLowerCase().replace(/\s+/g, '-'),
+        state: doc.data().state || "",
+        source: 'firestore'
+      };
+    }
 
+    // If no exact match in Firestore, try Google results
+    const googleResults = await searchPlacesWithGoogle(cityName);
+    const exactGoogleMatch = googleResults.find(
+      city => city.city_name.toLowerCase() === cityName.toLowerCase()
+    );
+    
+    return exactGoogleMatch || null;
+  } catch (error) {
+    console.error("Error finding exact match:", error);
+    return null;
+  }
+};
+
+// Update your handleAutoSelect function
+const handleAutoSelect = async (cityName) => {
+  setIsLoading(true);
+  try {
+    const exactMatch = await findExactMatch(cityName);
+    
+    if (exactMatch) {
+      handleCitySelection(exactMatch, true);
+      return true;
+    }
+    
+    // If no exact match, show suggestions
+    const [googleResults, firestoreResults] = await Promise.all([
+      searchPlacesWithGoogle(cityName),
+      searchFirestoreCities(cityName)
+    ]);
+    
+    const combinedResults = [...firestoreResults, ...googleResults];
+    const uniqueResults = combinedResults.filter(
+      (city, index, self) => 
+        index === self.findIndex(c => 
+          c.city_name.toLowerCase() === city.city_name.toLowerCase()
+        )
+    );
+    
+    setResults(uniqueResults.slice(0, 10));
+    return false;
+  } catch (error) {
+    console.error("Error in auto-selecting city:", error);
+    return false;
+  } finally {
+    setIsLoading(false);
+  }
+};
 async function searchFirestoreCities(term) {
   try {
     const results = [];

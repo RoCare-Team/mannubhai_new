@@ -4,7 +4,6 @@ import LogoLoader from '../components/LogoLoader';
 import '../styles/globals.css';
 import { AuthProvider } from './contexts/AuthContext';
 import Script from 'next/script';
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

@@ -222,7 +222,7 @@ const Appliance = () => {
               {/* Left Content */}
               <div className="flex-1 w-full order-2 lg:order-1">
                 <header className="text-center lg:text-left mb-6 lg:mb-8 hidden md:block">
-                  <h1 className="font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+                  <h1 className="font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 text-2xl sm:text-3xl md:text-4xl lg:text-5xl mt-6">
                     Home Appliance Services at Your Doorstep
                   </h1>
                   <p className="text-gray-600 mt-3 text-sm sm:text-base lg:text-lg max-w-2xl">
