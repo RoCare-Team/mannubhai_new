@@ -158,27 +158,44 @@ const Header = () => {
   }, [checkLoginStatus]);
 
 
-  const checkAndRedirectToCity = useCallback(async (locationName) => {
-    if (!locationName || initialLocationChecked) return;
+// In your Header component
+const checkAndRedirectToCity = useCallback(async (locationName) => {
+  if (!locationName || initialLocationChecked) return;
+  
+  try {
+    // First try to find exact match
+    const matchingCity = await findExactMatch(locationName);
     
-    try {
-      const matchingCity = await findMatchingCity(locationName);
-      if (matchingCity) {
-        // Store the matched city
-        localStorage.setItem("selectedCity", JSON.stringify(matchingCity));
-        setCurrentCity(matchingCity.city_name);
-        
-        // Redirect to city page
-        const cityUrl = matchingCity.city_url || 
-                       matchingCity.city_name.toLowerCase().replace(/\s+/g, '-');
-        router.push(`/${cityUrl}`);
-      }
-    } catch (error) {
-      console.error("Error in city matching:", error);
-    } finally {
-      setInitialLocationChecked(true);
+    if (matchingCity) {
+      // Store the matched city
+      localStorage.setItem("selectedCity", JSON.stringify(matchingCity));
+      setCurrentCity(matchingCity.city_name);
+      
+      // Redirect to city page
+      const cityUrl = matchingCity.city_url || 
+                     matchingCity.city_name.toLowerCase().replace(/\s+/g, '-');
+      router.push(`/${cityUrl}`);
+      setShowLocationSearch(false);
+      return true;
     }
-  }, [initialLocationChecked, router]);
+    
+    // If no exact match, open location search with suggestions
+    setShowLocationSearch(true);
+    return false;
+  } catch (error) {
+    console.error("Error in city matching:", error);
+    return false;
+  } finally {
+    setInitialLocationChecked(true);
+  }
+}, [initialLocationChecked, router]);
+
+// Update your location effect
+useEffect(() => {
+  if (location.address && !location.loading && !location.error && !initialLocationChecked) {
+    checkAndRedirectToCity(location.address);
+  }
+}, [location, checkAndRedirectToCity, initialLocationChecked]);
 
   
   const initializeLocation = useCallback(() => {
@@ -506,7 +523,7 @@ const Header = () => {
       }
     }}
     currentCity={currentCity}
-    autoSelect={!initialLocationChecked} // Pass this prop for initial auto-selection
+    autoSelect={!initialLocationChecked}
   />
 )}
       <MobileMenu {...{ 
@@ -525,13 +542,11 @@ const Header = () => {
         onClose={() => setShowLogin(false)} 
         onLoginSuccess={handleLoginSuccess} 
       />
-<FloatingContactButtons />
+      <FloatingContactButtons />
       <style jsx global>{`
-        body { padding-top:40px; padding-bottom: 40px; }
         @media (min-width: 1024px) {
           body { padding-top: 50px; padding-bottom: 0; }
         }
-      
       `}</style>
     </>
   );
