@@ -19,26 +19,18 @@ const AboutUsContent = () => {
 
   const leadership = [
     {
-      name: "MannuBhai Sharma",
-      role: "CEO & Business Analyst",
-      img: "/Brand/ayurvadicfacial.png",
-      linkedin: "#",
-      twitter: "#",
+      name: "Manoj Sharma",
+      role: "Founder",
+      img: "/Brand/Manoj Sir Image.webp",
+      linkedin: "https://www.linkedin.com/in/manoj-sharma-516b56125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+
     },
     {
-      name: "Anita Verma",
-      role: "CTO & Product Manager",
-      img: "/Brand/ayurvadicfacial.png",
-      linkedin: "#",
-      twitter: "#",
-    },
-    {
-      name: "Rohit Mehra",
-      role: "Head of Operations",
-      img: "/Brand/ayurvadicfacial.png",
-      linkedin: "#",
-      twitter: "#",
-    },
+      name: "Kunnu Singh",
+      role: "Co-Founder & CEO",
+      img: "/Brand/Kunnu Ma'am image.webp",
+      linkedin: "https://www.linkedin.com/in/kunnu-singh-b51521141?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+    }
   ];
 
   return (
@@ -102,53 +94,46 @@ const AboutUsContent = () => {
       </section>
 
       {/* Leadership Team */}
-      <section aria-labelledby="leadership-heading">
-        <h2 id="leadership-heading" className="font-semibold text-2xl text-center mb-6 text-gray-800">Our Leadership Team</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {leadership.map(({ name, role, img, linkedin, twitter }, i) => (
-            <article
-              key={i}
-              className="bg-white rounded-md shadow p-6 flex flex-col items-center text-center"
-            >
-              <figure className="w-20 h-20 rounded-full overflow-hidden mb-4 relative">
-                <Image
-                  src={img}
-                  alt={`Photo of ${name}`}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  loading="lazy"
-                />
-              </figure>
-              <h3 className="font-semibold text-lg text-gray-800">{name}</h3>
-              <p className="text-gray-600 text-sm mb-3">{role}</p>
-              <figcaption className="flex gap-3 text-blue-700 text-lg">
-                <a
-                  href={linkedin}
-                  aria-label={`LinkedIn profile of ${name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {/* LinkedIn SVG */}
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                    <path d="M4.98 3.5c0 1.38-1.12 2.5-2.5 2.5S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8.5h5v15H0v-15zm7 0h4.6v2.1h.1c.64-1.21 2.2-2.5 4.5-2.5 4.8 0 5.7 3.16 5.7 7.26V23.5h-5v-7.65c0-1.82-.03-4.17-2.55-4.17-2.55 0-2.94 2-2.94 4.05V23.5H7v-15z" />
-                  </svg>
-                </a>
-                <a
-                  href={twitter}
-                  aria-label={`Twitter profile of ${name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {/* Twitter SVG */}
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                    <path d="M24 4.56c-.88.39-1.82.65-2.82.77a4.93 4.93 0 002.16-2.72c-.94.56-2 .96-3.13 1.18a4.9 4.9 0 00-8.34 4.47c-4.07-.2-7.68-2.15-10.1-5.11a4.93 4.93 0 001.52 6.56 4.89 4.89 0 01-2.22-.62v.06a4.9 4.9 0 003.94 4.8c-.84.23-1.72.27-2.63.1a4.91 4.91 0 004.58 3.4 9.83 9.83 0 01-6.1 2.1c-.4 0-.8-.02-1.19-.07a13.84 13.84 0 007.53 2.2c9.04 0 14-7.5 14-14 0-.21 0-.42-.01-.63a9.92 9.92 0 002.46-2.54z" />
-                  </svg>
-                </a>
-              </figcaption>
-            </article>
-          ))}
+<section aria-labelledby="leadership-heading" className="py-12 bg-gray-50">
+  <h2 id="leadership-heading" className="text-3xl font-bold text-center text-gray-800 mb-10">
+    Our Leadership Team
+  </h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4">
+    {leadership.map(({ name, role, img, linkedin }, i) => (
+      <article
+        key={i}
+        className="bg-white rounded-xl shadow p-6 text-center hover:shadow-lg transition duration-300"
+      >
+        {/* Square Image */}
+        <div className="w-32 h-32 mx-auto mb-4 overflow-hidden rounded-lg shadow">
+          <Image
+            src={img}
+            alt={`Photo of ${name}`}
+            width={128}
+            height={128}
+            className="object-cover object-top w-full h-full"
+          />
         </div>
-      </section>
+        <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
+        <p className="text-sm text-gray-600 mb-3">{role}</p>
+
+        {/* LinkedIn Only */}
+        {linkedin && (
+          <a
+            href={linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 font-semibold text-sm hover:underline"
+          >
+            LinkedIn
+          </a>
+        )}
+      </article>
+    ))}
+  </div>
+</section>
+
+
     </main>
     </>
  

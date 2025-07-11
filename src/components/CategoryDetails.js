@@ -374,8 +374,8 @@ const handleSelectCity = (selectedCity) => {
                 <div>
                   <h1 className="text-lg md:text-xl font-semibold text-gray-800 text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
                     {city?.city_name
-                      ? `${category.category_name} Services in ${city.city_name}  @7065012902`
-                      : `${category.category_name} Services @7065012902`}
+                      ? `${category.category_name} Service  ${city.city_name}  @7065012902`
+                      : `${category.category_name} Service @7065012902`}
                   </h1>
 
                 </div>

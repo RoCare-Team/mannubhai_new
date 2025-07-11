@@ -14,14 +14,9 @@ const LandingContent = () => {
         setActiveFaq(activeFaq === index ? null : index); // Fixed typo: activeFag to activeFaq
     };
 
-    const inaugurationEvents = [
-        // ... (same as before)
-        // Assuming your inaugurationEvents array was complete in the original code,
-        // if there are apostrophes inside the strings here, they would also need escaping.
-        // Example:
-        // { city: "Mumbai", image: "/path/to/img.webp", guestName: "John Doe", guestDesc: "Mayor of Mumbai" },
-        // If guestDesc was "Mayor's Office", it would be "Mayor&apos;s Office"
-    ];
+    // const inaugurationEvents = [
+      
+    // ];
 
     return (
         <main className="w-full font-sans overflow-x-hidden">
@@ -403,7 +398,7 @@ const LandingContent = () => {
             <ProfitSection />
 
             {/* Inauguration Gallery */}
-            <section
+            {/* <section
                 className="py-12 md:py-16 bg-white"
                 aria-labelledby="inauguration-heading"
             >
@@ -439,7 +434,7 @@ const LandingContent = () => {
                         <Testimonials />
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Franchise Details */}
             <FranchiseeDetails />
