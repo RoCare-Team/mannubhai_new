@@ -16,7 +16,6 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = 
   const inputRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
-
   const fetchWithTimeout = useCallback(async (url, options = {}, timeout = 5000) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -76,7 +75,6 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = 
 
   const searchFirestoreCities = useCallback(async (term) => {
     if (!term.trim()) return [];
-    
     try {
       const results = [];
       const searchVariations = [

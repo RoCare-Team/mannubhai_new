@@ -3,20 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import CategorySearch from "./CategorySearch";
 import LocationBar from "./LocationBar";
-import { FaWhatsapp, FaPhone } from "react-icons/fa";
-import { useState } from "react";
-import { Margin } from "@mui/icons-material";
-import { MailWarningIcon } from "lucide-react";
 
 export default function MobileHeader({
   locationText,
-  setShowLocationSearch,
+  onLocationClick,  // Changed from setShowLocationSearch to onLocationClick
   location,
   setIsMobileMenuOpen,
- 
 }) {
-  const [showContactOptions, setShowContactOptions] = useState(false);
-
   return (
     <>
       {/* ─── Header ───────────────────────────────── */}
@@ -43,7 +36,7 @@ export default function MobileHeader({
           <div className="flex-shrink min-w-0 ml-2">
             <LocationBar
               locationText={locationText}
-              setShowLocationSearch={setShowLocationSearch}
+              onLocationClick={onLocationClick}  // Changed prop name
               location={location}
             />
           </div>
@@ -54,8 +47,6 @@ export default function MobileHeader({
           <CategorySearch />
         </div>
       </header>
-
-  
     </>
   );
 }

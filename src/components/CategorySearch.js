@@ -36,36 +36,15 @@ import { IoSearchOutline } from "react-icons/io5";
     { name: "Water Purifier", slug: "water-purifier-service", image: "/HomeIcons/RO.png" },
     { name: "Women Salon At Home", slug: "women-salon-at-home", image: "/BeautyCare/women salon at home.png" }
   ];
-
 const CategorySearch = ({ isDesktop, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Extract segments from current URL
-  const segments = pathname.split('/').filter(Boolean);
-  
-  const getServiceUrl = (serviceSlug) => {
-    if (segments.length === 1) {
-      // Check if the segment is a city (not a service)
-      const isCity = !SERVICES.some(service => service.slug === segments[0]);
-      if (isCity) {
-        return `/${segments[0]}/${serviceSlug}`;
-      }
-      return `/${serviceSlug}`;
-    } else if (segments.length === 2) {
-      // Preserve the city segment when changing categories
-      return `/${segments[0]}/${serviceSlug}`;
-    }
-    return `/${serviceSlug}`;
-  };
-
-  const filteredServices = SERVICES.filter(service =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -77,9 +56,55 @@ const CategorySearch = ({ isDesktop, className }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Filter services based on search term
+  const filteredServices = SERVICES.filter(service =>
+    service.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Determine the correct URL structure
+  // const getServiceUrl = (serviceSlug) => {
+  //   const segments = pathname.split('/').filter(Boolean);
+    
+  //   // If we're on a city page (/city-name)
+  //   if (segments.length === 1 && !SERVICES.some(s => s.slug === segments[0])) {
+  //     return `/${segments[0]}/${serviceSlug}`;
+  //   }
+    
+  //   // Default to root-level service page
+  //   return `/${serviceSlug}`;
+  // };
+
+  const getServiceUrl = (serviceSlug) => {
+  const segments = pathname.split('/').filter(Boolean);
+
+  // If on franchise-opportunities page
+  if (pathname === '/franchise-opportunities') {
+    return `/${serviceSlug}`;
+  }
+
+  // If on a city page (/city-name)
+  if (segments.length === 1 && !SERVICES.some(s => s.slug === segments[0])) {
+    return `/${segments[0]}/${serviceSlug}`;
+  }
+
+  // Default fallback
+  return `/${serviceSlug}`;
+};
+
+
   const handleServiceClick = (slug) => {
     setIsOpen(false);
+    setSearchTerm('');
     router.push(getServiceUrl(slug));
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchTerm && filteredServices.length > 0) {
+      handleServiceClick(filteredServices[0].slug);
+    }
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -88,52 +113,57 @@ const CategorySearch = ({ isDesktop, className }) => {
       ref={dropdownRef}
     >
       {/* Search Input */}
-      {isDesktop ? (
+      <div className={`flex items-center ${isDesktop ? 'border border-gray-300 rounded-lg' : 'bg-gray-50 rounded-lg'} px-3 py-2`}>
+        <IoSearchOutline className="text-gray-500 text-lg shrink-0" />
         <input
+          ref={inputRef}
           type="text"
           placeholder="Search services..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsOpen(true);
+          }}
           onFocus={() => setIsOpen(true)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+          onKeyDown={handleKeyDown}
+          className={`flex-1 bg-transparent outline-none text-sm ${isDesktop ? 'px-2' : ''}`}
         />
-      ) : (
-        <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2">
-          <IoSearchOutline className="text-gray-500 text-lg shrink-0" />
-          <input
-            type="text"
-            placeholder="Search services..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setIsOpen(true)}
-            className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500"
-          />
-        </div>
-      )}
+      </div>
 
       {/* Dropdown Results */}
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
           {filteredServices.length > 0 ? (
-            filteredServices.map((service) => (
-              <div
-                key={service.name}
-                onClick={() => handleServiceClick(service.slug)}
-                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer"
-              >
-                <Image 
-                  src={service.image} 
-                  alt={service.name} 
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 mr-3 object-contain"
-                />
-                <span className="text-sm">{service.name}</span>
-              </div>
-            ))
+            <ul>
+              {filteredServices.map((service) => (
+                <li 
+                  key={service.slug}
+                  onClick={() => handleServiceClick(service.slug)}
+                  className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="w-8 h-8 flex items-center justify-center mr-3">
+                    <Image 
+                      src={service.image} 
+                      alt={service.name} 
+                      width={32}
+                      height={32}
+                      className="object-contain"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{service.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {getServiceUrl(service.slug).replace(/^\//, '')}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <div className="px-4 py-3 text-gray-500 text-center text-sm">
-              No services found for {searchTerm}
+            <div className="px-4 py-6 text-center">
+              <p className="text-gray-500 text-sm">
+                {searchTerm ? `No services found for "${searchTerm}"` : 'Start typing to search'}
+              </p>
             </div>
           )}
         </div>
