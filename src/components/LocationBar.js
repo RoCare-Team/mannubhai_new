@@ -11,7 +11,10 @@ export default function LocationBar({
     <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b border-gray-200">
       <CiLocationOn className="text-gray-500" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-700 truncate">
+        <p 
+          className="text-sm text-gray-700 truncate"
+          title={locationText}
+        >
           {locationText}
         </p>
       </div>
@@ -19,6 +22,7 @@ export default function LocationBar({
         onClick={onLocationClick}
         className="text-blue-500 hover:text-blue-600 transition-colors text-lg"
         disabled={isLoading}
+        aria-label={isLoading ? "Detecting location" : "Change location"}
       >
         {isLoading ? (
           <span className="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />

@@ -6,7 +6,7 @@ const navigationItems = [
   { name: "Beauty", href: "/beauty" },
   { name: "Homecare", href: "/homecare" },
   { name: "Handyman", href: "/handyman" },
-  { name:"Become Franchise Partner", href:"/franchise-opportunities"}
+  { name:"Become Franchise Partner", href:"/franchise-opportunities"},
 ];
 
 export default function DesktopNavigation({ pathname }) {
