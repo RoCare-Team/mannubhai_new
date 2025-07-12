@@ -15,7 +15,7 @@ import AppDownloadCard from './_components/Home/AppDownloadCard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FloatingContactButtons from '@/components/FloatingContactButtons';
-
+import BeautyBrand from './_components/Home/BeautyBrand';
 export const metadata = {
   title: {
     default: "Mannubhai - Get Expert Professional Services at Home",
@@ -63,6 +63,7 @@ export default function Page() {
         <HeroSection />
         <Appliances />
         <BeautyCare />
+        <BeautyBrand />
         <HomecareServcies />
         <HandymanServices />
         <AppDownloadCard />

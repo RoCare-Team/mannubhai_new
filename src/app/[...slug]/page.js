@@ -53,6 +53,9 @@ const fetchDoc = async (col, field, val) => {
 // New function to fetch from page_master_tb
 const fetchPageMaster = async (cityId, categoryId) => {
   const cacheKey = `page-master-${cityId}-${categoryId}`;
+
+  console.log('cat id-------------',cacheKey);
+  
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
@@ -63,7 +66,8 @@ const fetchPageMaster = async (cityId, categoryId) => {
   );
   const snap = await getDocs(q);
   const result = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
-  
+    console.log('-----------------',result);
+    
   setCache(cacheKey, result, CACHE_TTL.MEDIUM);
   return result;
 };
