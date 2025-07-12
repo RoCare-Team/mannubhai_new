@@ -6,7 +6,6 @@ import { FiPhone } from 'react-icons/fi';
 
 export default function FloatingContactButtons() {
   const whatsappNumber = "+919319404430";
-  const phoneNumber = "+917065129020";
   const [showDownloadOptions, setShowDownloadOptions] = useState(false);
 
   return (
@@ -69,13 +68,7 @@ export default function FloatingContactButtons() {
         </a>
 
         {/* Phone */}
-        <a
-          href={`tel:${phoneNumber}`}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-lg"
-          aria-label="Call us"
-        >
-          <FiPhone className="text-xl" />
-        </a>
+      
       </div>
     </div>
     

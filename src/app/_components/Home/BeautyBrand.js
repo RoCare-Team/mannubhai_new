@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 const beatybrands = [
-  { name: "O3+", src: "Beauty Brand Logo/O3+.webp" },
+  { name: "O3", src: "Beauty Brand Logo/O3.webp" },
   { name: "Loreal", src: "Beauty Brand Logo/loreal.webp" },
   { name: "Lotus", src: "Beauty Brand Logo/lotus.webp" },
   { name: "Raaga", src: "Beauty Brand Logo/raaga.webp" }

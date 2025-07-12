@@ -102,6 +102,54 @@ const Header = () => {
     permissionDenied: false,
   });
 
+
+
+   const matchAndRedirect = useCallback(async (detectedCity) => {
+    try {
+      // Find matching city in your database
+      const matchedCity = await findExactMatch(detectedCity);
+      
+      if (matchedCity) {
+        // Update location state
+        setLocation({
+          city: matchedCity.city_name,
+          loading: false,
+          error: null
+        });
+        
+        // Redirect to city page
+        const cityUrl = matchedCity.city_url || 
+                       matchedCity.city_name.toLowerCase().replace(/\s+/g, '-');
+        router.push(`/${cityUrl}`);
+      } else {
+        // No match found - show location selector
+        setLocation({
+          city: detectedCity,
+          loading: false,
+          error: "City not found in our service area"
+        });
+      }
+    } catch (error) {
+      setLocation({
+        city: "",
+        loading: false,
+        error: "Error matching location"
+      });
+    }
+  }, [router]);
+
+
+   useEffect(() => {
+    const initializeLocation = async () => {
+      // Your existing location detection logic...
+      const detectedCity = "Delhi"; // Example - replace with actual detected city
+      
+      // Match and redirect
+      await matchAndRedirect(detectedCity);
+    };
+
+    initializeLocation();
+  }, [matchAndRedirect]);
   // Fetch cart count and check login status
   useEffect(() => {
     const fetchCartCount = async () => {
@@ -116,6 +164,9 @@ const Header = () => {
     fetchCartCount();
     checkLoginStatus();
   }, [checkLoginStatus]);
+
+
+
 
   // Initialize location
   const initializeLocation = useCallback(async () => {
