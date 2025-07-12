@@ -1,33 +1,22 @@
 "use client";
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { CiLocationOn } from "react-icons/ci";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  collection,
-  getDocs,
-  query,
-  limit,
-  where,
-  orderBy,
-  startAt,
-  endAt,
-} from "firebase/firestore";
+import { collection, getDocs, query, orderBy, startAt, endAt, limit } from "firebase/firestore";
 import { db } from "../app/firebaseConfig";
 
 const GOOGLE_API_KEY = "AIzaSyCFsdnyczEGJ1qOYxUvkS6blm5Fiph5u2o";
 
-const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = false }) => {
+  const [searchTerm, setSearchTerm] = useState(currentCity);
   const [searchResults, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [autoSelected, setAutoSelected] = useState(false);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
   const inputRef = useRef(null);
-  const pathname = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Memoized fetch function to prevent unnecessary re-renders
   const fetchWithTimeout = useCallback(async (url, options = {}, timeout = 5000) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -86,22 +75,23 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
   }, [fetchWithTimeout]);
 
   const searchFirestoreCities = useCallback(async (term) => {
+    if (!term.trim()) return [];
+    
     try {
       const results = [];
-      const searchTerms = [
+      const searchVariations = [
         term.toLowerCase(),
-        term.toUpperCase(), 
-        term.charAt(0).toUpperCase() + term.slice(1).toLowerCase(),
-        term
+        term.toUpperCase(),
+        term.charAt(0).toUpperCase() + term.slice(1).toLowerCase()
       ];
-      
-      for (const searchTerm of searchTerms) {
+
+      for (const variation of searchVariations) {
         try {
           const q = query(
             collection(db, "city_tb"),
             orderBy("city_name"),
-            startAt(searchTerm),
-            endAt(searchTerm + "\uf8ff"),
+            startAt(variation),
+            endAt(variation + "\uf8ff"),
             limit(5)
           );
 
@@ -118,19 +108,19 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
               });
             }
           });
-        } catch (queryError) {
-          console.warn('Firestore query error:', queryError);
+        } catch (error) {
+          console.warn('Firestore query error:', error);
         }
       }
       
-      return results.slice(0, 10);
+      return results;
     } catch (error) {
       console.error('Firestore search error:', error);
       return [];
     }
   }, []);
 
-  const fetchCities = useCallback(async (term) => {
+  const searchCities = useCallback(async (term) => {
     if (!term.trim()) {
       setResults([]);
       return;
@@ -144,65 +134,48 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
       ]);
       
       // Combine and deduplicate results
-      const combinedResults = [...firestoreResults, ...googleResults].reduce((acc, city) => {
-        const key = city.city_name.toLowerCase();
-        if (!acc.some(c => c.city_name.toLowerCase() === key)) {
-          acc.push(city);
-        }
-        return acc;
-      }, []);
+      const combinedResults = [...firestoreResults, ...googleResults]
+        .filter((city, index, self) => 
+          index === self.findIndex(c => 
+            c.city_name.toLowerCase() === city.city_name.toLowerCase()
+          )
+        )
+        .sort((a, b) => {
+          // Sort by relevance
+          const aMatch = a.city_name.toLowerCase() === term.toLowerCase();
+          const bMatch = b.city_name.toLowerCase() === term.toLowerCase();
+          if (aMatch && !bMatch) return -1;
+          if (bMatch && !aMatch) return 1;
+          return a.city_name.localeCompare(b.city_name);
+        })
+        .slice(0, 10);
       
-      // Sort results by relevance
-      combinedResults.sort((a, b) => {
-        const aName = a.city_name.toLowerCase();
-        const bName = b.city_name.toLowerCase();
-        const searchLower = term.toLowerCase();
-        
-        // Exact matches first
-        if (aName === searchLower) return -1;
-        if (bName === searchLower) return 1;
-        
-        // Then starts with matches
-        const aStarts = aName.startsWith(searchLower);
-        const bStarts = bName.startsWith(searchLower);
-        if (aStarts && !bStarts) return -1;
-        if (bStarts && !aStarts) return 1;
-        
-        // Then alphabetical
-        return aName.localeCompare(bName);
-      });
-      
-      setResults(combinedResults.slice(0, 10));
-    } catch (err) {
-      console.error("City search error:", err);
+      setResults(combinedResults);
+    } catch (error) {
+      console.error("Search error:", error);
       setResults([]);
     } finally {
       setIsLoading(false);
     }
   }, [searchPlacesWithGoogle, searchFirestoreCities]);
 
-  const handleCitySelection = useCallback((city) => {
+  const handleCitySelect = useCallback((city) => {
     if (!city?.city_name) {
       router.push("/");
       onClose();
       return;
     }
     
-    const cityUrl = city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-');
-    const segments = pathname.split('/').filter(Boolean);
-    
-    // Preserve service route if exists
-    const newPath = segments.length === 2 
-      ? `/${cityUrl}/${segments[1]}`
-      : `/${cityUrl}`;
-    
-    router.push(newPath);
-    setSearchTerm(city.city_name);
+    onSelectCity({
+      city_name: city.city_name,
+      city_url: city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-'),
+      state: city.state || ""
+    });
     onClose();
-  }, [onClose, pathname, router]);
+  }, [onClose, onSelectCity, router]);
 
-  const handleAutoSelect = useCallback(async (cityName) => {
-    if (!cityName || autoSelected) return;
+  const tryAutoSelect = useCallback(async (cityName) => {
+    if (!cityName || hasAutoSelected) return;
     
     setIsLoading(true);
     try {
@@ -211,47 +184,44 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
         searchFirestoreCities(cityName)
       ]);
       
-      // Try to find exact match first
+      // Try to find exact match
       const exactMatch = [...firestoreResults, ...googleResults].find(
         city => city.city_name.toLowerCase() === cityName.toLowerCase()
       );
       
       if (exactMatch) {
-        handleCitySelection(exactMatch);
+        handleCitySelect(exactMatch);
         return;
       }
       
       // If no exact match, show suggestions
       setResults([...firestoreResults, ...googleResults].slice(0, 10));
-      setAutoSelected(true);
+      setHasAutoSelected(true);
     } catch (error) {
       console.error("Auto-select error:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [autoSelected, handleCitySelection, searchFirestoreCities, searchPlacesWithGoogle]);
+  }, [hasAutoSelected, handleCitySelect, searchPlacesWithGoogle, searchFirestoreCities]);
 
-  // Focus input on mount
+  // Effects
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Handle current city changes
   useEffect(() => {
-    if (currentCity) {
+    if (currentCity && autoSelect && !hasAutoSelected) {
       setSearchTerm(currentCity);
-      if (autoSelect && !autoSelected) {
-        handleAutoSelect(currentCity);
-      }
+      tryAutoSelect(currentCity);
     }
-  }, [currentCity, autoSelect, autoSelected, handleAutoSelect]);
+  }, [currentCity, autoSelect, hasAutoSelected, tryAutoSelect]);
 
-  // Debounce search
   useEffect(() => {
-    const timer = setTimeout(() => fetchCities(searchTerm), 300);
+    const timer = setTimeout(() => searchCities(searchTerm), 300);
     return () => clearTimeout(timer);
-  }, [searchTerm, fetchCities]);
+  }, [searchTerm, searchCities]);
 
+  // Event handlers
   const handleInputKey = (e) => {
     if (e.key === "Escape") onClose();
     if (e.key === "ArrowDown" && searchResults.length > 0) {
@@ -263,7 +233,7 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
   const handleResultKey = (e, i, city) => {
     switch (e.key) {
       case "Enter":
-        handleCitySelection(city);
+        handleCitySelect(city);
         break;
       case "ArrowDown":
         e.preventDefault();
@@ -276,12 +246,16 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
     }
   };
 
-  const highlightMatch = (text, searchTerm) => {
-    if (!searchTerm.trim()) return text;
-    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.split(regex).map((part, i) => 
-      regex.test(part) ? <span key={i} className="bg-yellow-200 font-medium">{part}</span> : part
-    );
+  const highlightMatch = (text, query) => {
+    if (!query.trim()) return text;
+    try {
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.split(regex).map((part, i) => 
+        regex.test(part) ? <span key={i} className="bg-yellow-200 font-medium">{part}</span> : part
+      );
+    } catch {
+      return text;
+    }
   };
 
   return (
@@ -317,21 +291,21 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity, autoSelect = false
           </div>
           {searchTerm.trim() && (
             <p className="text-xs text-gray-500 mt-2">
-              Searching in both uppercase and lowercase...
+              Searching for: <span className="font-medium">{searchTerm}</span>
             </p>
           )}
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-[calc(80vh-180px)] overflow-y-auto">
           {searchResults.length > 0 ? (
-            <ul className="py-2">
+            <ul className="divide-y divide-gray-100">
               {searchResults.map((city, i) => (
                 <li
                   key={city.id || `${city.city_name}-${i}`}
                   id={`city-result-${i}`}
                   tabIndex={0}
                   className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-blue-50 focus:bg-blue-50 outline-none transition-colors"
-                  onClick={() => handleCitySelection(city)}
+                  onClick={() => handleCitySelect(city)}
                   onKeyDown={(e) => handleResultKey(e, i, city)}
                   aria-label={`Select ${city.city_name}`}
                 >

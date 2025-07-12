@@ -2,22 +2,29 @@
 import { CiLocationOn } from "react-icons/ci";
 import { MdEditLocationAlt } from "react-icons/md";
 
-export default function LocationBar({ locationText, setShowLocationSearch, location }) {
+export default function LocationBar({ 
+  locationText, 
+  onLocationClick, 
+  isLoading 
+}) {
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-gray-100">
-      
+    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b border-gray-200">
+      <CiLocationOn className="text-gray-500" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-700 truncate" title={locationText}>
+        <p className="text-sm text-gray-700 truncate">
           {locationText}
         </p>
       </div>
       <button
-        onClick={() => setShowLocationSearch(true)}
-        className="text-blue-500 hover:text-blue-600 transition-colors text-lg shrink-0"
-        disabled={location.loading}
-        aria-label="Change location"
+        onClick={onLocationClick}
+        className="text-blue-500 hover:text-blue-600 transition-colors text-lg"
+        disabled={isLoading}
       >
-        {location.loading ? "..." : <MdEditLocationAlt />}
+        {isLoading ? (
+          <span className="inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <MdEditLocationAlt />
+        )}
       </button>
     </div>
   );
