@@ -3,12 +3,10 @@ import React from "react";
 import Image from "next/image";
 
 const beatybrands = [
-  { name: "Samsung", src: "/Brand/samsung-logo.webp" },
-  { name: "Toshiba", src: "/Brand/toshiba-logoo.webp" },
-  { name: "LG", src: "/Brand/lg-logo.webp" },
-  { name: "Bosch", src: "/Brand/bosch-logo.webp" },
-  { name: "Electrolux", src: "/Brand/Electrolux-.webp" },
-  { name: "Haier", src: "/Brand/haire-logo.webp" },
+  { name: "O3+", src: "/Brand/O3+.webp" },
+  { name: "Loreal", src: "/Brand/loreal.webp" },
+  { name: "Lotus", src: "/Brand/lotus.webp" },
+  { name: "Raaga", src: "/Brand/raaga.webp" },
 
 ];
 
