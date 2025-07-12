@@ -28,7 +28,7 @@ export default function DesktopHeader({
     <header className="hidden lg:block sticky top-0 z-30 bg-white ">
       <div className="mx-auto w-full max-w-screen-2xl flex flex-wrap items-center justify-between gap-4 px-4 py-3 lg:py-4">
         {/* Logo + Nav */}
-        <div className="flex items-center gap-6 min-w-[250px]">
+        <div className="flex items-center gap-2 min-w-[250px]">
           <Link href="/" className="shrink-0" aria-label="Go to home page">
             <div className="relative w-[120px] h-[40px] sm:w-[140px] sm:h-[50px]">
               <Image
@@ -49,7 +49,7 @@ export default function DesktopHeader({
         </div>
 
         {/* Search + Location + WhatsApp + Phone + Cart + User */}
-        <div className="flex flex-wrap items-center justify-end gap-6 flex-1">
+        <div className="flex flex-wrap items-center justify-end gap-2 flex-1">
           {/* Location + Search */}
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 h-10 min-w-[200px] max-w-[240px]">
