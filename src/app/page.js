@@ -45,14 +45,16 @@ export const metadata = {
   },
   icons: {
     icon: 'favicon/MB Favicon.png',
-
-   
   },
   manifest: '/site.webmanifest',
   verification: {
     google: 'IaTaWIzhmYLa4xubMA-U595_5CX8O-zVfP_Y69z2Wss',
+    other: {
+      'ahrefs-site-verification': '483dfd13bd02e15036ba68fb4b8adc6ab44c031dbdfc6e9de0c36ea01ea99eab',
+    },
   },
 };
+
 
 export default function Page() {
   return (
