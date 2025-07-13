@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import LogoLoader from "@/components/LogoLoader";
+import BeautyBrand from "./BeautyBrand";
 
 // Constants moved outside component to avoid recreation on every render
 const DEFAULT_IMAGE = "/BeautyCare/default.png";
@@ -185,7 +186,16 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
           </div>
         )}
       </section>
+   <section 
+  aria-labelledby="beauty-brands" 
+  className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" 
+  id="beauty-brands"
+>
 
+  <div className="w-full">
+    <BeautyBrand />
+  </div>
+</section>
       {/* promo banner */}
       {!hideBrightBanner && (
         <section className="mt-0 md:mt-10 mb-0">

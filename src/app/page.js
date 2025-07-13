@@ -63,7 +63,7 @@ export default function Page() {
         <HeroSection />
         <Appliances />
         <BeautyCare />
-        <BeautyBrand />
+       
         <HomecareServcies />
         <HandymanServices />
         <AppDownloadCard />
