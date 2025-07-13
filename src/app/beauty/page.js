@@ -14,6 +14,7 @@ import "../_components/Home/swiper-custom.css";
 import BeautyCare from "../_components/Home/BeautyCare";
 import Head from "./head";
 import Link from "next/link";
+import BeautyBrand from "../_components/Home/BeautyBrand";
 // Constants moved outside component to prevent recreation on every render
 const SUBSERVICE_IMAGES = {
   "Women Salon At Home": "/BeautyCare/women salon at home.png",
@@ -340,6 +341,7 @@ const Beauty = () => {
             </div>
           </div>
         </section>
+     <section className="my-8 sm:my-12 w-full px-4 sm:px-6 lg:px-8" aria-labelledby="services-slider-heading"><BeautyBrand /></section>
 
         {/* Promotional Banner */}
         <section className="w-full px-4 sm:px-6 lg:px-8 my-8 sm:my-12" aria-label="Promotional offer">

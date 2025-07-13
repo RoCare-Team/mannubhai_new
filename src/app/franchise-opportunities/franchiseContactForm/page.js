@@ -10,12 +10,15 @@ export default function FranchiseContactForm() {
     city: '',
     pincode: '',
     investment: '',
+    message: '',
     otp: ''
   });
 
   // UI state
   const [errors, setErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState(1); // 1: Phone, 2: OTP, 3: Form Details
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [otpTimer, setOtpTimer] = useState(30);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
@@ -98,25 +101,6 @@ export default function FranchiseContactForm() {
     }
   };
 
-  // Validate form
-  const validateForm = () => {
-    const newErrors = {};
-    let isValid = true;
-
-    Object.keys(validations).forEach(field => {
-      if (field === 'otp' && !otpSent) return;
-      
-      const error = validations[field](formData[field]);
-      if (error) {
-        newErrors[field] = error;
-        isValid = false;
-      }
-    });
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
   // Send SMS
  const sendSms = async (phone, message) => {
   try {
@@ -134,6 +118,7 @@ export default function FranchiseContactForm() {
     return false;
   }
 };
+
   // Start OTP timer
   const startOtpTimer = () => {
     setOtpTimer(30);
@@ -168,42 +153,64 @@ export default function FranchiseContactForm() {
   };
 
   // Send OTP
-  const handleSendOtp = async () => {
-    const phoneError = validations.phone(formData.phone);
-    const nameError = validations.name(formData.name);
-    
-    if (phoneError || nameError) {
-      setErrors({
-        phone: phoneError,
-        name: nameError
-      });
-      return;
-    }
+const handleSendOtp = async () => {
+  // Validate phone number only (name will be validated later)
+  const phoneError = validations.phone(formData.phone);
+  
+  if (phoneError) {
+    setErrors({ phone: phoneError });
+    return;
+  }
 
-    setIsSubmitting(true);
-    
-    // Generate OTP
+  setIsSubmitting(true);
+  
+  try {
+    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
     setGeneratedOtp(otp);
     
+    // Using your approved message template
     const message = `Dear ${formData.name}, ${otp} is OTP to verify your mobile number for confirm request. Regards RO Care India.`;
     
+    // Send SMS with proper error handling
     const smsResult = await sendSms(formData.phone, message);
     
     if (smsResult) {
       setOtpSent(true);
+      setCurrentStep(2); // Move to OTP verification
       startOtpTimer();
+      setSuccessMessage('OTP sent successfully! Please check your messages.');
+      setTimeout(() => setSuccessMessage(''), 5000);
     } else {
-      setErrors({ general: 'Failed to send OTP. Please try again.' });
+      setErrors({ 
+        general: 'Failed to send OTP. Please ensure your number is correct and try again.' 
+      });
     }
-    
+  } catch (error) {
+    console.error('OTP sending failed:', error);
+    setErrors({ 
+      general: 'Service temporarily unavailable. Please try again shortly.' 
+    });
+  } finally {
     setIsSubmitting(false);
-  };
+  }
+};
+  // Verify OTP
+  const handleVerifyOtp = async () => {
+    const otpError = validations.otp(formData.otp);
+    if (otpError) {
+      setErrors({ otp: otpError });
+      return;
+    }
 
-  // Verify OTP and submit
-  const verifyAndSubmit = async () => {
+    setIsSubmitting(true);
+
     if (formData.otp === generatedOtp.toString()) {
-      await submitToAPI();
+      setOtpVerified(true);
+      setCurrentStep(3);
+      setErrors({});
+      setSuccessMessage('Phone number verified successfully! Please fill in your details.');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } else {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
@@ -211,6 +218,8 @@ export default function FranchiseContactForm() {
       if (newAttempts >= 3) {
         startLockout();
         setOtpSent(false);
+        setOtpVerified(false);
+        setCurrentStep(1);
         setFormData(prev => ({ ...prev, otp: '' }));
       } else {
         setErrors({ 
@@ -218,28 +227,59 @@ export default function FranchiseContactForm() {
         });
       }
     }
+    
+    setIsSubmitting(false);
   };
 
-  // Submit to API
-  const submitToAPI = async () => {
-    setIsSubmitting(true);
-    
-    const params = new URLSearchParams({
-      name: formData.name,
-      pincode: formData.pincode,
-      city: formData.city,
-      invst_rang: formData.investment,
-      email: formData.email,
-      mobile: formData.phone,
-      site_url: 'https://mannubhai.com'
+  // Validate final form
+  const validateFinalForm = () => {
+    const fieldsToValidate = ['name', 'email', 'city', 'pincode', 'investment'];
+    const newErrors = {};
+    let isValid = true;
+
+    fieldsToValidate.forEach(field => {
+      const error = validations[field](formData[field]);
+      if (error) {
+        newErrors[field] = error;
+        isValid = false;
+      }
     });
 
+    setErrors(newErrors);
+    return isValid;
+  };
+
+const handleFinalSubmit = async () => {
+  if (!validateFinalForm()) return;
+
+  setIsSubmitting(true);
+  
+  const params = new URLSearchParams({
+    name: formData.name,
+    pincode: formData.pincode,
+    city: formData.city,
+    invst_rang: formData.investment,
+    email: formData.email,
+    mobile: formData.phone,
+    message: formData.message,
+    site_url: 'https://mannubhai.com'
+  });
+
+  try {
+    console.log('Submitting form with params:', params.toString());
+    
+    const response = await fetch(
+      `https://waterpurifierservicecenter.in/wizard/app/mannubhai_enquery.php?${params}`
+    );
+    
+    console.log('Response status:', response.status);
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+    
     try {
-      const response = await fetch(
-        `https://waterpurifierservicecenter.in/wizard/app/mannubhai_enquery.php?${params}`
-      );
+      const data = JSON.parse(responseText);
+      console.log('Parsed response:', data);
       
-      const data = await response.json();
       if (data.status === 1) {
         setSuccessMessage('Thank you! We have received your request and will get back to you soon.');
         // Reset form
@@ -250,36 +290,35 @@ export default function FranchiseContactForm() {
           city: '',
           pincode: '',
           investment: '',
+          message: '',
           otp: ''
         });
+        setCurrentStep(1);
         setOtpSent(false);
+        setOtpVerified(false);
         setFailedAttempts(0);
       } else {
-        setErrors({ general: 'Something went wrong. Please try again.' });
+        console.error('API returned error status:', data);
+        setErrors({ general: data.message || 'Something went wrong. Please try again.' });
       }
-    } catch (error) {
-      setErrors({ general: 'Error processing request. Please try again.' });
-    } finally {
-      setIsSubmitting(false);
+    } catch (e) {
+      console.error('Failed to parse response:', e);
+      setErrors({ general: 'Unexpected response format from server' });
     }
-  };
-
-  // Form submission handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (isLocked) {
-      setErrors({ general: 'Account is temporarily locked. Please wait for the lockout period to expire.' });
-      return;
-    }
-
-    if (!validateForm()) return;
-
-    if (otpSent) {
-      await verifyAndSubmit();
-    } else {
-      await handleSendOtp();
-    }
+  } catch (error) {
+    console.error('Submission error:', error);
+    setErrors({ general: error.message || 'Error processing request. Please try again.' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+  // Go back to phone step
+  const handleBackToPhone = () => {
+    setCurrentStep(1);
+    setOtpSent(false);
+    setOtpVerified(false);
+    setFormData(prev => ({ ...prev, otp: '' }));
+    setErrors({});
   };
 
   // Format time display
@@ -371,192 +410,257 @@ export default function FranchiseContactForm() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            {/* Progress Indicator */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div className={`flex items-center ${currentStep === 1 ? 'text-indigo-600' : currentStep > 1 ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${currentStep === 1 ? 'bg-indigo-600 text-white' : currentStep > 1 ? 'bg-green-600 text-white' : 'bg-gray-400 text-white'}`}>
+                    {currentStep > 1 ? '✓' : '1'}
+                  </div>
+                  <span className="ml-2 text-sm font-medium">Phone Verification</span>
+                </div>
+                <div className={`flex items-center ${currentStep === 2 ? 'text-indigo-600' : currentStep > 2 ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${currentStep === 2 ? 'bg-indigo-600 text-white' : currentStep > 2 ? 'bg-green-600 text-white' : 'bg-gray-400 text-white'}`}>
+                    {currentStep > 2 ? '✓' : '2'}
+                  </div>
+                  <span className="ml-2 text-sm font-medium">OTP Verification</span>
+                </div>
+                <div className={`flex items-center ${currentStep === 3 ? 'text-indigo-600' : 'text-gray-400'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${currentStep === 3 ? 'bg-indigo-600 text-white' : 'bg-gray-400 text-white'}`}>
+                    3
+                  </div>
+                  <span className="ml-2 text-sm font-medium">Complete Application</span>
+                </div>
               </div>
+            </div>
 
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email address"
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {/* Step 1: Phone Number */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Enter Your Phone Number</h3>
+                  <p className="text-gray-600 mb-4">We'll send you an OTP to verify your phone number.</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your 10-digit phone number"
+                    maxLength={10}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
+                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                </div>
+
+                <button
+                  onClick={handleSendOtp}
+                  disabled={isSubmitting || isLocked}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Sending OTP...' : 'Send OTP'}
+                </button>
               </div>
+            )}
 
-              {/* Phone Number */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter your 10-digit phone number"
-                  maxLength={10}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                />
-                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-              </div>
-
-              {/* OTP Section */}
-              {otpSent && (
-                <div className="space-y-2">
-                  <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+            {/* Step 2: OTP Verification */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Verify Your Phone Number</h3>
+                  <p className="text-gray-600 mb-4">Enter the 6-digit OTP sent to {formData.phone}</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
                     Enter OTP <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      id="otp"
-                      value={formData.otp}
-                      onChange={handleChange}
-                      placeholder="Enter 6-digit OTP"
-                      maxLength={6}
-                      className={`flex-1 px-4 py-3 rounded-lg border ${
-                        errors.otp ? 'border-red-500' : 'border-gray-300'
-                      } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      disabled={otpTimer > 0 || isSubmitting}
-                      className={`px-4 py-3 rounded-lg font-medium transition ${
-                        otpTimer > 0 || isSubmitting
-                          ? 'bg-gray-400 text-white cursor-not-allowed'
-                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      }`}
-                    >
-                      {otpTimer > 0 ? `Resend (${otpTimer})` : 'Resend OTP'}
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    id="otp"
+                    value={formData.otp}
+                    onChange={handleChange}
+                    placeholder="Enter 6-digit OTP"
+                    maxLength={6}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.otp ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
                   {errors.otp && <p className="text-red-500 text-sm mt-1">{errors.otp}</p>}
-                  <div className="text-sm text-gray-600">
-                    Failed attempts: <span className="font-semibold">{failedAttempts}</span>/3
-                  </div>
                 </div>
-              )}
 
-              {/* City */}
-              <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                  City <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="Enter your city"
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.city ? 'border-red-500' : 'border-gray-300'
-                  } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                />
-                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                <div className="flex justify-between items-center text-sm text-gray-600">
+                  <span>Failed attempts: {failedAttempts}/3</span>
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={otpTimer > 0 || isSubmitting}
+                    className={`font-medium ${
+                      otpTimer > 0 || isSubmitting
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-indigo-600 hover:text-indigo-700'
+                    }`}
+                  >
+                    {otpTimer > 0 ? `Resend OTP in ${otpTimer}s` : 'Resend OTP'}
+                  </button>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleBackToPhone}
+                    className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-400 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Verifying...' : 'Verify OTP'}
+                  </button>
+                </div>
               </div>
+            )}
 
-              {/* Pincode */}
-              <div>
-                <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Pincode <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={formData.pincode}
-                  onChange={handleChange}
-                  placeholder="Enter your 6-digit pincode"
-                  maxLength={6}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.pincode ? 'border-red-500' : 'border-gray-300'
-                  } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                />
-                {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
-              </div>
+            {/* Step 3: Complete Form */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Complete Your Application</h3>
+                  <p className="text-gray-600 mb-4">Phone verified: {formData.phone} ✓</p>
+                </div>
 
-              {/* Investment Range */}
-              <div>
-                <label htmlFor="investment" className="block text-sm font-medium text-gray-700 mb-1">
-                  Investment Range <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="investment"
-                  value={formData.investment}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.investment ? 'border-red-500' : 'border-gray-300'
-                  } bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                {/* Name */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.name ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email address"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.email ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                </div>
+
+                {/* City */}
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                    City <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="Enter your city"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.city ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
+                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                </div>
+
+                {/* Pincode */}
+                <div>
+                  <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-1">
+                    Pincode <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    value={formData.pincode}
+                    onChange={handleChange}
+                    placeholder="Enter your 6-digit pincode"
+                    maxLength={6}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.pincode ? 'border-red-500' : 'border-gray-300'
+                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  />
+                  {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+                </div>
+
+                {/* Investment Range */}
+                <div>
+                  <label htmlFor="investment" className="block text-sm font-medium text-gray-700 mb-1">
+                    Investment Range <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="investment"
+                    value={formData.investment}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.investment ? 'border-red-500' : 'border-gray-300'
+                    } bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  >
+                    <option value="">Select Investment Range</option>
+                    <option value="Rs. 4lac - 5lac">Rs. 4lac - 5lac</option>
+                    <option value="Rs. 5lac - 10lac">Rs. 5lac - 10lac</option>
+                    <option value="Rs. 10lac - 20lac">Rs. 10lac - 20lac</option>
+                    <option value="Rs. 20lac - 30lac">Rs. 20lac - 30lac</option>
+                    <option value="Rs. 30lac - 50lac">Rs. 30lac - 50lac</option>
+                    <option value="Rs. 50lac - 1 Cr.">Rs. 50lac - 1 Cr.</option>
+                    <option value="Rs. 1 Cr. - 2 Cr">Rs. 1 Cr. - 2 Cr</option>
+                    <option value="Rs. 2 Cr. - 5 Cr">Rs. 2 Cr. - 5 Cr</option>
+                    <option value="Rs. 5 Cr. above">Rs. 5 Cr. above</option>
+                  </select>
+                  {errors.investment && <p className="text-red-500 text-sm mt-1">{errors.investment}</p>}
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Tell us about your interest"
+                    rows="4"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  ></textarea>
+                </div>
+
+                <button
+                  onClick={handleFinalSubmit}
+                  disabled={isSubmitting}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select Investment Range</option>
-                  <option value="Rs. 4lac - 5lac">Rs. 4lac - 5lac</option>
-                  <option value="Rs. 5lac - 10lac">Rs. 5lac - 10lac</option>
-                  <option value="Rs. 10lac - 20lac">Rs. 10lac - 20lac</option>
-                  <option value="Rs. 20lac - 30lac">Rs. 20lac - 30lac</option>
-                  <option value="Rs. 30lac - 50lac">Rs. 30lac - 50lac</option>
-                  <option value="Rs. 50lac - 1 Cr.">Rs. 50lac - 1 Cr.</option>
-                  <option value="Rs. 1 Cr. - 2 Cr">Rs. 1 Cr. - 2 Cr</option>
-                  <option value="Rs. 2 Cr. - 5 Cr">Rs. 2 Cr. - 5 Cr</option>
-                  <option value="Rs. 5 Cr. above">Rs. 5 Cr. above</option>
-                </select>
-                {errors.investment && <p className="text-red-500 text-sm mt-1">{errors.investment}</p>}
+                  {isSubmitting ? 'Submitting Application...' : 'Submit Application'}
+                </button>
               </div>
-
-              {/* Message */}
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  placeholder="Tell us about your interest"
-                  rows="4"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                ></textarea>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting || isLocked}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <span>Processing...</span>
-                ) : otpSent ? (
-                  <span>Verify & Submit</span>
-                ) : (
-                  <span>Continue</span>
-                )}
-              </button>
-            </form>
+            )}
           </div>
         </div>
       </div>
