@@ -13,56 +13,57 @@ const LandingContent = () => {
     const toggleFaq = (index) => {
         setActiveFaq(activeFaq === index ? null : index); // Fixed typo: activeFag to activeFaq
     };
-
-    // const inaugurationEvents = [
-      
-    // ];
-
     return (
         <main className="w-full font-sans overflow-x-hidden">
             {/* Hero Banner Section */}
-            <header
-                className="relative text-white py-12 md:py-16 px-4 md:px-8 lg:px-16"
-                style={{ background: "linear-gradient(to right, #4a8bbd, #f38a93)" }}
-            >
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 mt-6 md:mt-10">
-                    <div className="md:w-1/2 space-y-4 md:space-y-6 text-center md:text-left animate-fadeIn">
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-                            Join India&apos;s Leading Network
-                        </h1>
-                        <p className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-300">
-                            MannuBhai Quick Service Delivery Hub
-                        </p>
-                        <p className="text-base md:text-lg lg:text-xl opacity-90">
-                            150+ Quick Service Delivery Centers Across 100+ Cities Nationwide
-                        </p>
-                        <div className="space-y-3 mt-4 md:mt-6">
-                            <div className="flex flex-col md:flex-row md:items-center gap-2 bg-white/10 p-3 md:p-4 rounded-xl backdrop-blur-sm">
-                                <span className="text-xl md:text-2xl font-bold text-green-400">95%</span>
-                                <span className="text-sm md:text-base">Year-on-Year Return on Investment (ROI)</span>
-                            </div>
-                            <div className="flex flex-col md:flex-row md:items-center gap-2 bg-white/10 p-3 md:p-4 rounded-xl backdrop-blur-sm">
-                                <span className="text-xl md:text-2xl font-bold text-pink-300">
-                                    3 Million+
-                                </span>
-                                <span className="text-sm md:text-base">Satisfied Customers</span>
-                            </div>
-                        </div>
-                    </div>
+          {/* Hero Banner Section */}
+<header
+  className="relative text-white py-8 md:py-16 px-4 sm:px-6 lg:px-8"
+  style={{ background: "linear-gradient(to right, #4a8bbd, #f38a93)" }}
+>
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
+    {/* Text Content */}
+    <div className="w-full md:w-1/2 space-y-3 md:space-y-6 text-center md:text-left">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
+        Join India&apos;s Leading Network
+      </h1>
+      <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-yellow-300">
+        MannuBhai Quick Service Delivery Hub
+      </p>
+      <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90">
+        150+ Quick Service Delivery Centers Across 100+ Cities Nationwide
+      </p>
+      
+      {/* Stats Cards - Stacked on mobile */}
+      <div className="space-y-2 mt-3 md:mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+          <span className="text-xl sm:text-2xl font-bold text-green-400">95%</span>
+          <span className="text-xs sm:text-sm md:text-base">Year-on-Year ROI</span>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+          <span className="text-xl sm:text-2xl font-bold text-pink-300">
+            3 Million+
+          </span>
+          <span className="text-xs sm:text-sm md:text-base">Satisfied Customers</span>
+        </div>
+      </div>
+    </div>
 
-                    <div className="md:w-1/2 flex justify-center mt-8 md:mt-0">
-                        <div className="relative w-full h-56 md:h-64 lg:h-80 xl:h-96 rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-300">
-                            <Image
-                                src="/franchies/map.webp"
-                                alt="MannuBhai service coverage across India showing 100+ cities"
-                                fill
-                                className="object-contain mt-2 md:mt-5"
-                                priority
-                            />
-                        </div>
-                    </div>
-                </div>
-            </header>
+    {/* Image - Centered on mobile */}
+    <div className="w-full md:w-1/2 flex justify-center mt-4 md:mt-0">
+      <div className="relative w-full max-w-md h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 rounded-2xl overflow-hidden shadow-2xl">
+        <Image
+          src="/franchies/map.webp"
+          alt="MannuBhai service coverage across India"
+          fill
+          className="object-contain"
+          priority
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </div>
+    </div>
+  </div>
+</header>
 
             {/* About Us + Achievements */}
             <section
@@ -310,131 +311,122 @@ const LandingContent = () => {
             </section>
 
             {/* Industry Comparison Section */}
-            <section
-                className="py-12 md:py-16 bg-[#faf9f6]"
-                aria-labelledby="comparison-heading"
-            >
-                <div className="max-w-7xl mx-auto px-4 md:px-8 bg-white rounded-xl shadow p-5 md:p-8">
-                    <h2 id="comparison-heading" className="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-8 md:mb-12 leading-relaxed">
-                        Why <strong>Home Appliance Service, Home Care, Beauty Care</strong> and <strong>Handyman Service</strong> Are India&apos;s <span className="text-indigo-700">Most Profitable Franchise Business?</span>
-                    </h2>
+                   <section className="py-8 sm:py-10 md:py-14 bg-[#faf9f6]" aria-labelledby="comparison-heading">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8">
+      <h2 id="comparison-heading" className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-6 sm:mb-8 md:mb-10">
+        Why <span className="text-indigo-700">Home Appliance Service</span>, <span className="text-indigo-700">Home Care</span>, <span className="text-indigo-700">Beauty Care</span> and <span className="text-indigo-700">Handyman Service</span> Are India's Most Profitable Franchise Business?
+      </h2>
 
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
-                        <table className="min-w-full text-center border-collapse">
-                            <caption className="sr-only">Comparison of service business attributes</caption>
-                            <thead className="bg-white text-gray-900 text-sm md:text-base font-bold border-b border-gray-200">
-                                <tr>
-                                    <th scope="col" className="px-4 py-3 text-left">Attributes</th>
-                                    <th scope="col" className="px-4 py-3">Appliance Service</th>
-                                    <th scope="col" className="px-4 py-3">Home Care</th>
-                                    <th scope="col" className="px-4 py-3">Beauty Care</th>
-                                    <th scope="col" className="px-4 py-3">Handyman Service</th>
-                                    <th scope="col" className="px-4 py-3">Food</th>
-                                    <th scope="col" className="px-4 py-3">Gym</th>
-                                    <th scope="col" className="px-4 py-3">Retail</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-sm md:text-base font-medium text-gray-800">
-                                {[
-                                    ["Recession Proof", ["✅", "✅", "✅", "✅", "❌", "❌", "✅"]],
-                                    ["Easy Setup", ["✅", "✅", "✅", "✅", "❌", "❌", "❌"]],
-                                    ["Recurring Revenue", ["✅", "✅", "✅", "✅", "✅", "❌", "❌"]],
-                                    ["High Retention", ["✅", "✅", "✅", "✅", "❌", "❌", "❌"]],
-                                    ["High Margins", ["✅", "✅", "✅", "✅", "❌", "❌", "❌"]],
-                                ].map(([attribute, values], index) => (
-                                    <tr
-                                        key={index}
-                                        className="border-b border-gray-200 hover:bg-gray-50 transition"
-                                    >
-                                        <th scope="row" className="px-4 py-3 text-left font-bold text-gray-900 whitespace-normal">
-                                            {attribute}
-                                        </th>
-                                        {values.map((value, idx) => (
-                                            <td key={idx} className="px-4 py-3">
-                                                <div
-                                                    className={`inline-flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full ${
-                                                        value === "✅"
-                                                            ? "bg-lime-400 text-white"
-                                                            : "bg-red-400 text-white"
-                                                    }`}
-                                                    aria-label={value === "✅" ? "Yes" : "No"}
-                                                >
-                                                    {value === "✅" ? "✓" : "✕"}
-                                                </div>
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <p className="text-center mt-4 text-sm md:text-base">These Local Service businesses offer high growth with High ROI, Low Risk and Zero Hassles.</p>
-                </div>
-            </section>
+      {/* Desktop/Tablet View (Table) */}
+      <div className="hidden sm:block">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <caption className="sr-only">Comparison of service business attributes</caption>
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th scope="col" className="px-3 py-3 text-left text-sm md:text-base font-semibold text-gray-900 min-w-[120px]">Attributes</th>
+                {['Appliance', 'Home Care', 'Beauty Care', 'Handyman', 'Food', 'Gym', 'Retail'].map((service, i) => (
+                  <th key={i} scope="col" className="px-2 py-3 text-center text-xs sm:text-sm md:text-base font-semibold text-gray-900 whitespace-nowrap">
+                    {service}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {[
+                ['Recession Proof', ['✅', '✅', '✅', '✅', '❌', '❌', '✅']],
+                ['Easy Setup', ['✅', '✅', '✅', '✅', '❌', '❌', '❌']],
+                ['Recurring Revenue', ['✅', '✅', '✅', '✅', '✅', '❌', '❌']],
+                ['High Retention', ['✅', '✅', '✅', '✅', '❌', '❌', '❌']],
+                ['High Margins', ['✅', '✅', '✅', '✅', '❌', '❌', '❌']],
+              ].map(([attribute, values], i) => (
+                <tr key={i} className="hover:bg-gray-50 transition-colors">
+                  <th scope="row" className="px-3 py-3 text-left text-xs sm:text-sm md:text-base font-medium text-gray-900">
+                    {attribute}
+                  </th>
+                  {values.map((value, j) => (
+                    <td key={j} className="px-2 py-3 text-center">
+                      <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full ${value === '✅' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {value === '✅' ? '✓' : '✕'}
+                      </span>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile View (Cards) */}
+      <div className="sm:hidden space-y-4">
+        {[
+          ['Recession Proof', ['Appliance', 'Home Care', 'Beauty Care', 'Handyman', 'Retail']],
+          ['Easy Setup', ['Appliance', 'Home Care', 'Beauty Care', 'Handyman']],
+          ['Recurring Revenue', ['Appliance', 'Home Care', 'Beauty Care', 'Handyman', 'Food']],
+          ['High Retention', ['Appliance', 'Home Care', 'Beauty Care', 'Handyman']],
+          ['High Margins', ['Appliance', 'Home Care', 'Beauty Care', 'Handyman']],
+        ].map(([attribute, services], i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 shadow-xs">
+            <h3 className="font-medium text-gray-900 mb-3">{attribute}</h3>
+            <div className="flex flex-wrap gap-2">
+              {services.map((service, j) => (
+                <span key={j} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  {service}
+                </span>
+              ))}
+              {['Food', 'Gym', 'Retail'].filter(s => !services.includes(s)).map((service, j) => (
+                <span key={`na-${j}`} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {service}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-center mt-6 text-sm sm:text-base text-gray-600">
+        These Local Service businesses offer high growth with High ROI, Low Risk and Zero Hassles.
+      </p>
+    </div>
+  </div>
+</section>
 
             {/* Growth Timeline Section */}
-            <section
-                className="py-12 md:py-16 bg-white"
-                aria-labelledby="growth-heading"
-            >
-                <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
-                    <h2 id="growth-heading" className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6 md:mb-8">
-                        India&apos;s Fastest Growing Local Service Provider<br />
-                        <span className="text-indigo-600">Adding 10+ New Stores Every Month</span>
-                    </h2>
-                    <div className="relative overflow-x-auto">
-                        <Image
-                            src="/franchies/road-img.webp"
-                            alt="MannuBhai franchise growth timeline showing expansion milestones"
-                            width={1200}
-                            height={400}
-                            className="min-w-[800px] md:min-w-full mx-auto"
-                        />
-                    </div>
-                </div>
-            </section>
+<section
+  className="py-10 sm:py-12 md:py-16 bg-white"
+  aria-labelledby="growth-heading"
+>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 text-center">
+    <h2
+      id="growth-heading"
+      className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 md:mb-8"
+    >
+      India&apos;s Fastest Growing Local Service Provider
+      <br />
+      <span className="text-indigo-600">
+        Adding 10+ New Stores Every Month
+      </span>
+    </h2>
+
+    <div className="w-full overflow-x-auto">
+      <Image
+        src="/franchies/road-img.webp"
+        alt="MannuBhai franchise growth timeline showing expansion milestones"
+        width={1200}
+        height={400}
+        className="w-full h-auto max-w-none sm:max-w-full mx-auto"
+        priority
+      />
+    </div>
+  </div>
+</section>
+
+
 
             {/* Profit Section */}
             <ProfitSection />
-
-            {/* Inauguration Gallery */}
-            {/* <section
-                className="py-12 md:py-16 bg-white"
-                aria-labelledby="inauguration-heading"
-            >
-                <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
-                    <div className="mb-12 md:mb-16">
-                        <h2 id="inauguration-heading" className="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-indigo-700 mb-6 md:mb-8">
-                            Check our Inauguration
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
-                            {inaugurationEvents.map((event, i) => (
-                                <article key={i} className="text-center bg-gray-50 rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow">
-                                    <h3 className="text-lg md:text-xl font-bold mb-2">{event.city}</h3>
-                                    <div className="relative h-40 md:h-48 rounded-xl overflow-hidden shadow-md mb-2">
-                                        <Image
-                                            src={event.image}
-                                            alt={`Inauguration event in ${event.city} with ${event.guestName}`}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <p className="font-semibold text-sm md:text-base">
-                                        Chief Guest: <span className="text-black font-bold">{event.guestName}</span>
-                                    </p>
-                                    <p className="text-gray-600 text-xs md:text-sm">{event.guestDesc}</p>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-xl md:text-2xl font-bold text-center text-gray-800 mb-6 md:mb-8">
-                            Check our New Onboarding Franchise
-                        </h3>
-                        <Testimonials />
-                    </div>
-                </div>
-            </section> */}
 
             {/* Franchise Details */}
             <FranchiseeDetails />
