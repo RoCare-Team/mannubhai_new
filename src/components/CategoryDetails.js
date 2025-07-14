@@ -279,51 +279,52 @@ const CategoryDetails = ({
     }
   };
 
-  const handleCartAction = async (serviceId, operation, currentQuantity = 0) => {
-    const customerId = localStorage.getItem("customer_id");
-    if (!customerId) {
-      setPendingCartAction({ serviceId, operation, currentQuantity });
-      setShowLoginPopup(true);
-      return;
-    }
+const handleCartAction = async (serviceId, operation, currentQuantity = 0) => {
+  const customerId = localStorage.getItem("customer_id"); 
+  if (!customerId) {
+    setPendingCartAction({ serviceId, operation, currentQuantity });
+    setShowLoginPopup(true);
+    return;
+  }
 
-    try {
-      const payload = {
-        service_id: serviceId,
-        type: operation === "remove" ? "delete" : operation,
-        cid: customerId,
-        quantity:
-          operation === "add"
-            ? currentQuantity + 1
-            : operation === "decrement"
-              ? currentQuantity - 1
-              : 0,
-      };
+  try {
+    const payload = {
+      service_id: serviceId,
+      type: operation === "remove" ? "delete" : operation,
+      cid: customerId,
+      quantity:
+        operation === "add"
+          ? currentQuantity + 1
+          : operation === "decrement"
+            ? currentQuantity - 1
+            : 0,
+          source: 'mannubhai',
+    };
 
-      const res = await fetch(
-        "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.AllCartDetails) {
-        localStorage.setItem(
-          "checkoutState",
-          JSON.stringify(data.AllCartDetails)
-        );
-        localStorage.setItem("cart_total_price", data.total_main || 0);
-        setCartLoaded((prev) => !prev);
+    const res = await fetch(
+      "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       }
-    } catch (error) {
-      console.error("Cart update error:", error);
-    }
-  };
+    );
 
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+    const data = await res.json();
+    console.log('Cart API Response:', data);
+
+    if (data.AllCartDetails) {
+      localStorage.setItem("checkoutState", JSON.stringify(data.AllCartDetails));
+      localStorage.setItem("cart_total_price", data.total_main || 0);
+      setCartLoaded((prev) => !prev); // Triggers cart reload
+    }
+  } catch (error) {
+    console.error("Cart update failed:", error);
+    
+  }
+};
   const calculateTotalItems = () => {
     const cartData = localStorage.getItem("checkoutState");
     if (!cartData) return 0;

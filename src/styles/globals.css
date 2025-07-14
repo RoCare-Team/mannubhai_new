@@ -46,7 +46,34 @@ body {
 }
 
 
+/* styles/globals.css */
+.blog-content h2 {
+  @apply text-2xl font-bold mt-8 mb-4;
+}
 
+.blog-content h3 {
+  @apply text-xl font-bold mt-6 mb-3;
+}
+
+.blog-content p {
+  @apply mb-4 leading-relaxed;
+}
+
+.blog-content ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.blog-content li {
+  @apply mb-2;
+}
+
+.blog-content a {
+  @apply text-blue-600 hover:underline;
+}
+
+.blog-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic my-4;
+}
 
 /* Ensure smooth scrolling */
 html {

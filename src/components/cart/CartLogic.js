@@ -65,9 +65,9 @@ const Cart = ({ cartLoaded, cartLoadedToggle }) => {
     const cid = localStorage.getItem("customer_id");
     const num = Number(qunt);
     const quantity = num + 1;
-
+    const source="mannubhai";
     if (quantity <= 5) {
-      const payload = { service_id, type, cid, quantity };
+      const payload = { service_id, type, cid, quantity,  source  };
       console.log(JSON.stringify(payload));
 
       const res = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php", {
@@ -94,9 +94,12 @@ const Cart = ({ cartLoaded, cartLoadedToggle }) => {
     const cid = localStorage.getItem("customer_id");
     const num = Number(qunt);
     const quantity = num - 1;
-
+    const source="mannubhai";
     if (quantity <= 5) {
-      const payload = { service_id, type, cid, quantity };
+      const payload = { service_id, type, cid, quantity , source};
+
+      console.log(payload);
+      
       console.log(JSON.stringify(payload));
 
       const res = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php", {
@@ -107,6 +110,9 @@ const Cart = ({ cartLoaded, cartLoadedToggle }) => {
       });
 
       const data = await res.json();
+
+      console.log(data);
+      
       // localStorage.setItem('checkoutState', JSON.stringify(data.AllCartDetails, data.total_cart_price, data.cart_id));
       localStorage.setItem('checkoutState', JSON.stringify(data.AllCartDetails == null ? [] : data.AllCartDetails));
       localStorage.setItem('cart_total_price', data.total_main == null ? 0 : data.total_main);
@@ -136,7 +142,8 @@ const Cart = ({ cartLoaded, cartLoadedToggle }) => {
     const cid = localStorage.getItem("customer_id");
     // const num = Number(qunt);
     const quantity = 0;
-    const payload = { service_id, type, cid, quantity };
+    const source= "manuubhai";
+    const payload = { service_id, type, cid, quantity , source };
 
     // console.log(JSON.stringify(payload) + 'remove thing will work here');
 

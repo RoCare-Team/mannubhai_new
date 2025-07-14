@@ -32,7 +32,7 @@ const Footer = () => {
             </h4>
             <ul className="text-sm space-y-2">
               {/* <li><Link href="#">Categories Near You</Link></li> */}
-              <li><Link href="#">Blog</Link></li>
+              <li><Link href="/blogs">Blog</Link></li>
               <li><Link href="/contact-us">Contact Us</Link></li>
             </ul>
           </div>

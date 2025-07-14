@@ -1,0 +1,17 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"mannucpa_website"},
+{"type":"table","name":"blog_category","database":"mannucpa_website","data":
+[
+{"id":"1","name":"Water Purifier","contant":null,"meta_title":"Water Purifier Blog Categoty","canonical":null,"meta_description":"Water Purifier Blog Categoty","meta_keywords":"Water Purifier Blog Categoty","robots":null,"created_at":"2020-07-06","updated_at":"2020-09-16","category_url":"water-purifier"},
+{"id":"2","name":"Air Conditioner","contant":null,"meta_title":"Air Conditioner","canonical":null,"meta_description":"Air Conditioner","meta_keywords":"Air Conditioner","robots":"index, follow","created_at":"2020-07-23","updated_at":"2020-07-23","category_url":"air-conditioner"},
+{"id":"3","name":"Fitness Care","contant":null,"meta_title":"Fitness Care","canonical":null,"meta_description":null,"meta_keywords":"Fitness Care","robots":"index, follow","created_at":"2020-07-27","updated_at":"2020-07-27","category_url":"fitness-care"},
+{"id":"4","name":"Plumbing","contant":null,"meta_title":"Plumbing","canonical":null,"meta_description":null,"meta_keywords":"Plumbing","robots":"index, follow","created_at":"2020-07-28","updated_at":"2020-07-28","category_url":"plumbing"},
+{"id":"5","name":"Kitchen Chimney","contant":null,"meta_title":"Kitchen Chimney","canonical":null,"meta_description":null,"meta_keywords":"Kitchen Chimney","robots":"index, follow","created_at":"2020-07-29","updated_at":"2020-07-29","category_url":"kitchen-chimney"},
+{"id":"6","name":"Washing Machine","contant":null,"meta_title":"Washing Machine","canonical":null,"meta_description":"Washing Machine","meta_keywords":"Washing Machine","robots":"index, follow","created_at":"2020-07-30","updated_at":"2020-07-30","category_url":"washing-machine"},
+{"id":"7","name":"LED","contant":null,"meta_title":"LED","canonical":null,"meta_description":"LED","meta_keywords":"LED","robots":"index, follow","created_at":"2020-07-31","updated_at":"2020-07-31","category_url":"LED"},
+{"id":"8","name":"Refrigerator","contant":null,"meta_title":"Refrigerator","canonical":null,"meta_description":"Refrigerator","meta_keywords":"Refrigerator","robots":null,"created_at":"2020-10-26","updated_at":"2021-05-13","category_url":"refrigerator"},
+{"id":"9","name":"Franchise","contant":null,"meta_title":"Franchise","canonical":null,"meta_description":"Franchise","meta_keywords":"Franchise","robots":null,"created_at":"2024-03-17","updated_at":"2024-03-17","category_url":"franchise"}
+]
+}
+]
