@@ -90,10 +90,7 @@ const CityDetails = ({ city }) => {
               <BeautyCare />
             </ServiceWrapper>
 
-            <section className="w-full mb-8 md:mb-12">
-              <BeautyBrand />
-            </section>
-
+            
             <ServiceWrapper categoryUrl="homecare-services">
               <HomecareServcies />
             </ServiceWrapper>
