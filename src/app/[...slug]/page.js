@@ -5,6 +5,8 @@ import { db } from "../../app/firebaseConfig";
 import dynamic from 'next/dynamic';
 
 import LogoLoader from '@/components/LogoLoader'; // Adjust path as needed
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const FAQSection = dynamic(() => import('@/components/FAQSection'), {
   loading: () => <LogoLoader />
@@ -36,15 +38,30 @@ const setCache = (key, value, ttl) => {
   setTimeout(() => cache.delete(key), ttl * 1000);
 };
 
+
+// Utility function to normalize URL segments
+const normalizeUrlSegment = (segment) => {
+  return segment ? segment.toLowerCase().trim() : '';
+};
+
+
 // Optimized fetchDoc function with caching
 const fetchDoc = async (col, field, val) => {
-  const cacheKey = `${col}-${field}-${val}`;
+  const normalizedVal = normalizeUrlSegment(val);
+  const cacheKey = `${col}-${field}-${normalizedVal}`;
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
-  const q = query(collection(db, col), where(field, "==", val));
+  const q = query(collection(db, col));
   const snap = await getDocs(q);
-  const result = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
+  
+  // Find document where the field matches case-insensitively
+  const doc = snap.docs.find(d => {
+    const fieldValue = d.data()[field];
+    return fieldValue && normalizeUrlSegment(fieldValue) === normalizedVal;
+  });
+  
+  const result = doc ? { id: doc.id, ...doc.data() } : null;
   
   setCache(cacheKey, result, CACHE_TTL.MEDIUM);
   return result;
@@ -277,36 +294,39 @@ export async function generateMetadata({ params }) {
 
 export default async function DynamicRouteHandler({ params ,searchParams  }) {
   const { slug = [] } = params;
-   const { city: cityQueryParam } = searchParams; 
+  const { city: cityQueryParam } = searchParams;
+    const normalizedSlug = slug.map(segment => normalizeUrlSegment(segment));
   if (slug.length === 0) notFound();
 
   try {
-      const cities = await fetchCities();
+        const cities = await fetchCities();
     // Start fetching cities immediately as they're needed in most cases
     const citiesPromise = fetchCities();
      
     // Handle city query param (from LocationSearch)
-    if (cityQueryParam) {
+if (cityQueryParam) {
+      const normalizedQueryParam = normalizeUrlSegment(cityQueryParam);
       const selectedCity = cities.find(c => 
-        c.city_name.toLowerCase() === decodeURIComponent(cityQueryParam).toLowerCase()
+        normalizeUrlSegment(c.city_name) === normalizedQueryParam ||
+        normalizeUrlSegment(c.city_url) === normalizedQueryParam
       );
       
       if (selectedCity) {
-        // Redirect to proper city URL format
-        const redirectUrl = `/${selectedCity.city_url}`;
-        return <Redirect to={redirectUrl} />; // Or use Next.js redirect
+        // Redirect to lowercase URL format
+        const redirectUrl = `/${selectedCity.city_url.toLowerCase()}`;
+        return <Redirect to={redirectUrl} />;
       }
     }
-    if (slug.length === 1) {
-      const [segment] = slug;
+
+  if (normalizedSlug.length === 1) {
+      const [segment] = normalizedSlug;
       
       const [cityDoc, catDoc] = await Promise.all([
         fetchDoc("city_tb", "city_url", segment),
         fetchDoc("category_manage", "category_url", segment),
       ]);
       
-      //  const cities = await citiesPromise;
-    if (cityDoc) {
+      if (cityDoc) {
         return (
           <>
             <CityDetails city={cityDoc} />
@@ -317,13 +337,15 @@ export default async function DynamicRouteHandler({ params ,searchParams  }) {
       
       if (catDoc) {
         const services = await fetchServices(catDoc.lead_type_id);
-        return <CategoryDetails category={{ ...catDoc,  services }} />;
+        return <CategoryDetails category={{ ...catDoc, services }} />;
       }
       
       notFound();
     }
+
+
     if (slug.length === 2) {
-      const [citySeg, catSeg] = slug;
+     const [citySeg, catSeg] = normalizedSlug;
       
       const [cityDoc, catDoc, cities] = await Promise.all([
         fetchDoc("city_tb", "city_url", citySeg),
@@ -352,6 +374,7 @@ export default async function DynamicRouteHandler({ params ,searchParams  }) {
       const faqData = pageMasterDoc ? prepareFAQ(pageMasterDoc) : [];
       return (
         <>
+      
           <CategoryDetails 
             category={{ 
               ...(pageMasterDoc || catDoc),
@@ -366,39 +389,40 @@ export default async function DynamicRouteHandler({ params ,searchParams  }) {
             city={cityDoc}
           />
            {/* FAQ Section - Updated for your data structure */}
-       {faqData.length > 0 && <FAQSection faqData={faqData} />}
+         {faqData.length > 0 && <FAQSection faqData={faqData} />}
           {/* Page Content Section - Hidden since your data shows page_content is null */}
-{pageMasterDoc?.page_content && (
-  <div className="page-content my-8 px-4 max-w-6xl mx-auto">
-    <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-      About  {cityDoc.city_name} - {catDoc.category_name}
-    </h2>
-    <div 
-      className="prose max-w-none
-        [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-6 [&_h2]:pb-2 
-        [&_h2]:border-b-2 [&_h2]:border-gradient [&_h2]:from-blue-500 [&_h2]:to-purple-500
-        [&_h2]:bg-clip-text [&_h2]:text-transparent [&_h2]:bg-gradient-to-r
-        [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-4 [&_h3]:text-blue-700
-        [&_p]:my-4 [&_p]:text-gray-800 [&_p]:leading-relaxed [&_p]:text-justify
-        [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4 [&_ul]:space-y-2
-        [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4 [&_ol]:space-y-2
-        [&_li]:my-2 [&_li]:pl-2 [&_li]:transition-colors [&_li]:hover:text-blue-600
-        [&_a]:text-blue-600 [&_a]:hover:text-blue-800 [&_a]:underline [&_a]:font-medium [&_a]:transition-colors
-        [&_blockquote]:border-l-4 [&_blockquote]:border-purple-500 [&_blockquote]:pl-4 [&_blockquote]:italic 
-        [&_blockquote]:text-gray-700 [&_blockquote]:bg-purple-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg
-        [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:my-6 [&_img]:transition-all [&_img]:hover:scale-[1.02] [&_img]:hover:shadow-xl
-        [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:shadow-md [&_table]:rounded-lg [&_table]:overflow-hidden
-        [&_th]:bg-gradient-to-r [&_th]:from-blue-500 [&_th]:to-purple-500 [&_th]:p-3 [&_th]:text-left [&_th]:text-white [&_th]:font-bold
-        [&_td]:p-3 [&_td]:border [&_td]:border-gray-200 [&_td]:even:bg-gray-50
-        [&_pre]:bg-gray-800 [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
-        [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
-        [&_hr]:my-8 [&_hr]:border-t-2 [&_hr]:border-gray-200 [&_hr]:rounded-full
-        hover:[&_img]:shadow-xl transition-all duration-300"
-      dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
-    />
-  </div>
-)}
+          {pageMasterDoc?.page_content && (
+            <div className="page-content my-8 px-4 max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                About  {cityDoc.city_name} - {catDoc.category_name}
+              </h2>
+              <div 
+                className="prose max-w-none
+                  [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-6 [&_h2]:pb-2 
+                  [&_h2]:border-b-2 [&_h2]:border-gradient [&_h2]:from-blue-500 [&_h2]:to-purple-500
+                  [&_h2]:bg-clip-text [&_h2]:text-transparent [&_h2]:bg-gradient-to-r
+                  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-4 [&_h3]:text-blue-700
+                  [&_p]:my-4 [&_p]:text-gray-800 [&_p]:leading-relaxed [&_p]:text-justify
+                  [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4 [&_ul]:space-y-2
+                  [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4 [&_ol]:space-y-2
+                  [&_li]:my-2 [&_li]:pl-2 [&_li]:transition-colors [&_li]:hover:text-blue-600
+                  [&_a]:text-blue-600 [&_a]:hover:text-blue-800 [&_a]:underline [&_a]:font-medium [&_a]:transition-colors
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-purple-500 [&_blockquote]:pl-4 [&_blockquote]:italic 
+                  [&_blockquote]:text-gray-700 [&_blockquote]:bg-purple-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg
+                  [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:my-6 [&_img]:transition-all [&_img]:hover:scale-[1.02] [&_img]:hover:shadow-xl
+                  [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:shadow-md [&_table]:rounded-lg [&_table]:overflow-hidden
+                  [&_th]:bg-gradient-to-r [&_th]:from-blue-500 [&_th]:to-purple-500 [&_th]:p-3 [&_th]:text-left [&_th]:text-white [&_th]:font-bold
+                  [&_td]:p-3 [&_td]:border [&_td]:border-gray-200 [&_td]:even:bg-gray-50
+                  [&_pre]:bg-gray-800 [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
+                  [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
+                  [&_hr]:my-8 [&_hr]:border-t-2 [&_hr]:border-gray-200 [&_hr]:rounded-full
+                  hover:[&_img]:shadow-xl transition-all duration-300"
+                dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
+              />
+            </div>
+          )}
           <CityAccordion cities={cities} currentCity={cityDoc} />
+    
         </>
       );
     }

@@ -34,7 +34,7 @@ const HelpCenter = () => {
 
   return (
     <>
-    <Header />
+
        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <section className="w-full max-w-xl p-6 bg-white rounded-3xl shadow-xl border border-gray-200">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">All Topics</h2>
@@ -58,7 +58,7 @@ const HelpCenter = () => {
         </div>
       </section>
     </div>
-    <Footer />
+ 
     </>
  
   );

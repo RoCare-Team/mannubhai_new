@@ -199,7 +199,7 @@ const Beauty = () => {
 
   return (
     <>
-    <Header />
+
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         {/* Hero Section */}
@@ -378,7 +378,7 @@ const Beauty = () => {
         {/* Content Sections */}
         <ContentSections />
       </main>
-      <Footer />
+  
     </>
   );
 };

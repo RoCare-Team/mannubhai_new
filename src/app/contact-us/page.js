@@ -117,7 +117,7 @@ export default function ContactPage() {
 
   return (
     <>
-    <Header />
+  
       <Head>
         <title>Contact Us | Mannubhai Services</title>
         <meta name="description" content="Need help or have questions? Contact Mannubhai Services via email or chat support for quick resolution." />
@@ -354,7 +354,7 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-      <Footer />
+    
     </>
   );
 }

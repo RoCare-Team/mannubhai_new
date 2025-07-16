@@ -2,8 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Head from "./head";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+
 const AboutUsContent = () => {
   const brandLogos = [
     { src: "/Brand/samsung-logo.webp", alt: "Samsung" },
@@ -38,7 +37,7 @@ const AboutUsContent = () => {
   return (
 
     <>
-    <Header />
+  
       <Head />
       <main className="max-w-7xl mx-auto px-6 py-16 bg-gray-50 rounded-md shadow-sm">
         {/* Page Title */}
@@ -138,7 +137,7 @@ const AboutUsContent = () => {
 
 
       </main>
-    <Footer />
+
     </>
  
   );

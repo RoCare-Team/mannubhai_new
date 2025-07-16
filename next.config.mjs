@@ -15,6 +15,23 @@ const nextConfig = {
       },
     ],
   },
+  // Add redirects configuration
+  async redirects() {
+    return [
+      {
+        source: '/franchise-opportunities',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      },
+      {
+        
+        source: '/franchise',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      }
+      
+    ];
+  },
 };
 
 // HTTPS configuration for local development

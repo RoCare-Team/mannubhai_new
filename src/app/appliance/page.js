@@ -215,7 +215,7 @@ const Appliance = () => {
 
   return (
     <>
-    <Header />
+   
       <Head />
       <main className="min-h-screen bg-gray-50">
         {/* Hero Section */}
@@ -406,7 +406,7 @@ const Appliance = () => {
           </div>
         </section>
       </main>
-      <Footer />
+   
     </>
   );
 };

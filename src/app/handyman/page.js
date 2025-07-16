@@ -476,7 +476,7 @@ const Handyman = () => {
 
   return (
     <>
-     <Header />
+   
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         <HeroSection 
@@ -503,7 +503,7 @@ const Handyman = () => {
           </div>
         </section>
       </main>
-      <Footer />
+  
     </>
   );
 };

@@ -340,7 +340,7 @@ function Booking() {
 
   return (
     <>
-    <Header />
+ 
       <Head>
         <title>Booking History | Your Service Bookings</title>
         <meta name="description" content="View your active, completed, and cancelled service bookings." />
@@ -649,7 +649,7 @@ function Booking() {
           </div>
         </div>
       )}
-      <Footer />
+   
     </>
   );
 }

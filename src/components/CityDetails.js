@@ -1,27 +1,62 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, memo } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import AboutMannuBhaiExpert from "./AboutMannuBhaiExpert";
-import 'react-toastify/dist/ReactToastify.css';
+import dynamic from 'next/dynamic';
+import Head from 'next/head';
 
-// Components
-import HeroSection from "@/app/_components/Home/HeroSection";
-import Appliances from "@/app/_components/Home/Appliances";
-import HandymanServices from "@/app/_components/Home/HandymanServices";
-import BeautyCare from "@/app/_components/Home/BeautyCare";
-import HomecareServcies from '@/app/_components/Home/HomecareServcies';
-import BrandsWeRepair from '@/components/BrandsWeRepair';
-import Services from '@/app/_components/Home/Services';
-import PopularCities from "@/app/_components/Home/PopularCities";
-import ClientReviews from "@/app/_components/Home/ClientReviews";
-import FooterLinks from "@/app/_components/Home/FooterLinks";
-import AppDownloadCard from '@/app/_components/Home/AppDownloadCard';
-import BeautyBrand from "@/app/_components/Home/BeautyBrand";
-import FloatingContactButtons from '@/components/FloatingContactButtons';
-import Header from "./Header";
-import Footer from "./Footer";
-// UI
-import { ToastContainer } from 'react-toastify';
+// Lazy load all non-critical components
+const AboutMannuBhaiExpert = dynamic(() => import("./AboutMannuBhaiExpert"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const HeroSection = dynamic(() => import("@/app/_components/Home/HeroSection"), {
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse w-full" />
+});
+const Appliances = dynamic(() => import("@/app/_components/Home/Appliances"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const HandymanServices = dynamic(() => import("@/app/_components/Home/HandymanServices"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const BeautyCare = dynamic(() => import("@/app/_components/Home/BeautyCare"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const HomecareServcies = dynamic(() => import('@/app/_components/Home/HomecareServcies'), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const BrandsWeRepair = dynamic(() => import('@/components/BrandsWeRepair'), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const Services = dynamic(() => import('@/app/_components/Home/Services'), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const PopularCities = dynamic(() => import("@/app/_components/Home/PopularCities"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const ClientReviews = dynamic(() => import("@/app/_components/Home/ClientReviews"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const FooterLinks = dynamic(() => import("@/app/_components/Home/FooterLinks"), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const AppDownloadCard = dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+});
+const FloatingContactButtons = dynamic(() => import('@/components/FloatingContactButtons'), {
+  ssr: false
+});
+
+
+// Delay loading ToastContainer until after hydration
+const ToastContainer = dynamic(
+  () => import('react-toastify').then((c) => {
+    import('react-toastify/dist/ReactToastify.css');
+    return c.ToastContainer;
+  }),
+  {
+    ssr: false,
+    loading: () => null
+  }
+);
 
 const CityDetails = ({ city }) => {
   const [showCitySearch, setShowCitySearch] = useState(false);
@@ -29,35 +64,33 @@ const CityDetails = ({ city }) => {
   const pathname = usePathname();
   const [selectedService, setSelectedService] = useState(null);
   const serviceRefs = useRef({});
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const ServiceWrapper = ({ children, categoryUrl, className = "" }) => {
-    const handleClick = (serviceUrl) => {
+  const ServiceWrapper = memo(({ children, categoryUrl, className = "" }) => {
+    const handleClick = useCallback((serviceUrl) => {
+      setIsNavigating(true);
       router.push(`/${city.city_url}/${serviceUrl}`);
-    };
+    }, [router, city?.city_url]);
 
     return React.cloneElement(children, {
       onServiceClick: handleClick,
-      cityUrl: city.city_url,
+      cityUrl: city?.city_url,
       className
     });
-  };
+  });
 
-  const handleSelectCity = (selectedCity) => {
+  const handleSelectCity = useCallback((selectedCity) => {
+    setIsNavigating(true);
     const segments = pathname.split('/').filter(Boolean);
-
-    // Case 1: On a city page (/delhi)
+    
     if (segments.length === 1) {
       window.location.href = `/${selectedCity.city_url}`;
-    }
-    // Case 2: On a category page (/air-purifier-repair-service)
-    else if (segments.length === 1 && segments[0] === selectedCity.city_url) {
+    } else if (segments.length === 1 && segments[0] === selectedCity.city_url) {
       setShowCitySearch(false);
-    }
-    // Case 3: On city+category page (/delhi/air-purifier-repair-service)
-    else if (segments.length === 2) {
+    } else if (segments.length === 2) {
       window.location.href = `/${selectedCity.city_url}/${segments[1]}`;
     }
-  };
+  }, [pathname]);
 
   if (!city) {
     return (
@@ -73,16 +106,23 @@ const CityDetails = ({ city }) => {
 
   return (
     <>
-    <Header/>
+   
+      <Head>
+        <title>{`${city.city_name} Services | MannuBhai`}</title>
+        <meta name="description" content={`Find expert services in ${city.city_name} - appliances repair, beauty care, home services and more`} />
+        <link rel="preload" href="/hero-image.webp" as="image" />
+      </Head>
+      {isNavigating && (
+        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
       <main className="w-full bg-white">
-        {/* Hero Section - Full width */}
         <section className="w-full mb-8 md:mb-12">
           <HeroSection />
         </section>
 
-        {/* Main content container with responsive padding */}
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto">
-          {/* Services Sections with consistent spacing */}
           <div className="space-y-12 md:space-y-16 lg:space-y-20 w-full">
             <ServiceWrapper categoryUrl="appliances">
               <Appliances />
@@ -92,7 +132,6 @@ const CityDetails = ({ city }) => {
               <BeautyCare />
             </ServiceWrapper>
 
-            
             <ServiceWrapper categoryUrl="homecare-services">
               <HomecareServcies />
             </ServiceWrapper>
@@ -101,50 +140,39 @@ const CityDetails = ({ city }) => {
               <HandymanServices />
             </ServiceWrapper>
 
-            {/* App Download - Full width */}
             <section className="w-full my-8 md:my-12">
               <AppDownloadCard />
             </section>
 
-            {/* About Expert */}
-            <section 
-              className="w-full my-8 md:my-12"
-              aria-labelledby="expert-heading"
-            >
+            <section className="w-full my-8 md:my-12" aria-labelledby="expert-heading">
               <h2 id="expert-heading" className="sr-only">
                 About MannuBhai Expert Services in {city.city_name}
               </h2>
               <AboutMannuBhaiExpert />
             </section>
 
-            {/* Client Reviews */}
             <section className="w-full my-8 md:my-12">
               <ClientReviews />
             </section>
 
-            {/* Popular Cities - Full width */}
             <section className="w-full my-8 md:my-12">
               <PopularCities />
             </section>
 
-            {/* Brands We Repair */}
             <section className="w-full my-8 md:my-12">
               <BrandsWeRepair />
             </section>
 
-            {/* Services */}
             <section className="w-full my-8 md:my-12">
               <Services />
             </section>
           </div>
         </div>
 
-        {/* Footer Links - Full width */}
         <section className="w-full mt-12 md:mt-16">
           <FooterLinks />
         </section>
 
-        {/* Toast Notifications */}
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -159,12 +187,10 @@ const CityDetails = ({ city }) => {
           bodyClassName="!text-sm"
         />
       </main>
-
-      {/* Floating Contact Buttons */}
       <FloatingContactButtons />
-      <Footer />
+    
     </>
   );
 };
 
-export default CityDetails;
+export default memo(CityDetails);
