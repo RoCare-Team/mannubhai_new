@@ -1,15 +1,14 @@
-"use client";
 
+"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TiSocialFacebook, TiSocialLinkedin } from "react-icons/ti";
 import { FaInstagram } from "react-icons/fa6";
 import { AiOutlineYoutube } from "react-icons/ai";
-
-const Footer = () => {
+export default function FranchiseFooter() {
   return (
-    <footer className="bg-gray-50 text-gray-800 w-full">
+      <footer className="bg-gray-50 text-gray-800 w-full">
       <div className="max-w-screen-xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
           {/* Company */}
@@ -44,7 +43,7 @@ const Footer = () => {
             </h4>
             <ul className="text-sm space-y-2">
               <li><Link href="#">Register as a Professional</Link></li>
-              <li><Link href="/franchise/franchise-opportunities">Become Franchise Partner</Link></li>
+            <li><Link href="/franchise/franchise-opportunities">Become Franchise Partner</Link></li>
             </ul>
           </div>
 
@@ -131,6 +130,8 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+}
 
-export default Footer;
+
+
+

@@ -13,6 +13,8 @@ import {
   FiShoppingCart, FiChevronRight, FiX 
 } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const CheckOut = () => {
   // Use auth context
@@ -367,6 +369,9 @@ const CheckOut = () => {
   }
   // Main render
   return (
+
+    <>
+    <Header />
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">
       <ToastContainer position="top-right" autoClose={3000} />
 
@@ -560,6 +565,9 @@ const CheckOut = () => {
         onLoginSuccess={handleLoginSuccess}
       />
     </div>
+    <Footer />
+    </>
+    
   );
 };
 

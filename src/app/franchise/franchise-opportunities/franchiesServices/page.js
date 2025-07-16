@@ -178,24 +178,24 @@ const ServicesWithTabs = () => {
 
   return (
     <section
-      className="max-w-7xl mx-auto px-6 py-16 font-sans text-gray-800"
+      className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 font-sans text-gray-800"
       aria-labelledby="our-services-heading"
     >
-      <header className="text-center mb-8">
+      <header className="text-center mb-6 md:mb-8">
         <h2
           id="our-services-heading"
-          className="text-4xl font-extrabold text-indigo-700 mb-4"
+          className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-indigo-700 mb-2 md:mb-4"
         >
           Our Services
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
           Explore our wide range of professional services tailored for your home and lifestyle needs.
         </p>
       </header>
 
       {/* Tabs */}
       <nav
-        className="flex justify-center flex-wrap gap-4 mb-10"
+        className="flex justify-center flex-wrap gap-2 sm:gap-4 mb-6 md:mb-10"
         role="tablist"
         aria-label="Service categories"
       >
@@ -207,13 +207,13 @@ const ServicesWithTabs = () => {
             aria-controls={`service-panel-${index}`}
             id={`service-tab-${index}`}
             onClick={() => setActiveTab(index)}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-full text-lg font-semibold border transition ${
+            className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg font-semibold border transition ${
               activeTab === index
                 ? "bg-indigo-600 text-white border-indigo-600"
                 : "bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-100"
             }`}
           >
-            <span className="text-2xl" aria-hidden="true">{service.icon}</span>
+            <span className="text-xl sm:text-2xl" aria-hidden="true">{service.icon}</span>
             <span>{service.title}</span>
           </button>
         ))}
@@ -225,33 +225,33 @@ const ServicesWithTabs = () => {
         role="tabpanel"
         aria-labelledby={`service-tab-${activeTab}`}
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {services[activeTab].subServices.length > 0 ? (
             services[activeTab].subServices.map((subService, index) => (
               <article
                 key={index}
-                className="flex flex-col justify-between h-full border border-indigo-100 rounded-xl p-6 bg-white shadow-sm hover:shadow-md transition hover:bg-indigo-50 cursor-pointer"
+                className="flex flex-col justify-between h-full border border-indigo-100 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 bg-white shadow-sm hover:shadow-md transition hover:bg-indigo-50 cursor-pointer"
               >
-                <header className="flex items-center space-x-3 mb-3">
+                <header className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
                   <div
-                    className="text-3xl p-2 bg-indigo-100 rounded-full group-hover:scale-110 transition-transform"
+                    className="text-2xl sm:text-3xl p-1 sm:p-2 bg-indigo-100 rounded-full group-hover:scale-110 transition-transform"
                     aria-hidden="true"
                   >
                     {subService.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-indigo-700">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-indigo-700">
                     <Link href={`/${subService.slug}`} className="hover:underline">
                       {subService.title}
                     </Link>
                   </h3>
                 </header>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   {subService.description}
                 </p>
               </article>
             ))
           ) : (
-            <div className="col-span-full text-center text-indigo-700 font-semibold text-lg py-12 animate-pulse">
+            <div className="col-span-full text-center text-indigo-700 font-semibold text-base sm:text-lg md:text-xl py-8 sm:py-12 animate-pulse">
               Coming Soon 🚀
             </div>
           )}

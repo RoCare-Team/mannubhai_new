@@ -18,7 +18,8 @@ import FooterLinks from "@/app/_components/Home/FooterLinks";
 import AppDownloadCard from '@/app/_components/Home/AppDownloadCard';
 import BeautyBrand from "@/app/_components/Home/BeautyBrand";
 import FloatingContactButtons from '@/components/FloatingContactButtons';
-
+import Header from "./Header";
+import Footer from "./Footer";
 // UI
 import { ToastContainer } from 'react-toastify';
 
@@ -72,6 +73,7 @@ const CityDetails = ({ city }) => {
 
   return (
     <>
+    <Header/>
       <main className="w-full bg-white">
         {/* Hero Section - Full width */}
         <section className="w-full mb-8 md:mb-12">
@@ -160,6 +162,7 @@ const CityDetails = ({ city }) => {
 
       {/* Floating Contact Buttons */}
       <FloatingContactButtons />
+      <Footer />
     </>
   );
 };

@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import Dropdown from "@/components/Dropdown";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 const Terms = () => {
  const countries = [
     { code: "IND", name: "India", flag: "/flags/In-flag.jpeg" },
@@ -10,7 +12,9 @@ const Terms = () => {
   ];
 
   return (
-    <section className="bg-white px-4 py-8">
+    <>
+    <Header />
+      <section className="bg-white px-4 py-8">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
           TERMS AND CONDITIONS
@@ -134,6 +138,9 @@ const Terms = () => {
         </div>
       </div>
     </section>
+    <Footer />
+    </>
+  
   );
 };
 
