@@ -17,8 +17,7 @@ import {
   FiChevronUp,
 } from "react-icons/fi";
 import AwardCertifications from "./AwardCertifications";
-import Header from "./Header";
-import Footer from "./Footer";
+
 
 // Utility function to extract images from HTML content
 const extractImagesAndContent = (html) => {
@@ -359,7 +358,7 @@ const handleSelectCity = (selectedCity) => {
   };
   return (
     <>
-    <Header />
+
       <Head>
         <title>{meta_title || `${category?.category_name} Services`}</title>
         <meta name="description" content={meta_description || ""} />
@@ -680,7 +679,7 @@ const handleSelectCity = (selectedCity) => {
           />
         )}
       </AnimatePresence>
-  <Footer />
+
     </>
   );
 };

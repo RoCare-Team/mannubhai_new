@@ -1,9 +1,19 @@
-
+"use client";
+import Header from '@/components/Header';
 import LogoLoader from '../components/LogoLoader';
 import '../styles/globals.css';
 import { AuthProvider } from './contexts/AuthContext';
 import Script from 'next/script';
+import Footer from '@/components/Footer';
+import { usePathname } from 'next/navigation';
+
 export default function RootLayout({ children }) {
+  // Get the current path
+  const pathname = usePathname();
+  
+  // Check if the current path is the franchise page
+  const isFranchisePage = pathname === '/franchise/franchise-opportunities';
+
   return (
     <html lang="en">
       <head>
@@ -28,12 +38,12 @@ export default function RootLayout({ children }) {
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
-        
+      
         <AuthProvider>
           <LogoLoader />
-        
+          {!isFranchisePage && <Header />}
           {children}
-            
+          {!isFranchisePage && <Footer />}  
         </AuthProvider>
       </body>
     </html>

@@ -25,7 +25,7 @@ export default async function BlogList() {
 
   return (
     <>
-     <Header />
+   
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">
@@ -123,7 +123,7 @@ export default async function BlogList() {
         
       </div>
     </div>
-     <Footer />
+  
     </>
    
   );

@@ -48,49 +48,6 @@ const services = [
     ],
   },
   {
-    title: "Home Care",
-    icon: "🧹",
-    description: "Professional cleaning and maintenance services for your home",
-    subServices: [
-      {
-        title: "Sofa Cleaning",
-        slug: "sofa-cleaning",
-        icon: "🛋️",
-        description: "Deep cleaning and shampooing of all types of sofas",
-      },
-      {
-        title: "Kitchen Cleaning",
-        slug: "kitchen-cleaning",
-        icon: "🍳",
-        description: "Thorough cleaning of kitchen walls, cabinets, tiles, and appliances",
-      },
-      {
-        title: "Bathroom Cleaning",
-        slug: "bathroom-cleaning",
-        icon: "🚿",
-        description: "Removal of stains, scaling, and sanitization of bathrooms",
-      },
-      {
-        title: "Home Deep Cleaning",
-        slug: "home-deep-cleaning",
-        icon: "🏠",
-        description: "Complete home deep cleaning including floors, walls, and furniture",
-      },
-      {
-        title: "Pest Control",
-        slug: "pest-control-service",
-        icon: "🐜",
-        description: "Pest control treatments for cockroaches, ants, termites, and more",
-      },
-      {
-        title: "Tank Cleaning",
-        slug: "tank-cleaning-service",
-        icon: "🛢️",
-        description: "Comprehensive cleaning and sanitization of water storage tanks",
-      },
-    ],
-  },
-  {
     title: "Beauty Care",
     icon: "💅",
     description: "Salon-quality beauty services delivered at your home",
@@ -165,13 +122,50 @@ const services = [
     ],
   },
   {
-    title: "Gadgets Care",
-    slug: "gadgets-care",
-    icon: "📱",
-    description: "Professional repair and maintenance for your gadgets",
-    subServices: [], // Coming Soon
+    title: "Home Care",
+    icon: "🧹",
+    description: "Professional cleaning and maintenance services for your home",
+    subServices: [
+      {
+        title: "Sofa Cleaning",
+        slug: "sofa-cleaning",
+        icon: "🛋️",
+        description: "Deep cleaning and shampooing of all types of sofas",
+      },
+      {
+        title: "Kitchen Cleaning",
+        slug: "kitchen-cleaning",
+        icon: "🍳",
+        description: "Thorough cleaning of kitchen walls, cabinets, tiles, and appliances",
+      },
+      {
+        title: "Bathroom Cleaning",
+        slug: "bathroom-cleaning",
+        icon: "🚿",
+        description: "Removal of stains, scaling, and sanitization of bathrooms",
+      },
+      {
+        title: "Home Deep Cleaning",
+        slug: "home-deep-cleaning",
+        icon: "🏠",
+        description: "Complete home deep cleaning including floors, walls, and furniture",
+      },
+      {
+        title: "Pest Control",
+        slug: "pest-control-service",
+        icon: "🐜",
+        description: "Pest control treatments for cockroaches, ants, termites, and more",
+      },
+      {
+        title: "Tank Cleaning",
+        slug: "tank-cleaning-service",
+        icon: "🛢️",
+        description: "Comprehensive cleaning and sanitization of water storage tanks",
+      },
+    ],
   },
 ];
+
 
 const ServicesWithTabs = () => {
   const [activeTab, setActiveTab] = useState(0);

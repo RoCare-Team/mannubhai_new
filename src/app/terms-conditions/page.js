@@ -13,7 +13,7 @@ const Terms = () => {
 
   return (
     <>
-    <Header />
+   
       <section className="bg-white px-4 py-8">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
@@ -138,7 +138,7 @@ const Terms = () => {
         </div>
       </div>
     </section>
-    <Footer />
+ 
     </>
   
   );

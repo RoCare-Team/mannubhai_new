@@ -223,7 +223,7 @@ const Homecare = () => {
 
   return (
     <>
-      <Header />
+
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         {/* Hero Section */}
@@ -249,7 +249,7 @@ const Homecare = () => {
         {/* Content Sections */}
         <ContentSections />
       </main>
-      <Footer />
+    
     </>
   );
 };
