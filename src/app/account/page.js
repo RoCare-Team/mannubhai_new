@@ -19,6 +19,8 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const AccountDetails = () => {
   const router = useRouter();
@@ -79,19 +81,6 @@ const AccountDetails = () => {
     fetchUser();
   }, [router]);
 
-// const handleLogout = () => {
-//   // Clear all user data
-//   localStorage.clear(); // Wipes everything
-  
-//   // Set a session flag that works even after refresh
-//   sessionStorage.setItem("wasLoggedOut", "true");
-  
-//   // Redirect to home with a query param
-//   router.push("/?logout=true");
-  
-//   // Optional: Force clear cache for hard refresh cases
-//   window.location.href = "/?logout=true&t=" + Date.now();
-// };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -243,7 +232,10 @@ const AccountDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4">
+
+    <>
+    <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8 relative">
@@ -548,6 +540,10 @@ const AccountDetails = () => {
         toastClassName="rounded-2xl"
       />
     </div>
+
+    <Footer />
+    </>
+  
   );
 };
 

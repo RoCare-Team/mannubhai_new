@@ -16,6 +16,8 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { MdOutlineVerifiedUser } from "react-icons/md";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -127,6 +129,8 @@ const AccountDetails = () => {
   }
 
   return (
+    <>
+    <Header />
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <section className="w-full max-w-lg p-6 bg-white rounded-xl shadow-lg border">
         <Typography variant="h5" className="mb-6 text-indigo-600 font-semibold text-center">
@@ -260,6 +264,9 @@ const AccountDetails = () => {
         <ToastContainer position="top-center" autoClose={3000} />
       </section>
     </div>
+    <Footer />
+    </>
+    
   );
 };
 

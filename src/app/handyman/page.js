@@ -14,6 +14,8 @@ import "../_components/Home/swiper-custom.css";
 import HandymanServics from "../_components/Home/HandymanServices";
 import Head from "./head";
 import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 // Constants
 const SERVICE_CONFIG = {
   images: {
@@ -474,6 +476,7 @@ const Handyman = () => {
 
   return (
     <>
+     <Header />
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         <HeroSection 
@@ -500,6 +503,7 @@ const Handyman = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   );
 };

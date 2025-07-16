@@ -130,146 +130,180 @@ const Header = () => {
     }
   }, []);
 
-  const matchAndRedirect = useCallback(async (detectedCity) => {
-    if (!detectedCity) return;
+const matchAndRedirect = useCallback(async (detectedCity) => {
+  if (!detectedCity) {
+    router.push("/");
+    return;
+  }
 
-    try {
-      const persistedLocation = getPersistedLocation();
-      if (persistedLocation?.isManualSelection) {
-        setLocation(persistedLocation);
-        return;
-      }
-
-      const matchedCity = await findExactMatch(detectedCity);
-      
-      if (matchedCity) {
-        const newLocation = {
-          city: matchedCity.city_name,
-          state: matchedCity.state || "",
-          loading: false,
-          error: null,
-          permissionDenied: false,
-          isManualSelection: false,
-        };
-        
-        setLocation(newLocation);
-        persistLocation(newLocation);
-        
-        const cityUrl = matchedCity.city_url || 
-                       matchedCity.city_name.toLowerCase().replace(/\s+/g, '-');
-        
-        const currentPath = pathname.split('/')[1];
-        if (currentPath !== cityUrl) {
-          router.push(`/${cityUrl}`);
-        }
-      } else {
-        setLocation({
-          city: detectedCity,
-          state: "",
-          loading: false,
-          error: "City not found in our service area",
-          permissionDenied: false,
-          isManualSelection: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error in matchAndRedirect:", error);
-      setLocation({
-        city: "",
-        state: "",
-        loading: false,
-        error: "Error matching location",
-        permissionDenied: false,
-        isManualSelection: false,
-      });
-    }
-  }, [router, pathname, persistLocation, getPersistedLocation]);
-
-  const initializeLocation = useCallback(async () => {
+  try {
     const persistedLocation = getPersistedLocation();
-    if (persistedLocation) {
+    if (persistedLocation?.isManualSelection) {
       setLocation(persistedLocation);
       return;
     }
 
-    try {
-      setLocation(prev => ({ ...prev, loading: true, error: null }));
-
-      try {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve,
-            reject,
-            { timeout: 10000, maximumAge: 300000 }
-          );
-        });
-
-        const { latitude, longitude } = position.coords;
-        const locationData = await getLocationFromCoords(latitude, longitude);
-        
-        if (locationData.success) {
-          await matchAndRedirect(locationData.address);
-          return;
-        }
-      } catch (geoError) {
-        console.warn('Geolocation failed:', geoError);
-        if (geoError.code === geoError.PERMISSION_DENIED) {
-          setLocation(prev => ({
-            ...prev,
-            loading: false,
-            permissionDenied: true
-          }));
-        }
+    const matchedCity = await findExactMatch(detectedCity);
+    
+    if (matchedCity) {
+      const newLocation = {
+        city: matchedCity.city_name,
+        state: matchedCity.state || "",
+        loading: false,
+        error: null,
+        permissionDenied: false,
+        isManualSelection: false,
+      };
+      
+      setLocation(newLocation);
+      persistLocation(newLocation);
+      
+      const cityUrl = matchedCity.city_url || 
+                     matchedCity.city_name.toLowerCase().replace(/\s+/g, '-');
+      
+      const currentPath = pathname.split('/')[1];
+      if (currentPath !== cityUrl) {
+        router.push(`/${cityUrl}`);
       }
-
-      try {
-        const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
-        const ipData = await ipResponse.json();
-        
-        if (ipData.city) {
-          await matchAndRedirect(ipData.city);
-        } else {
-          throw new Error("IP location data incomplete");
-        }
-      } catch (ipError) {
-        console.error('IP location fallback failed:', ipError);
-        throw ipError;
-      }
-    } catch (error) {
+    } else {
+      // City not found - set state and redirect to home
       setLocation({
         city: "",
         state: "",
         loading: false,
-        error: "Location unavailable",
+        error: "City not found in our service area",
         permissionDenied: false,
         isManualSelection: false,
       });
-    }
-  }, [matchAndRedirect, getPersistedLocation]);
-
-  const handleCitySelection = useCallback((selectedCity) => {
-    if (!selectedCity?.city_name) {
+      
+      // Clear any persisted location
+      localStorage.removeItem('userLocation');
+      
+      // Redirect to home route
       router.push("/");
-      return;
+    }
+  } catch (error) {
+    console.error("Error in matchAndRedirect:", error);
+    setLocation({
+      city: "",
+      state: "",
+      loading: false,
+      error: "Error matching location",
+      permissionDenied: false,
+      isManualSelection: false,
+    });
+    
+    // Redirect to home on error
+    router.push("/");
+  }
+}, [router, pathname, persistLocation, getPersistedLocation]);
+
+
+
+ const initializeLocation = useCallback(async () => {
+  const persistedLocation = getPersistedLocation();
+  if (persistedLocation) {
+    setLocation(persistedLocation);
+    return;
+  }
+
+  try {
+    setLocation(prev => ({ ...prev, loading: true, error: null }));
+
+    // Try geolocation first
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          { timeout: 10000, maximumAge: 300000 }
+        );
+      });
+
+      const { latitude, longitude } = position.coords;
+      const locationData = await getLocationFromCoords(latitude, longitude);
+      
+      if (locationData.success) {
+        await matchAndRedirect(locationData.address);
+        return;
+      }
+    } catch (geoError) {
+      console.warn('Geolocation failed:', geoError);
+      if (geoError.code === geoError.PERMISSION_DENIED) {
+        setLocation(prev => ({
+          ...prev,
+          loading: false,
+          permissionDenied: true
+        }));
+      }
     }
 
-    const newLocation = {
-      city: selectedCity.city_name,
-      state: selectedCity.state || "",
+    // Fallback to IP-based location
+    try {
+      const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
+      const ipData = await ipResponse.json();
+      
+      if (ipData.city) {
+        await matchAndRedirect(ipData.city);
+      } else {
+        throw new Error("IP location data incomplete");
+      }
+    } catch (ipError) {
+      console.error('IP location fallback failed:', ipError);
+      // If all location methods fail, redirect to home
+      await matchAndRedirect(null);
+    }
+  } catch (error) {
+    console.error('Location initialization failed:', error);
+    await matchAndRedirect(null);
+  }
+}, [matchAndRedirect, getPersistedLocation]);
+
+const handleCitySelection = useCallback(async (selectedCity) => {
+  if (!selectedCity?.city_name) {
+    router.push("/");
+    return;
+  }
+
+  // Normalize city name for Gurgaon/Gurugram case
+  const normalizedCity = selectedCity.city_name.toLowerCase();
+  const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
+
+  // Get the canonical city data (Gurgaon for Gurgaon/Gurugram variants)
+  const cityData = isGurgaonVariant 
+    ? await findExactMatch('Gurgaon')
+    : await findExactMatch(selectedCity.city_name);
+
+  if (!cityData) {
+    setLocation({
+      city: "",
+      state: "",
       loading: false,
-      error: null,
+      error: "City not in service area",
       permissionDenied: false,
-      isManualSelection: true,
-    };
+      isManualSelection: false,
+    });
+    router.push("/");
+    return;
+  }
 
-    setLocation(newLocation);
-    persistLocation(newLocation);
+  const newLocation = {
+    city: cityData.city_name, // This will be "Gurgaon" for Gurugram variants
+    state: cityData.state || "",
+    loading: false,
+    error: null,
+    permissionDenied: false,
+    isManualSelection: true,
+  };
 
-    const cityUrl = selectedCity.city_url || 
-                   selectedCity.city_name.toLowerCase().replace(/\s+/g, '-');
-    router.push(`/${cityUrl}`);
-    setShowLocationSearch(false);
-  }, [router, persistLocation]);
+  setLocation(newLocation);
+  persistLocation(newLocation);
+
+  const cityUrl = cityData.city_url || 
+                 cityData.city_name.toLowerCase().replace(/\s+/g, '-');
+  router.push(`/${cityUrl}`);
+  setShowLocationSearch(false);
+}, [router, persistLocation]);
 
   const handleLoginSuccess = useCallback(() => {
     setShowLogin(false);

@@ -1,4 +1,6 @@
 import { getActiveBlogs } from "@/app/lib/fetchBlogs";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 export async function generateStaticParams() {
   const blogs = await getActiveBlogs();
@@ -25,7 +27,9 @@ export default async function BlogPost({ params }) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <>
+    <Header />
+     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <article>
         <h1 className="text-3xl font-bold mb-4">{blog.blog_name}</h1>
         <div 
@@ -34,5 +38,8 @@ export default async function BlogPost({ params }) {
         />
       </article>
     </div>
+    <Footer />
+    </>
+   
   );
 }

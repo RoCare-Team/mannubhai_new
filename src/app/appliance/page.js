@@ -14,6 +14,8 @@ import "swiper/css/pagination";
 import "../_components/Home/swiper-custom.css";
 import Appliances from "../_components/Home/Appliances";
 import Head from "./head";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 // Constants
 const SUBSERVICE_IMAGES = {
@@ -213,6 +215,7 @@ const Appliance = () => {
 
   return (
     <>
+    <Header />
       <Head />
       <main className="min-h-screen bg-gray-50">
         {/* Hero Section */}
@@ -403,6 +406,7 @@ const Appliance = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   );
 };
