@@ -66,7 +66,6 @@ const FooterLinks = () => {
       <div className="max-w-6xl mx-auto">
         <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900">Quick Links</h2>
 
-        <div className="space-y-3 sm:space-y-4">
           {accordions.map((item, i) => (
             <div key={i} className="border-b border-gray-200 pb-2 sm:pb-3">
               <button
