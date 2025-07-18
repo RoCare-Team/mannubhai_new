@@ -24,9 +24,9 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, { 
-      ...options, 
-      signal: controller.signal 
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
     });
     clearTimeout(timeoutId);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -97,7 +97,7 @@ const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isLoggedIn, userInfo, checkLoginStatus, logout: contextLogout } = useAuth();
-  
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -130,7 +130,7 @@ const Header = () => {
     }
   }, []);
 
-const handleDetectedLocation = useCallback(async (detectedCity) => {
+  const handleDetectedLocation = useCallback(async (detectedCity) => {
     if (!detectedCity) {
       setLocation({
         city: "",
@@ -145,7 +145,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
 
     try {
       const matchedCity = await findExactMatch(detectedCity);
-      
+
       const newLocation = {
         city: matchedCity?.city_name || "",
         state: matchedCity?.state || "",
@@ -154,7 +154,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
         permissionDenied: false,
         isManualSelection: false,
       };
-      
+
       setLocation(newLocation);
       persistLocation(newLocation);
     } catch (error) {
@@ -171,7 +171,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
   }, [persistLocation])
 
 
- const initializeLocation = useCallback(async () => {
+  const initializeLocation = useCallback(async () => {
     const persistedLocation = getPersistedLocation();
     if (persistedLocation) {
       setLocation(persistedLocation);
@@ -193,7 +193,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
 
         const { latitude, longitude } = position.coords;
         const locationData = await getLocationFromCoords(latitude, longitude);
-        
+
         if (locationData.success) {
           await handleDetectedLocation(locationData.address);
           return;
@@ -213,7 +213,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
       try {
         const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
         const ipData = await ipResponse.json();
-        
+
         if (ipData.city) {
           await handleDetectedLocation(ipData.city);
         } else {
@@ -239,7 +239,7 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
     const normalizedCity = selectedCity.city_name.toLowerCase();
     const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
 
-    const cityData = isGurgaonVariant 
+    const cityData = isGurgaonVariant
       ? await findExactMatch('Gurgaon')
       : await findExactMatch(selectedCity.city_name);
 
@@ -258,8 +258,8 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
 
     // Only update URL if we're not already on a city page
     if (cityData && !pathname.startsWith(`/${cityData.city_url}`)) {
-      const cityUrl = cityData.city_url || 
-                     cityData.city_name.toLowerCase().replace(/\s+/g, '-');
+      const cityUrl = cityData.city_url ||
+        cityData.city_name.toLowerCase().replace(/\s+/g, '-');
       router.push(`/${cityUrl}`);
     }
   }, [router, persistLocation, pathname]);
@@ -275,8 +275,8 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
     router.push("/");
   }, [contextLogout, router]);
 
-  useEffect(() => { 
-    initializeLocation(); 
+  useEffect(() => {
+    initializeLocation();
   }, [initializeLocation]);
 
   useEffect(() => {
@@ -293,88 +293,88 @@ const handleDetectedLocation = useCallback(async (detectedCity) => {
     checkLoginStatus();
   }, [checkLoginStatus]);
 
-  useEffect(() => { 
-    const handleScroll = () => setIsScrolled(window.scrollY > 10); 
-    window.addEventListener("scroll", handleScroll); 
-    return () => window.removeEventListener("scroll", handleScroll); 
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => { 
-    setIsMobileMenuOpen(false); 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  useEffect(() => { 
+  useEffect(() => {
     const body = document.body;
     const originalOverflow = body.style.overflow;
     body.style.overflow = (isMobileMenuOpen || showLocationSearch) ? "hidden" : originalOverflow;
-    return () => { body.style.overflow = originalOverflow }; 
+    return () => { body.style.overflow = originalOverflow };
   }, [isMobileMenuOpen, showLocationSearch]);
 
- const locationText = location.loading
-  ? "Detecting location..."
-  : location.permissionDenied
-    ? "Location access denied"
-    : location.error
-      ? "Set your location"
-      : location.city
-        ? `${location.city}${location.state ? `, ${location.state}` : ''}`
-        : "Set your location";
+  const locationText = location.loading
+    ? "Detecting location..."
+    : location.permissionDenied
+      ? "Location access denied"
+      : location.error
+        ? "Set your location"
+        : location.city
+          ? `${location.city}${location.state ? `, ${location.state}` : ''}`
+          : "Set your location";
 
   return (
     <>
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
-        <MobileHeader 
-  cartCount={cartCount}
-  locationText={locationText}
-  onLocationClick={() => setShowLocationSearch(true)}
-  setShowLogin={setShowLogin}
-  setIsMobileMenuOpen={setIsMobileMenuOpen}
-  user={userInfo}
-  locationLoading={location.loading}
-  locationError={!!location.error || !location.city}
-/>
+          <MobileHeader
+            cartCount={cartCount}
+            locationText={locationText}
+            onLocationClick={() => setShowLocationSearch(true)}
+            setShowLogin={setShowLogin}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            user={userInfo}
+            locationLoading={location.loading}
+            locationError={!!location.error || !location.city}
+          />
 
 
-<DesktopHeader
-  locationText={locationText}
-  onLocationClick={() => setShowLocationSearch(true)}
-  location={location}
-  isLoading={location.loading}
-  setShowLogin={setShowLogin}
-  user={userInfo}
-  navigationItems={navigationItems}
-  pathname={pathname}
-  handleLogout={handleLogout}
-/>
+          <DesktopHeader
+            locationText={locationText}
+            onLocationClick={() => setShowLocationSearch(true)}
+            location={location}
+            isLoading={location.loading}
+            setShowLogin={setShowLogin}
+            user={userInfo}
+            navigationItems={navigationItems}
+            pathname={pathname}
+            handleLogout={handleLogout}
+          />
         </div>
       </header>
 
       {showLocationSearch && (
-        <LocationSearch 
+        <LocationSearch
           onClose={() => setShowLocationSearch(false)}
           onSelectCity={handleCitySelection}
           currentCity={location.city}
         />
       )}
 
-      <MobileMenu {...{ 
-        isMobileMenuOpen, 
-        setIsMobileMenuOpen, 
-        user: userInfo, 
-        setShowLogin, 
-        navigationItems, 
-        handleLogout 
+      <MobileMenu {...{
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
+        user: userInfo,
+        setShowLogin,
+        navigationItems,
+        handleLogout
       }} />
-      
+
       <MobileBottomNavigation {...{ navigationItems, pathname }} />
-      <LoginPopup 
-        show={showLogin} 
-        onClose={() => setShowLogin(false)} 
-        onLoginSuccess={handleLoginSuccess} 
+      <LoginPopup
+        show={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
       <FloatingContactButtons />
-      
+
       <style jsx global>{`
         @media (min-width: 1024px) {
           body { 
