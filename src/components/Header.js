@@ -130,180 +130,139 @@ const Header = () => {
     }
   }, []);
 
-const matchAndRedirect = useCallback(async (detectedCity) => {
-  if (!detectedCity) {
-    router.push("/");
-    return;
-  }
-
-  try {
-    const persistedLocation = getPersistedLocation();
-    if (persistedLocation?.isManualSelection) {
-      setLocation(persistedLocation);
+const handleDetectedLocation = useCallback(async (detectedCity) => {
+    if (!detectedCity) {
+      setLocation({
+        city: "",
+        state: "",
+        loading: false,
+        error: "Location not available",
+        permissionDenied: false,
+        isManualSelection: false,
+      });
       return;
     }
 
-    const matchedCity = await findExactMatch(detectedCity);
-    
-    if (matchedCity) {
+    try {
+      const matchedCity = await findExactMatch(detectedCity);
+      
       const newLocation = {
-        city: matchedCity.city_name,
-        state: matchedCity.state || "",
+        city: matchedCity?.city_name || "",
+        state: matchedCity?.state || "",
         loading: false,
-        error: null,
+        error: matchedCity ? null : "City not in our service area",
         permissionDenied: false,
         isManualSelection: false,
       };
       
       setLocation(newLocation);
       persistLocation(newLocation);
-      
-      const cityUrl = matchedCity.city_url || 
-                     matchedCity.city_name.toLowerCase().replace(/\s+/g, '-');
-      
-      const currentPath = pathname.split('/')[1];
-      if (currentPath !== cityUrl) {
-        router.push(`/${cityUrl}`);
-      }
-    } else {
-      // City not found - set state and redirect to home
+    } catch (error) {
+      console.error("Error handling detected location:", error);
       setLocation({
         city: "",
         state: "",
         loading: false,
-        error: "City not found in our service area",
+        error: "Error processing location",
         permissionDenied: false,
         isManualSelection: false,
       });
-      
-      // Clear any persisted location
-      localStorage.removeItem('userLocation');
-      
-      // Redirect to home route
-      router.push("/");
     }
-  } catch (error) {
-    console.error("Error in matchAndRedirect:", error);
-    setLocation({
-      city: "",
-      state: "",
-      loading: false,
-      error: "Error matching location",
-      permissionDenied: false,
-      isManualSelection: false,
-    });
-    
-    // Redirect to home on error
-    router.push("/");
-  }
-}, [router, pathname, persistLocation, getPersistedLocation]);
-
+  }, [persistLocation])
 
 
  const initializeLocation = useCallback(async () => {
-  const persistedLocation = getPersistedLocation();
-  if (persistedLocation) {
-    setLocation(persistedLocation);
-    return;
-  }
-
-  try {
-    setLocation(prev => ({ ...prev, loading: true, error: null }));
-
-    // Try geolocation first
-    try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          resolve,
-          reject,
-          { timeout: 10000, maximumAge: 300000 }
-        );
-      });
-
-      const { latitude, longitude } = position.coords;
-      const locationData = await getLocationFromCoords(latitude, longitude);
-      
-      if (locationData.success) {
-        await matchAndRedirect(locationData.address);
-        return;
-      }
-    } catch (geoError) {
-      console.warn('Geolocation failed:', geoError);
-      if (geoError.code === geoError.PERMISSION_DENIED) {
-        setLocation(prev => ({
-          ...prev,
-          loading: false,
-          permissionDenied: true
-        }));
-      }
+    const persistedLocation = getPersistedLocation();
+    if (persistedLocation) {
+      setLocation(persistedLocation);
+      return;
     }
 
-    // Fallback to IP-based location
     try {
-      const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
-      const ipData = await ipResponse.json();
-      
-      if (ipData.city) {
-        await matchAndRedirect(ipData.city);
-      } else {
-        throw new Error("IP location data incomplete");
+      setLocation(prev => ({ ...prev, loading: true, error: null }));
+
+      // Try geolocation first
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            reject,
+            { timeout: 10000, maximumAge: 300000 }
+          );
+        });
+
+        const { latitude, longitude } = position.coords;
+        const locationData = await getLocationFromCoords(latitude, longitude);
+        
+        if (locationData.success) {
+          await handleDetectedLocation(locationData.address);
+          return;
+        }
+      } catch (geoError) {
+        console.warn('Geolocation failed:', geoError);
+        if (geoError.code === geoError.PERMISSION_DENIED) {
+          setLocation(prev => ({
+            ...prev,
+            loading: false,
+            permissionDenied: true
+          }));
+        }
       }
-    } catch (ipError) {
-      console.error('IP location fallback failed:', ipError);
-      // If all location methods fail, redirect to home
-      await matchAndRedirect(null);
+
+      // Fallback to IP-based location
+      try {
+        const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
+        const ipData = await ipResponse.json();
+        
+        if (ipData.city) {
+          await handleDetectedLocation(ipData.city);
+        } else {
+          throw new Error("IP location data incomplete");
+        }
+      } catch (ipError) {
+        console.error('IP location fallback failed:', ipError);
+        await handleDetectedLocation(null);
+      }
+    } catch (error) {
+      console.error('Location initialization failed:', error);
+      await handleDetectedLocation(null);
     }
-  } catch (error) {
-    console.error('Location initialization failed:', error);
-    await matchAndRedirect(null);
-  }
-}, [matchAndRedirect, getPersistedLocation]);
+  }, [handleDetectedLocation, getPersistedLocation]);
 
-const handleCitySelection = useCallback(async (selectedCity) => {
-  if (!selectedCity?.city_name) {
-    router.push("/");
-    return;
-  }
+  // Update handleCitySelection to not redirect automatically
+  const handleCitySelection = useCallback(async (selectedCity) => {
+    if (!selectedCity?.city_name) {
+      setShowLocationSearch(false);
+      return;
+    }
 
-  // Normalize city name for Gurgaon/Gurugram case
-  const normalizedCity = selectedCity.city_name.toLowerCase();
-  const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
+    const normalizedCity = selectedCity.city_name.toLowerCase();
+    const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
 
-  // Get the canonical city data (Gurgaon for Gurgaon/Gurugram variants)
-  const cityData = isGurgaonVariant 
-    ? await findExactMatch('Gurgaon')
-    : await findExactMatch(selectedCity.city_name);
+    const cityData = isGurgaonVariant 
+      ? await findExactMatch('Gurgaon')
+      : await findExactMatch(selectedCity.city_name);
 
-  if (!cityData) {
-    setLocation({
-      city: "",
-      state: "",
+    const newLocation = {
+      city: cityData?.city_name || selectedCity.city_name,
+      state: cityData?.state || selectedCity.state || "",
       loading: false,
-      error: "City not in service area",
+      error: cityData ? null : "City not in service area",
       permissionDenied: false,
-      isManualSelection: false,
-    });
-    router.push("/");
-    return;
-  }
+      isManualSelection: true,
+    };
 
-  const newLocation = {
-    city: cityData.city_name, // This will be "Gurgaon" for Gurugram variants
-    state: cityData.state || "",
-    loading: false,
-    error: null,
-    permissionDenied: false,
-    isManualSelection: true,
-  };
+    setLocation(newLocation);
+    persistLocation(newLocation);
+    setShowLocationSearch(false);
 
-  setLocation(newLocation);
-  persistLocation(newLocation);
-
-  const cityUrl = cityData.city_url || 
-                 cityData.city_name.toLowerCase().replace(/\s+/g, '-');
-  router.push(`/${cityUrl}`);
-  setShowLocationSearch(false);
-}, [router, persistLocation]);
+    // Only update URL if we're not already on a city page
+    if (cityData && !pathname.startsWith(`/${cityData.city_url}`)) {
+      const cityUrl = cityData.city_url || 
+                     cityData.city_name.toLowerCase().replace(/\s+/g, '-');
+      router.push(`/${cityUrl}`);
+    }
+  }, [router, persistLocation, pathname]);
 
   const handleLoginSuccess = useCallback(() => {
     setShowLogin(false);
@@ -351,36 +310,43 @@ const handleCitySelection = useCallback(async (selectedCity) => {
     return () => { body.style.overflow = originalOverflow }; 
   }, [isMobileMenuOpen, showLocationSearch]);
 
-  const locationText = location.loading
-    ? "Detecting location..."
-    : location.permissionDenied
-      ? "Location blocked - Tap to set"
-      : location.error
-        ? "Location unavailable"
-        : `${location.city}${location.state ? `, ${location.state}` : ''}`;
+ const locationText = location.loading
+  ? "Detecting location..."
+  : location.permissionDenied
+    ? "Location access denied"
+    : location.error
+      ? "Set your location"
+      : location.city
+        ? `${location.city}${location.state ? `, ${location.state}` : ''}`
+        : "Set your location";
 
   return (
     <>
       <header className={`bg-white fixed top-0 left-0 right-0 w-full z-50 border-b border-b-gray-200 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="w-full px-0 sm:px-6 lg:px-8">
-          <MobileHeader {...{ 
-            cartCount, 
-            locationText, 
-            onLocationClick: () => setShowLocationSearch(true),
-            setShowLogin, 
-            setIsMobileMenuOpen, 
-            user: userInfo 
-          }} />
-          <DesktopHeader {...{ 
-            cartCount, 
-            locationText, 
-            onLocationClick: () => setShowLocationSearch(true),
-            setShowLogin, 
-            user: userInfo, 
-            navigationItems, 
-            pathname, 
-            handleLogout 
-          }} />
+        <MobileHeader 
+  cartCount={cartCount}
+  locationText={locationText}
+  onLocationClick={() => setShowLocationSearch(true)}
+  setShowLogin={setShowLogin}
+  setIsMobileMenuOpen={setIsMobileMenuOpen}
+  user={userInfo}
+  locationLoading={location.loading}
+  locationError={!!location.error || !location.city}
+/>
+
+
+<DesktopHeader
+  locationText={locationText}
+  onLocationClick={() => setShowLocationSearch(true)}
+  location={location}
+  isLoading={location.loading}
+  setShowLogin={setShowLogin}
+  user={userInfo}
+  navigationItems={navigationItems}
+  pathname={pathname}
+  handleLogout={handleLogout}
+/>
         </div>
       </header>
 

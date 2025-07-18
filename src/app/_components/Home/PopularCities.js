@@ -4,10 +4,10 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
 import { Navigation, Autoplay } from "swiper/modules";
 import { MapPin } from "lucide-react";
+import "swiper/css";
+import "swiper/css/navigation";
 
 const cities = [
   { name: "Delhi", img: "/city/delhi.webp", link: "/delhi" },
@@ -28,6 +28,17 @@ const cities = [
   { name: "Indore", img: "/city/indore.webp", link: "/indore" },
 ];
 
+
+const swiperBreakpoints = {
+  320: { slidesPerView: 4 },
+  480: { slidesPerView: 5 },
+  640: { slidesPerView: 6 },
+  768: { slidesPerView: 7 },
+  1024: { slidesPerView: 8 },
+  1280: { slidesPerView: 10 },
+  1536: { slidesPerView: 12 },
+};
+
 const PopularCities = () => {
   return (
     <section id="popular-cities" className="sm:py-10">
@@ -47,20 +58,12 @@ const PopularCities = () => {
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
-          breakpoints={{
-            320: { slidesPerView: 4 },
-            480: { slidesPerView: 5 },
-            640: { slidesPerView: 6 },
-            768: { slidesPerView: 7 },
-            1024: { slidesPerView: 8 },
-            1280: { slidesPerView: 10 },
-            1536: { slidesPerView: 12 },
-          }}
+          breakpoints={swiperBreakpoints}
           className="w-full"
         >
-          {cities.map((city, index) => (
-            <SwiperSlide key={index}>
-              <Link href={city.link} className="block group">
+          {cities.map((city) => (
+            <SwiperSlide key={city.name}>
+              <Link href={city.link} className="block group" prefetch={false}>
                 <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 w-16 mx-auto">
                   <div className="relative w-10 h-10 mx-auto mt-2 overflow-hidden rounded-full">
                     <Image
@@ -88,4 +91,4 @@ const PopularCities = () => {
   );
 };
 
-export default PopularCities;
+export default React.memo(PopularCities);

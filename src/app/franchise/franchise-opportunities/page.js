@@ -160,22 +160,22 @@ const LandingContent = () => {
                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 p-4 md:p-6 border border-gray-200 rounded-2xl bg-white shadow-md mt-5">
   {[
     {
-      icon: "/franchies/time.png",
+      icon: "/franchies/time.webp",
       title: "On time Service",
       desc: "Guaranteed punctuality",
     },
     {
-      icon: "/franchies/rupees.png",
+      icon: "/franchies/rupees.webp",
       title: "Transparent Price",
       desc: "No hidden fees",
     },
     {
-      icon: "/franchies/professional.png",
+      icon: "/franchies/professional.webp",
       title: "Trained Professionals",
       desc: "Certified experts",
     },
     {
-      icon: "/franchies/award.png",
+      icon: "/franchies/award.webp",
       title: "Assured Quality",
       desc: "Performance guaranteed",
     },

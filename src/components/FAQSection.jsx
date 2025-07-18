@@ -1,9 +1,6 @@
-    // components/FAQSection.jsx
     "use client";
-
     import FAQItem from './FAQItem';
     import Image from 'next/image';
-
     export default function FAQSection({ faqData }) {
     return (
         <div className="my-16 px-4 max-w-7xl mx-auto">
@@ -21,15 +18,15 @@
         <div className="flex flex-col lg:flex-row items-center gap-8">
             {/* Left Image - Only shown on larger screens */}
        <div className="hidden lg:block flex-1 relative min-h-[500px] rounded-xl overflow-hidden shadow-lg">
-  <Image
-    src="/Faq/faq.jpeg"
-    alt="Customer support illustration"
-    fill
-    className="object-contain"
-    sizes="(max-width: 1024px) 100vw, 50vw"
-    priority
-  />
-</div>
+            <Image
+                src="/Faq/faq.webp"
+                alt="Customer support illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
+            />
+            </div>
 
             {/* FAQ Items */}
             <div className="flex-1 w-full lg:max-w-2xl">
