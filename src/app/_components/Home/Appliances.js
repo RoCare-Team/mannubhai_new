@@ -1,30 +1,29 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where} from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import LogoLoader from "@/components/LogoLoader";
+// Constants
+const DEFAULT_IMAGE = "/ApplianceHomeIcons/default.webp";
+const IMAGE_MAP = {
+  "Water Purifier": "/ApplianceHomeIcons/RO.webp",
+  "Air Conditioner": "/ApplianceHomeIcons/AIR-CONDITIONAR.webp",
+  "Fridge": "/ApplianceHomeIcons/REFRIGERATOR.webp",
+  "Washing Machine": "/ApplianceHomeIcons/WASHING-MACHINE.webp",
+  "Microwave": "/ApplianceHomeIcons/MICROWAVE.webp",
+  "Kitchen Chimney": "/ApplianceHomeIcons/KitchenChimney.webp",
+  "LED TV": "/ApplianceHomeIcons/LED-TV.webp",
+  "Vacuum Cleaner": "/ApplianceHomeIcons/vacuum-cleaner.webp",
+  "Air Purifier": "/ApplianceHomeIcons/air-purifier.webp",
+  "Air Cooler": "/ApplianceHomeIcons/air-cooler.webp",
+  "Kitchen Appliance": "/ApplianceHomeIcons/Kitchen-Appliance.webp",
+  "Geyser": "/ApplianceHomeIcons/geyser.webp",
+};
 
-// Constants moved outside component to avoid recreation on every render
-const DEFAULT_IMAGE = "/HomeIcons/default.png";
-const IMAGE_MAP = Object.freeze({
-  "Water Purifier": "/HomeIcons/RO.png",
-  "Air Conditioner": "/HomeIcons/AIR-CONDITIONAR.png",
-  Fridge: "/HomeIcons/REFRIGERATOR.png",
-  "Washing Machine": "/HomeIcons/WASHINGMACHINE.png",
-  Microwave: "/HomeIcons/MICROWAVE.png",
-  "Kitchen Chimney": "/HomeIcons/KitchenChimney.png",
-  "LED TV": "/HomeIcons/LED-TV.png",
-  "Vacuum Cleaner": "/HomeIcons/vacuum-cleaner.png",
-  "Air Purifier": "/HomeIcons/air-purifier.png",
-  "Air Cooler": "/HomeIcons/air-cooler.png",
-  "Kitchen Appliance": "/HomeIcons/Kitchen-Appliance.png",
-  Geyser: "/HomeIcons/geyser.png",
-});
-
-const SERVICE_ORDER = Object.freeze([
+const SERVICE_ORDER = [
   "Water Purifier",
   "Air Conditioner",
   "Fridge",
@@ -37,9 +36,7 @@ const SERVICE_ORDER = Object.freeze([
   "Air Cooler",
   "Small Appliances",
   "Geyser",
-]);
-
-const getSubServiceImage = (type) => IMAGE_MAP[type] || DEFAULT_IMAGE;
+];
 
 export default function Appliances({ hideBeautyBanner = false, onServiceClick, cityUrl }) {
   const router = useRouter();
@@ -47,176 +44,215 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
 
-  // Memoized fetch function
+  // Memoized service order map
+  const serviceOrderMap = useMemo(() => 
+    SERVICE_ORDER.reduce((acc, service, index) => {
+      acc[service] = index;
+      return acc;
+    }, {}), 
+  []);
+  // Memoized image getter
+  const getSubServiceImage = useCallback((type) => IMAGE_MAP[type] || DEFAULT_IMAGE, []);
+
+  // Fetch services with error boundary
   const fetchSubServices = useCallback(async () => {
     try {
+      setLoading(true);
       const q = query(
         collection(db, "lead_type"),
         where("mannubhai_cat_id", "==", "1")
       );
       const snapshot = await getDocs(q);
 
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        ServiceName: doc.data().type,
-        ServiceIcon: getSubServiceImage(doc.data().type),
-      }));
-
-      // Create a map for O(1) lookups
-      const serviceOrderMap = Object.fromEntries(
-        SERVICE_ORDER.map((service, index) => [service, index])
-      );
-
-      const sortedData = data.sort((a, b) => {
-        const indexA = serviceOrderMap[a.ServiceName] ?? Infinity;
-        const indexB = serviceOrderMap[b.ServiceName] ?? Infinity;
-        return indexA - indexB;
+      const services = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ServiceName: data.type,
+          ServiceIcon: getSubServiceImage(data.type),
+          ...data,
+        };
       });
 
-      setSubServices(sortedData);
+      services.sort((a, b) => 
+        (serviceOrderMap[a.ServiceName] ?? Infinity) - 
+        (serviceOrderMap[b.ServiceName] ?? Infinity)
+      );
+
+      setSubServices(services);
     } catch (error) {
-      console.error("Error fetching sub-services:", error);
+      console.error("Fetch error:", error);
       setSubServices([]);
     } finally {
       setLoading(false);
     }
+  }, [getSubServiceImage, serviceOrderMap]);
+
+  // Cached category URL fetcher
+  const getCategoryUrl = useCallback(async (lead_type_id) => {
+    try {
+      const cacheKey = `cat-url-${lead_type_id}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) return cached;
+
+      const q = query(
+        collection(db, "category_manage"),
+        where("lead_type_id", "==", lead_type_id)
+      );
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) return null;
+      
+      const url = snapshot.docs[0].data().category_url;
+      sessionStorage.setItem(cacheKey, url);
+      return url;
+    } catch (error) {
+      console.error("Category URL error:", error);
+      return null;
+    }
   }, []);
 
-  // Memoized category URL fetch
-  const getCategoryUrlByLeadTypeId = useCallback(async (lead_type_id) => {
-    const q = query(
-      collection(db, "category_manage"),
-      where("lead_type_id", "==", lead_type_id)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.empty ? null : snapshot.docs[0].data().category_url;
-  }, []);
-
-  // Memoized click handler
-  const handleSubServiceClick = useCallback(async (service) => {
+  // Optimized navigation handler
+  const handleServiceClick = useCallback(async (service) => {
     setRouteLoading(true);
     try {
-      const category_url = await getCategoryUrlByLeadTypeId(service.id);
-      if (category_url) {
-        if (onServiceClick) {
-          onServiceClick(category_url);
-        } else if (cityUrl) {
-          router.push(`/${cityUrl}/${category_url}`);
-        } else {
-          router.push(`/${category_url}`);
-        }
+      const categoryUrl = await getCategoryUrl(service.id);
+      if (!categoryUrl) {
+        alert("Service not available");
+        return;
+      }
+
+      const targetUrl = cityUrl ? `/${cityUrl}/${categoryUrl}` : `/${categoryUrl}`;
+      
+      if (onServiceClick) {
+        onServiceClick(categoryUrl);
       } else {
-        alert("Category URL not found!");
+        await router.prefetch(targetUrl);
+        router.push(targetUrl);
       }
     } catch (error) {
       console.error("Navigation error:", error);
     } finally {
       setRouteLoading(false);
     }
-  }, [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router]);
+  }, [getCategoryUrl, cityUrl, onServiceClick, router]);
 
+  // Initial data fetch
   useEffect(() => {
     fetchSubServices();
   }, [fetchSubServices]);
 
-  if (routeLoading) return <LogoLoader />;
+  // Skeleton loader
+  const SkeletonLoader = useMemo(() => (
+    <div className="grid grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+      {Array.from({ length: Math.min(8, SERVICE_ORDER.length) }).map((_, i) => (
+        <div
+          key={`skeleton-${i}`}
+          className="bg-white rounded-xl p-4 flex flex-col items-center justify-center shadow animate-pulse"
+          style={{ aspectRatio: '1/1.2' }}
+        >
+          <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
+          <div className="h-4 w-20 bg-blue-100 rounded" />
+        </div>
+      ))}
+    </div>
+  ), []);
+
+  if (routeLoading) return <LogoLoader fullScreen />;
 
   return (
-    <main className="pb-5 px-4 sm:px-6 lg:px-20 mt-0 mb-0 sm:mt-5 sm:mb-5">
-      <section aria-labelledby="appliance-services" className="max-w-7xl mx-auto" id="appliances-care">
-        <header className="mt-5 mb-5">
-          <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
+    <main className="pb-5 px-4 sm:px-6 lg:px-20">
+      <section 
+        aria-labelledby="appliance-services" 
+        className="max-w-7xl mx-auto"
+        id="appliances-care"
+      >
+        <header className="my-5">
+          <h1 className="text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
             Appliance Services
-          </h2>
+          </h1>
         </header>
 
         {loading ? (
           <>
             <p className="text-center text-gray-500 mb-4">Loading services…</p>
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:[grid-template-columns:repeat(auto-fit,_minmax(140px,_1fr))] gap-4 sm:gap-6">
-              {Array.from({ length: Math.min(8, SERVICE_ORDER.length) }).map((_, i) => (
-                <div
-                  key={`skeleton-${i}`}
-                  className="bg-white rounded-xl p-4 flex flex-col items-center justify-center shadow animate-pulse"
-                >
-                  <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
-                  <div className="h-4 w-20 bg-blue-100 rounded" />
-                </div>
-              ))}
-            </div>
+            {SkeletonLoader}
           </>
         ) : subServices.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">No appliance services found.</p>
+          <p className="text-center text-gray-500 py-8">No services found</p>
         ) : (
-        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-4 sm:gap-6">
+         <div className="grid grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+
             {subServices.map((service) => (
-              <button
+              <ServiceCard 
                 key={service.id}
-                onClick={() => handleSubServiceClick(service)}
-                aria-label={`View ${service.ServiceName} services`}
-                className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow"
-              >
-                <div className="relative w-full aspect-square max-w-[96px] sm:max-w-[80px] bg-blue-50 rounded-lg mb-2">
-                  <Image
-                    src={service.ServiceIcon}
-                    alt={service.ServiceName}
-                    fill
-                    className="object-contain"
-                    placeholder="blur"
-                    blurDataURL="/blur.png"
-                    loading="lazy"
-                    sizes="(max-width: 640px) 96px, 80px"
-                  />
-                </div>
-                <span className="text-[10px] font-semibold text-center text-gray-700 leading-tight">
-                  {service.ServiceName}
-                </span>
-              </button>
+                service={service}
+                onClick={handleServiceClick}
+              />
             ))}
           </div>
         )}
       </section>
 
-      {!hideBeautyBanner && (
-        <section className="mt-4 md:mt-10 mb-0 max-w-7xl mx-auto">
-          <div className="rounded-xl overflow-hidden shadow">
-            <Image
-              src="/HomeBanner/beauty_mob.webp"
-              alt="Beauty services banner for mobile"
-              width={768}
-              height={300}
-              placeholder="blur"
-              blurDataURL="/blur-banner.png"
-              sizes="100vw"
-              className="block md:hidden w-full h-auto"
-              priority={true}
-              fetchPriority="high"  
-              loading="eager"    
-              quality={80}       
-              unoptimized={false}
-            />
-
-            <Image
-              src="/HomeBanner/beauty.webp"
-              alt="Beauty services banner for desktop"
-              width={1920}
-              height={400}
-              priority
-              placeholder="blur"
-              blurDataURL="/blur-banner.png"
-              sizes="100vw"
-              className="hidden md:block w-full h-auto"
-              
-  fetchPriority="high"  // Explicit fetch priority
-  loading="eager"      // Force immediate loading
-  quality={80}         // Optimized quality for mobile
-     // Full viewport width on all devices
-  unoptimized={false}
-            />
-          </div>
-        </section>
-      )}
+      {!hideBeautyBanner && <PromoBanner />}
     </main>
   );
 }
+
+// Extracted Service Card Component
+const ServiceCard = ({ service, onClick }) => (
+  <button
+    onClick={() => onClick(service)}
+    aria-label={`View ${service.ServiceName} services`}
+    className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all"
+    style={{ aspectRatio: '1/1.2' }}
+  >
+    <div className="relative w-full aspect-square max-w-[96px] bg-blue-50 rounded-lg mb-2">
+      <Image
+        src={service.ServiceIcon}
+        alt={service.ServiceName}
+        fill
+        className="object-contain"
+        placeholder="blur"
+        blurDataURL="/blur.png"
+        loading="lazy"
+        sizes="(max-width: 640px) 96px, 80px"
+        onError={(e) => {
+          e.currentTarget.src = DEFAULT_IMAGE;
+        }}
+      />
+    </div>
+    <span className="text-xs font-semibold text-center text-gray-700">
+      {service.ServiceName}
+    </span>
+  </button>
+);
+// Extracted Promo Banner Component
+const PromoBanner = () => (
+  <section className="mt-4 md:mt-10 max-w-7xl mx-auto">
+    <div className="rounded-xl overflow-hidden shadow">
+      <Image
+        src="/HomeBanner/beauty_mob.webp"
+        alt="Beauty services"
+        width={768}
+        height={300}
+        placeholder="blur"
+        blurDataURL="/blur-banner.png"
+        sizes="100vw"
+        className="block md:hidden w-full h-auto"
+        priority
+      />
+      <Image
+        src="/HomeBanner/beauty.webp"
+        alt="Beauty services"
+        width={1920}
+        height={400}
+        priority
+        placeholder="blur"
+        blurDataURL="/blur-banner.png"
+        sizes="100vw"
+        className="hidden md:block w-full h-auto"
+      />
+    </div>
+  </section>
+);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -10,23 +10,43 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
 
-const serviceBannerData = [
-    { ServiceIcon: "/Appliance Slider Banner/RO Repair.webp", link: "water-purifier-service" },
-  { ServiceIcon: "/Appliance Slider Banner/AC Repair.webp", link: "ac-service" },
-    { ServiceIcon: "/Appliance Slider Banner/fridge repair.webp", link: "refrigerator-repair-service" },
-
-  { ServiceIcon: "/Appliance Slider Banner/washing machine repair.webp", link: "washing-machine-repair" },
-    { ServiceIcon:"/Appliance Slider Banner/all repairs.webp", link: "appliance" },
-];
+// Memoized banner data to prevent recreation on re-renders
+const serviceBannerData = Object.freeze([
+  { 
+    ServiceIcon: "/Appliance Slider Banner/RO Repair.webp", 
+    link: "water-purifier-service",
+    alt: "RO Repair Service" 
+  },
+  { 
+    ServiceIcon: "/Appliance Slider Banner/AC Repair.webp", 
+    link: "ac-service",
+    alt: "AC Repair Service" 
+  },
+  { 
+    ServiceIcon: "/Appliance Slider Banner/fridge repair.webp", 
+    link: "refrigerator-repair-service",
+    alt: "Refrigerator Repair Service" 
+  },
+  { 
+    ServiceIcon: "/Appliance Slider Banner/washing machine repair.webp", 
+    link: "washing-machine-repair",
+    alt: "Washing Machine Repair Service" 
+  },
+  { 
+    ServiceIcon: "/Appliance Slider Banner/all repairs.webp", 
+    link: "appliance",
+    alt: "All Appliance Repairs" 
+  },
+]);
 
 export default function ServiceBannerSlider() {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const [swiperInstance, setSwiperInstance] = useState(null);
 
-  // Attach custom nav buttons once Swiper is ready
-  useEffect(() => {
-    if (swiperInstance && swiperInstance.params?.navigation) {
+  // Memoized navigation update function
+  const updateNavigation = useCallback(() => {
+    if (swiperInstance?.params?.navigation) {
       swiperInstance.params.navigation.prevEl = prevRef.current;
       swiperInstance.params.navigation.nextEl = nextRef.current;
       swiperInstance.navigation.init();
@@ -34,47 +54,65 @@ export default function ServiceBannerSlider() {
     }
   }, [swiperInstance]);
 
+  // Effect for navigation setup
+  useEffect(() => {
+    updateNavigation();
+  }, [updateNavigation]);
+
+  // Optimized Swiper configuration
+  const swiperConfig = {
+    modules: [Navigation],
+    onSwiper: setSwiperInstance,
+    spaceBetween: 20,
+    slidesPerView: 1,
+    slidesOffsetBefore: 20,
+    slidesOffsetAfter: 20,
+    breakpoints: {
+      640: { slidesPerView: 2 },
+      1024: { slidesPerView: 3 },
+    },
+    // Additional performance optimizations
+    watchSlidesProgress: true,
+    resistanceRatio: 0.85,
+    shortSwipes: false,
+    threshold: 10,
+    followFinger: true,
+  };
+
   return (
     <div className="w-full px-4 mx-auto max-w-7xl">
-      {/* Slider wrapper */}
       <div className="relative">
-        {/* Navigation buttons */}
+        {/* Navigation buttons with aria labels */}
         <button
           ref={prevRef}
-          className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow hover:bg-gray-200"
+          aria-label="Previous slide"
+          className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <FaArrowLeft />
+          <FaArrowLeft className="text-gray-700" />
         </button>
         <button
           ref={nextRef}
-          className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow hover:bg-gray-200"
+          aria-label="Next slide"
+          className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <FaArrowRight />
+          <FaArrowRight className="text-gray-700" />
         </button>
 
-        <Swiper
-          modules={[Navigation]}
-          onSwiper={setSwiperInstance}
-          spaceBetween={20}
-          slidesPerView={1}
-          slidesOffsetBefore={20}   // <-- gap at the start
-          slidesOffsetAfter={20}    // <-- gap at the end
-          breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-        >
+        <Swiper {...swiperConfig}>
           {serviceBannerData.map((item, idx) => (
-            <SwiperSlide key={idx}>
-              <Link href={item.link} className="block w-full">
-                <div className="relative aspect-[16/9] overflow-hidden rounded-lg shadow transition hover:shadow-lg">
+            <SwiperSlide key={`${item.link}-${idx}`}>
+              <Link href={item.link} className="block w-full" prefetch={false}>
+                <div className="relative aspect-[16/9] overflow-hidden rounded-lg shadow transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                   <Image
                     src={item.ServiceIcon}
-                    alt={`Service ${idx + 1}`}
+                    alt={item.alt || `Service ${idx + 1}`}
                     fill
                     className="object-cover"
                     loading="lazy"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    quality={80}
+                    placeholder="blur"
+                    blurDataURL="/blur-placeholder.png"
                   />
                 </div>
               </Link>

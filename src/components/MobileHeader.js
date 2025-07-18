@@ -6,8 +6,8 @@ import LocationBar from "./LocationBar";
 
 export default function MobileHeader({
   locationText,
-  onLocationClick,  // Changed from setShowLocationSearch to onLocationClick
-  location,
+  onLocationClick,
+  location, // This should contain loading and error states
   setIsMobileMenuOpen,
 }) {
   return (
@@ -36,8 +36,9 @@ export default function MobileHeader({
           <div className="flex-shrink min-w-0 ml-2">
             <LocationBar
               locationText={locationText}
-              onLocationClick={onLocationClick}  // Changed prop name
-              location={location}
+              onLocationClick={onLocationClick}
+              isLoading={location?.loading || false}
+              isError={!!location?.error || !location?.city}
             />
           </div>
         </div>

@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CiStar } from "react-icons/ci";
 import { PiUsersThree } from "react-icons/pi";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, enableIndexedDbPersistence } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -13,15 +13,18 @@ import "swiper/css/navigation";
 import "./swiper-custom.css";
 import ServiceBannerSlider from "./ServiceBannerSlider";
 
-const SERVICE_IMAGES = {
+
+// Constants
+const SERVICE_IMAGES = Object.freeze({
   "Appliances Care": "/HomeIcons/home appliances.png",
   "Home Care": "/HomeIcons/sofa-bathroom-and-kitchen-cleaning.png",
   "Beauty Care": "/HomeIcons/BEAUTY CARE.png",
   "Handyman": "/HomeIcons/Electrician.png",
-};
+});
 
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default-service.png";
 const MAIN_BANNER = "/MainBanner/HomeBanner.webp";
+const SERVICE_ORDER = ["Appliances Care", "Home Care", "Beauty Care", "Handyman"];
 
 const HeroSection = () => {
   const router = useRouter();
@@ -29,44 +32,60 @@ const HeroSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchMainServices = async () => {
+
+
+   useEffect(() => {
+    // Initialize Firestore with persistence if not already done
+    const initializePersistence = async () => {
       try {
-        const servicesCollection = collection(db, "main_category");
-        const snapshot = await getDocs(servicesCollection);
-        const order = [
-          "Appliances Care",
-          "Home Care",
-          "Beauty Care",
-          "Handyman",
-        ];
-
-        const servicesData = snapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            const name = data.name || "Service";
-            return {
-              id: doc.id,
-              ...data,
-              name,
-              pkgIconName: name,
-              imageUrl: SERVICE_IMAGES[name] || DEFAULT_SERVICE_IMAGE,
-            };
-          })
-          .sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
-
-        setServices(servicesData);
+        const { enableIndexedDbPersistence } = await import("firebase/firestore");
+        await enableIndexedDbPersistence(db);
       } catch (err) {
-        console.error("Error fetching services:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        // Handle errors silently as persistence might already be enabled
+        console.debug("Persistence initialization:", err.message);
       }
     };
-    fetchMainServices();
-  }, []);
 
-  const scrollToSection = (serviceName) => {
+    if (typeof window !== 'undefined') {
+      initializePersistence();
+    }
+  }, []);
+  // Memoized service order map
+  const serviceOrderMap = useMemo(() => 
+    Object.fromEntries(SERVICE_ORDER.map((service, index) => [service, index])),
+  []);
+
+  // Memoized fetch function with error boundaries
+  const fetchMainServices = useCallback(async () => {
+    try {
+      const servicesCollection = collection(db, "main_category");
+      const snapshot = await getDocs(servicesCollection);
+
+      const servicesData = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          const name = data.name || "Service";
+          return {
+            id: doc.id,
+            ...data,
+            name,
+            pkgIconName: name,
+            imageUrl: SERVICE_IMAGES[name] || DEFAULT_SERVICE_IMAGE,
+          };
+        })
+        .sort((a, b) => (serviceOrderMap[a.name] ?? Infinity) - (serviceOrderMap[b.name] ?? Infinity));
+
+      setServices(servicesData);
+    } catch (err) {
+      console.error("Error fetching services:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [serviceOrderMap]);
+
+  // Optimized scroll function with intersection observer
+  const scrollToSection = useCallback((serviceName) => {
     const sectionMap = {
       'Appliances Care': 'appliances-care',
       'Home Care': 'home-care',
@@ -75,37 +94,61 @@ const HeroSection = () => {
     };
     
     const sectionId = sectionMap[serviceName];
-    if (sectionId) {
+    if (!sectionId) return;
+
     const section = document.getElementById(sectionId);
-    if (section) {
-      // Calculate the position considering any fixed headers
-      const headerHeight = document.querySelector('header')?.offsetHeight || 0;
-      const offsetPosition = section.offsetTop - headerHeight - 20; // 20px extra padding
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+    if (!section) return;
 
-      // Highlight effect
-      section.classList.add('highlight-section');
-      setTimeout(() => {
-        section.classList.remove('highlight-section');
-      }, 2000);
+    // Calculate position considering fixed headers
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    const offsetPosition = section.offsetTop - headerHeight - 20;
 
-      // Focus for accessibility
-      section.setAttribute('tabindex', '-1');
-      section.focus();
-    }
-  }
-};
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
 
-  const handleServiceClick = (service, e) => {
-    if (e) e.preventDefault();
+    // Highlight effect with cleanup
+    section.classList.add('highlight-section');
+    const timer = setTimeout(() => {
+      section.classList.remove('highlight-section');
+    }, 2000);
+
+    // Focus for accessibility
+    section.setAttribute('tabindex', '-1');
+    section.focus();
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Memoized click handler
+  const handleServiceClick = useCallback((service, e) => {
+    e?.preventDefault();
     scrollToSection(service.name);
-  };
+  }, [scrollToSection]);
 
-  const displayServices = loading || error ? [] : services;
+  useEffect(() => {
+    fetchMainServices();
+  }, [fetchMainServices]);
+
+  // Memoized services data
+  const displayServices = useMemo(() => {
+    return loading || error ? [] : services;
+  }, [loading, error, services]);
+
+  // Stats data
+  const stats = useMemo(() => [
+    {
+      icon: <CiStar className="text-yellow-500 text-xl md:text-2xl lg:text-3xl" />,
+      value: "4.5",
+      label: "Service Rating"
+    },
+    {
+      icon: <PiUsersThree className="text-blue-500 text-xl md:text-2xl lg:text-3xl" />,
+      value: "30 Lacs+",
+      label: "Customer Globally"
+    }
+  ], []);
 
   return (
     <section className="relative mt-0 pt-0">
@@ -113,19 +156,12 @@ const HeroSection = () => {
       <div className="hero-section w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0">
         <div className="hero-section-container max-w-7xl mx-auto mt-5">
           
-          {/* Mobile Header - Hidden on mobile */}
-          <header className="hidden">
-            <h1 className="text-base sm:text-lg text[20px]font-bold leading-tight text-center text-gradient mt-4">
-              Home services at your doorstep
-            </h1>
-          </header>
-
           <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-12">
             
             {/* Left Content */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
               
-              {/* Desktop Header - Hidden on mobile */}
+              {/* Desktop Header */}
               <header className="hidden md:flex items-center gap-3 mb-6 lg:mb-8">
                 <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-gradient">
                   Home services at your doorstep
@@ -148,125 +184,95 @@ const HeroSection = () => {
                   What are you looking for?
                 </h2>
 
-                {/* Services Grid - Single Row Layout */}
+                {/* Services Grid */}
                 <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 lg:p-5 shadow-sm mt-6 sm:mt-8 md:mt-0">
                   
-                  {/* Mobile: Single Row with 4 columns - INCREASED IMAGE SIZE */}
+                  {/* Mobile: Single Row with 4 columns */}
                   <div className="grid grid-cols-4 gap-2 sm:hidden">
-                    {displayServices
-                      .sort((a, b) => {
-                        const order = [
-                          "Appliances Care",
-                          "Home Care",
-                          "Beauty Care",
-                          "Handyman",
-                        ];
-                        return order.indexOf(a.name) - order.indexOf(b.name);
-                      })
-                      .map((service) => (
-                        <article
-                          key={service.id}
-                          className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
-                          onClick={(e) => handleServiceClick(service, e)}
-                        >
-                          <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
-                            <Image
-                              src={service.imageUrl}
-                              alt={`${service.name} service`}
-                              width={56}
-                              height={56}
-                              className="object-contain"
-                              priority
-                            />
-                          </div>
-                          <h3 className="text-xs font-medium text-center leading-tight">
-                            {service.name}
-                          </h3>
-                        </article>
-                      ))}
+                    {displayServices.map((service) => (
+                      <article
+                        key={service.id}
+                        className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
+                        onClick={(e) => handleServiceClick(service, e)}
+                      >
+                        <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
+                          <Image
+                            src={service.imageUrl}
+                            alt={`${service.name} service`}
+                            width={56}
+                            height={56}
+                            className="object-contain"
+                            priority
+                            loading="eager"
+                          />
+                        </div>
+                        <h3 className="text-xs font-medium text-center leading-tight">
+                          {service.name}
+                        </h3>
+                      </article>
+                    ))}
                   </div>
 
                   {/* Tablet & Desktop: Single Row */}
                   <div className="hidden sm:grid sm:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
-                    {displayServices
-                      .sort((a, b) => {
-                        const order = [
-                          "Appliances Care",
-                          "Home Care",
-                          "Beauty Care",
-                          "Handyman",
-                        ];
-                        return order.indexOf(a.name) - order.indexOf(b.name);
-                      })
-                      .map((service) => (
-                        <article
-                          key={service.id}
-                          className="flex flex-col items-center p-3 md:p-3 lg:p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
-                          onClick={(e) => handleServiceClick(service, e)}
-                        >
-                          <div className="relative w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 mb-2 md:mb-3 transition-transform duration-200 group-hover:scale-105">
-                            <Image
-                              src={service.imageUrl}
-                              alt={`${service.name} service`}
-                              width={64}
-                              height={64}
-                              className="object-contain"
-                              priority
-                            />
-                          </div>
-                          <h3 className="text-xs md:text-sm font-medium text-center leading-tight relative after:content-[''] after:block after:h-[1px] after:bg-blue-500 after:scale-x-0 after:transition-transform after:duration-200 group-hover:after:scale-x-100 after:origin-left">
-                            {service.name}
-                          </h3>
-                        </article>
-                      ))}
+                    {displayServices.map((service) => (
+                      <article
+                        key={service.id}
+                        className="flex flex-col items-center p-3 md:p-3 lg:p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
+                        onClick={(e) => handleServiceClick(service, e)}
+                      >
+                        <div className="relative w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 mb-2 md:mb-3 transition-transform duration-200 group-hover:scale-105">
+                          <Image
+                            src={service.imageUrl}
+                            alt={`${service.name} service`}
+                            width={64}
+                            height={64}
+                            className="object-contain"
+                            priority
+                            loading="eager"
+                          />
+                        </div>
+                        <h3 className="text-xs md:text-sm font-medium text-center leading-tight relative after:content-[''] after:block after:h-[1px] after:bg-blue-500 after:scale-x-0 after:transition-transform after:duration-200 group-hover:after:scale-x-100 after:origin-left">
+                          {service.name}
+                        </h3>
+                      </article>
+                    ))}
                   </div>
                 </div>
               </section>
 
               {/* Stats Section - Hidden on mobile */}
               <div className="hidden sm:flex flex-row justify-center lg:justify-start gap-4 md:gap-6 lg:gap-8 mb-6 mt-6 lg:mt-0">
-                <article className="flex items-center gap-3 md:gap-4 p-3 md:p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 shadow-sm">
-                  <CiStar className="text-yellow-500 text-xl md:text-2xl lg:text-3xl" />
-                  <div>
-                    <h3 className="text-sm md:text-base lg:text-lg font-bold">
-                      4.5
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      Service Rating
-                    </p>
-                  </div>
-                </article>
-                <article className="flex items-center gap-3 md:gap-4 p-3 md:p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 shadow-sm">
-                  <PiUsersThree className="text-blue-500 text-xl md:text-2xl lg:text-3xl" />
-                  <div>
-                    <h3 className="text-sm md:text-base lg:text-lg font-bold">
-                      30 Lacs+
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      Customer Globally
-                    </p>
-                  </div>
-                </article>
+                {stats.map((stat, index) => (
+                  <article key={index} className="flex items-center gap-3 md:gap-4 p-3 md:p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 shadow-sm">
+                    {stat.icon}
+                    <div>
+                      <h3 className="text-sm md:text-base lg:text-lg font-bold">
+                        {stat.value}
+                      </h3>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {stat.label}
+                      </p>
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
 
             {/* Right Image - Hidden on mobile */}
             <div className="hidden lg:block w-full lg:flex-1 lg:max-w-2xl">
-              <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-[340px] xl:h-[380px] 2xl:h-[420px] border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200" style={{ height: '550px' }}>
+              <div className="relative w-full h-[550px] border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200">
                 <Image
                   src={MAIN_BANNER}
                   alt="Professional home services"
                   fill
                   className="object-cover"
-                  unoptimized={false}  
-                priority={true}
-                    loading="eager"     
-            quality={80}      
-            fetchPriority="high"
+                  priority
+                  loading="eager"
+                  quality={80}
+                  fetchPriority="high"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
-                  style={{
-                    objectPosition: "center 30%",
-                  }}
+                  style={{ objectPosition: "center 30%" }}
                 />
               </div>
             </div>
@@ -281,25 +287,24 @@ const HeroSection = () => {
         </div>
       </div>
       
-      {/* Banner below Swiper - Aligned to container */}
+      {/* Banner below Swiper */}
       <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5 mt-0 md:mt-10 mb-0">
         <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
           
           {/* Mobile Banner */}
           <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
-           <Image
-            src="/HomeBanner/app_mob.webp"
-            alt="Mobile promotional banner"
-            width={768}
-            height={300}
-            className="object-contain w-full h-auto rounded-lg"
-            priority={true}
-            fetchPriority="high"
-            loading="eager"     
-            quality={80}        
-            sizes="100vw"       
-            unoptimized={false}  
-          />
+            <Image
+              src="/HomeBanner/app_mob.webp"
+              alt="Mobile promotional banner"
+              width={768}
+              height={300}
+              className="object-contain w-full h-auto rounded-lg"
+              priority
+              fetchPriority="high"
+              loading="eager"
+              quality={80}
+              sizes="100vw"
+            />
           </div>
 
           {/* Desktop Banner */}
@@ -310,12 +315,11 @@ const HeroSection = () => {
               width={1820}
               height={400}
               className="object-cover w-full h-auto"
-               priority={true}
-              fetchPriority="high"  
-              loading="eager"      
-              quality={80}    
-              sizes="100vw"     
-              unoptimized={false}
+              priority
+              fetchPriority="high"
+              loading="eager"
+              quality={80}
+              sizes="100vw"
             />
           </div>
         </div>

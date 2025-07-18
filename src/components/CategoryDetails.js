@@ -1,49 +1,34 @@
-"use client";
+'use client';
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
-import LoginPopup from "./login";
-import Cart from "./cart/CartLogic";
-import {
-  FiShoppingCart,
-  FiX,
-  FiCheck,
-  FiClock,
-  FiShield,
-  FiTruck,
-  FiUserCheck,
-  FiChevronDown,
-  FiChevronUp,
+import dynamic from 'next/dynamic';
+
+// Dynamic imports for better code splitting
+const LoginPopup = dynamic(() => import('./login'));
+const Cart = dynamic(() => import('./cart/CartLogic'));
+const AwardCertifications = dynamic(() => import('./AwardCertifications'));
+
+// Icons - consider importing only what you need
+import { 
+  FiShoppingCart, FiX, FiCheck, FiClock, 
+  FiShield, FiTruck, FiUserCheck, 
+  FiChevronDown, FiChevronUp 
 } from "react-icons/fi";
-import AwardCertifications from "./AwardCertifications";
 
-
-// Utility function to extract images from HTML content
-const extractImagesAndContent = (html) => {
-  if (!html) return { content: "", images: [] };
-  const imgRegex = /<img[^>]+src="([^">]+)"[^>]*>/g;
-  const images = [];
-  let content = html;
-  let match;
-
-  while ((match = imgRegex.exec(html)) !== null) {
-    images.push(match[1]);
-  }
-
-  content = html.replace(imgRegex, "");
-  return { content, images };
+// Constants
+const DEFAULT_BANNER = "/ApplianceBanner/appliancs.jpg";
+const SERVICE_PRIORITY = {
+  service: 1, repair: 2, install: 3, 
+  uninstallation: 4, amc: 5, foamjet: 6, gasfilling: 7
 };
 
-// Service priority mapping
-const SERVICE_PRIORITY = {
-  service: 1,
-  repair: 2,
-  install: 3,
-  uninstallation: 4,
-  amc: 5,
-  foamjet: 6,
-  gasfilling: 7,
+// Utility functions
+const normalizeString = (str) => str?.toLowerCase().trim().replace(/\s+/g, '-') || '';
+const extractFirstWords = (str) => {
+  const match = str.replace(/^\d+\s*/, "").trim().match(/^([\w'-]+(?:\s+[\w'-]+)*)/i);
+  return match ? match[0] : "other";
 };
 
 const CategoryDetails = ({
@@ -51,72 +36,22 @@ const CategoryDetails = ({
   meta_description,
   meta_keywords,
   category,
-  city = {},
+  city = {}
 }) => {
-  // State management
+  // State
   const [selectedService, setSelectedService] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [pendingCartAction, setPendingCartAction] = useState(null);
-  const [serviceDetailsMap, setServiceDetailsMap] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
 
   // Refs
-  const serviceRefs = useRef({});
-  const groupRefs = useRef({});
   const contentRef = useRef(null);
+  const groupRefs = useRef({});
 
-  // Constants
-  const DEFAULT_BANNER = "/ApplianceBanner/appliancs.jpg";
-
-  // Effects
-  useEffect(() => {
-    if (!contentRef.current || !category?.category_content) return;
-
-    const checkHeight = () => {
-      const element = contentRef.current;
-      if (!element) return;
-
-      element.style.maxHeight = 'none';
-      const fullHeight = element.scrollHeight;
-      const needsTruncation = fullHeight > 384;
-      setShowReadMore(needsTruncation);
-
-      if (!isExpanded && needsTruncation) {
-        element.style.maxHeight = '24rem';
-      }
-    };
-
-    const timer = setTimeout(checkHeight, 100);
-    return () => clearTimeout(timer);
-  }, [category?.category_content, isExpanded]);
-
-  useEffect(() => {
-    setIsExpanded(false);
-    setShowReadMore(false);
-  }, [category?.category_name]);
-
-  useEffect(() => {
-    if (category?.services) {
-      const map = {};
-      category.services.forEach((service) => {
-        map[service.service_id] = {
-          image: service.image_icon
-            ? service.image_icon.startsWith("http")
-              ? service.image_icon
-              : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`
-            : "/placeholder-service.png",
-          name: service.service_name,
-          price: service.price,
-        };
-      });
-      setServiceDetailsMap(map);
-    }
-  }, [category]);
-
-  // Service grouping logic
+  // Memoized data transformations
   const serviceGroups = useMemo(() => {
     if (!category?.services) return {};
 
@@ -124,11 +59,10 @@ const CategoryDetails = ({
     const displayNameMap = new Map();
 
     category.services.forEach((service) => {
-      let cleanedName = service.service_name.replace(/^\d+\s*/, "").trim();
-      const firstWordsMatch = cleanedName.match(/^([\w'-]+(?:\s+[\w'-]+)*)/i);
-      let firstWords = firstWordsMatch ? firstWordsMatch[0] : "other";
+      let cleanedName = service.service_name;
+      let firstWords = extractFirstWords(cleanedName);
 
-      // Handle special cases
+      // Special case handling
       if (cleanedName.toLowerCase().startsWith("installation")) {
         firstWords = "Installation";
       } else if (cleanedName.toLowerCase().startsWith("un-installation")) {
@@ -139,33 +73,19 @@ const CategoryDetails = ({
         firstWords = "Gas Filling";
       } else if (cleanedName.toLowerCase().startsWith("foam jet")) {
         firstWords = "Foam Jet";
-      } else if (cleanedName.toLowerCase().startsWith("l'oréal")) {
-        firstWords = "L'Oréal";
       }
 
-      let groupKey = firstWords.toLowerCase().replace(/\s+/g, '_');
-      let displayName = firstWords;
-
-      if (displayNameMap.has(displayName)) {
-        const count = displayNameMap.get(displayName) + 1;
-        displayNameMap.set(displayName, count);
-        groupKey = `${groupKey}_${count}`;
-      } else {
-        displayNameMap.set(displayName, 1);
-      }
-
+      const groupKey = firstWords.toLowerCase().replace(/\s+/g, '_');
       const priority = SERVICE_PRIORITY[groupKey.split('_')[0]] || 99;
 
       if (!groups[groupKey]) {
         groups[groupKey] = {
-          displayName,
+          displayName: firstWords,
           services: [],
           priority,
-          image: service.image_icon
-            ? service.image_icon.startsWith("http")
-              ? service.image_icon
-              : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`
-            : "/placeholder-service.png",
+          image: service.image_icon?.startsWith("http") 
+            ? service.image_icon 
+            : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`,
           id: `service-group-${groupKey}`
         };
       }
@@ -176,191 +96,151 @@ const CategoryDetails = ({
     return groups;
   }, [category]);
 
-  const orderedServiceNames = useMemo(() => {
-    return Object.keys(serviceGroups).sort((a, b) => {
+  const orderedServiceNames = useMemo(() => 
+    Object.keys(serviceGroups).sort((a, b) => {
       const pA = serviceGroups[a].priority || 99;
       const pB = serviceGroups[b].priority || 99;
       return pA !== pB ? pA - pB : serviceGroups[a].displayName.localeCompare(serviceGroups[b].displayName);
-    });
+    }), 
+    [serviceGroups]
+  );
+
+  const uniqueServiceGroups = useMemo(() => {
+    const seen = new Set();
+    return Object.values(serviceGroups)
+      .filter(group => !seen.has(group.displayName) && seen.add(group.displayName))
+      .sort((a, b) => a.priority - b.priority || a.displayName.localeCompare(b.displayName));
   }, [serviceGroups]);
 
-  // Scroll to all matching service groups
+  // Effects
+  useEffect(() => {
+    if (!contentRef.current || !category?.category_content) return;
+
+    const checkHeight = () => {
+      const element = contentRef.current;
+      if (!element) return;
+
+      element.style.maxHeight = '';
+      const fullHeight = element.scrollHeight;
+      setShowReadMore(fullHeight > 384);
+      
+      if (!isExpanded && showReadMore) {
+        element.style.maxHeight = '24rem';
+      }
+    };
+
+    const timer = setTimeout(checkHeight, 100);
+    return () => clearTimeout(timer);
+  }, [category?.category_content, isExpanded]);
+
+  // Handlers
   const scrollToServiceGroup = useCallback((displayName) => {
     setSelectedService(displayName);
+    const matchingGroup = Object.entries(serviceGroups)
+      .find(([_, group]) => group.displayName === displayName);
 
-    const matchingGroups = Object.entries(serviceGroups)
-      .filter(([_, group]) => group.displayName === displayName)
-      .map(([key]) => key);
-
-    if (matchingGroups.length > 0) {
+    if (matchingGroup) {
       setTimeout(() => {
-        const firstGroupKey = matchingGroups[0];
-        if (groupRefs.current[firstGroupKey]) {
-          const element = groupRefs.current[firstGroupKey];
-          const headerHeight = 100; // Adjust based on your actual header height
-          const yOffset = -headerHeight - 16; // Additional 16px padding
-          const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-
+        const element = groupRefs.current[matchingGroup[0]];
+        if (element) {
+          const y = element.getBoundingClientRect().top + window.scrollY - 116;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }, 100);
     }
   }, [serviceGroups]);
 
-  // Get unique groups for filter display
-  const uniqueServiceGroups = useMemo(() => {
-    const seen = new Set();
-    return Object.values(serviceGroups)
-      .filter(group => {
-        if (seen.has(group.displayName)) return false;
-        seen.add(group.displayName);
-        return true;
-      })
-      .sort((a, b) => {
-        if (a.priority !== b.priority) return a.priority - b.priority;
-        return a.displayName.localeCompare(b.displayName);
-      });
-  }, [serviceGroups]);
-  const isServiceInCart = (serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return false;
-
-      if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
-        return false;
-      }
-
-      const parsedData = JSON.parse(cartData);
-      if (!Array.isArray(parsedData)) return false;
-
-      return parsedData.some((item) =>
-        item.cart_dtls?.some((dtl) => dtl.service_id === serviceId)
-      );
-    } catch (error) {
-      console.error("Error reading cart data:", error);
-      return false;
-    }
-  };
-
-  const getCartQuantity = (serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return 0;
-
-      if (typeof cartData !== 'string' || !cartData.trim().startsWith('[')) {
-        return 0;
-      }
-
-      const cartItems = JSON.parse(cartData);
-      if (!Array.isArray(cartItems)) return 0;
-
-      for (const item of cartItems) {
-        if (!item || typeof item !== 'object') continue;
-        const found = item.cart_dtls?.find((dtl) => dtl.service_id === serviceId);
-        if (found) return found.quantity || 1;
-      }
-      return 0;
-    } catch (error) {
-      console.error("Error reading cart quantity:", error);
-      return 0;
-    }
-  };
-
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = useCallback(() => {
     setShowLoginPopup(false);
     if (pendingCartAction) {
       setTimeout(() => {
-        handleCartAction(
-          pendingCartAction.serviceId,
-          pendingCartAction.operation,
-          pendingCartAction.currentQuantity
-        );
+        handleCartAction(pendingCartAction);
         setPendingCartAction(null);
       }, 300);
     }
-  };
+  }, [pendingCartAction]);
 
-const handleCartAction = async (serviceId, operation, currentQuantity = 0) => {
-  const customerId = localStorage.getItem("customer_id"); 
-  if (!customerId) {
-    setPendingCartAction({ serviceId, operation, currentQuantity });
-    setShowLoginPopup(true);
-    return;
-  }
-
-  try {
-    const payload = {
-      service_id: serviceId,
-      type: operation === "remove" ? "delete" : operation,
-      cid: customerId,
-      quantity:
-        operation === "add"
-          ? currentQuantity + 1
-          : operation === "decrement"
-            ? currentQuantity - 1
-            : 0,
-          source: 'mannubhai',
-    };
-
-    const res = await fetch(
-      "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    );
-
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-    const data = await res.json();
-    console.log('Cart API Response:', data);
-
-    if (data.AllCartDetails) {
-      localStorage.setItem("checkoutState", JSON.stringify(data.AllCartDetails));
-      localStorage.setItem("cart_total_price", data.total_main || 0);
-      setCartLoaded((prev) => !prev); // Triggers cart reload
+  const handleCartAction = useCallback(async ({ serviceId, operation, currentQuantity = 0 }) => {
+    const customerId = localStorage.getItem("customer_id");
+    if (!customerId) {
+      setPendingCartAction({ serviceId, operation, currentQuantity });
+      setShowLoginPopup(true);
+      return;
     }
-  } catch (error) {
-    console.error("Cart update failed:", error);
-    
-  }
-};
-  const calculateTotalItems = () => {
-    const cartData = localStorage.getItem("checkoutState");
-    if (!cartData) return 0;
 
-    const cartItems = JSON.parse(cartData);
-    return cartItems.reduce((total, item) => {
-      const itemTotal = item.cart_dtls?.reduce((sum, dtl) => sum + (dtl.quantity || 1), 0) || 0;
-      return total + itemTotal;
-    }, 0);
-  };
+    try {
+      const payload = {
+        service_id: serviceId,
+        type: operation === "remove" ? "delete" : operation,
+        cid: customerId,
+        quantity: operation === "add" ? currentQuantity + 1 
+               : operation === "decrement" ? currentQuantity - 1 : 0,
+        source: 'mannubhai'
+      };
 
-  if (!category || !category.services) {
+      const res = await fetch(
+        "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.AllCartDetails) {
+          localStorage.setItem("checkoutState", JSON.stringify(data.AllCartDetails));
+          localStorage.setItem("cart_total_price", data.total_main || 0);
+          setCartLoaded(prev => !prev);
+        }
+      }
+    } catch (error) {
+      console.error("Cart update failed:", error);
+    }
+  }, []);
+
+  const isServiceInCart = useCallback((serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return false;
+      
+      const parsedData = JSON.parse(cartData);
+      return Array.isArray(parsedData) && 
+        parsedData.some(item => item?.cart_dtls?.some(dtl => dtl.service_id === serviceId));
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const getCartQuantity = useCallback((serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return 0;
+      
+      const cartItems = JSON.parse(cartData);
+      return cartItems.reduce((total, item) => 
+        total + (item?.cart_dtls?.find(dtl => dtl.service_id === serviceId)?.quantity || 0), 0);
+    } catch {
+      return 0;
+    }
+  }, []);
+
+  if (!category?.services) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-t-4 border-blue-500 rounded-full animate-spin mx-auto" />
           <p className="mt-4 text-gray-600">Loading services...</p>
         </div>
       </div>
     );
   }
-const handleSelectCity = (selectedCity) => {
-    const segments = pathname.split('/').filter(Boolean);
-    
-    // On category page (/air-purifier-repair-service)
-    if (segments.length === 1) {
-      // Redirect to city+category page
-      window.location.href = `/${selectedCity.city_url}/${segments[0]}`;
-    }
-  };
+
   return (
     <>
-
       <Head>
-        <title>{meta_title || `${category?.category_name} Services`}</title>
+        <title>{meta_title || `${category.category_name} Services`}</title>
         <meta name="description" content={meta_description || ""} />
         <meta name="keywords" content={meta_keywords || ""} />
       </Head>
@@ -375,38 +255,37 @@ const handleSelectCity = (selectedCity) => {
                   <FiCheck className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h1 className="text-lg md:text-xl font-semibold text-gray-800 text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
-                    {city?.city_name
-                      ? `${category.category_name} Service  ${city.city_name}  @7065012902`
+                  <h1 className="text-lg md:text-xl font-semibold text-[12px] bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent">
+                    {city.city_name
+                      ? `${category.category_name} Service ${city.city_name} @7065012902`
                       : `${category.category_name} Service @7065012902`}
                   </h1>
-
                 </div>
               </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3">
                 {uniqueServiceGroups.map((group) => (
                   <button
                     key={group.displayName}
                     onClick={() => scrollToServiceGroup(group.displayName)}
-                    className={`flex flex-col items-center p-5 rounded-lg transition-all ${selectedService === group.displayName
-                      ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
-                      : "hover:bg-gray-50 text-gray-700 border border-gray-200"
-                      }`}
+                    className={`flex flex-col items-center p-5 rounded-lg transition-all ${
+                      selectedService === group.displayName
+                        ? "bg-blue-100 border-2 border-blue-500 text-blue-700 font-semibold"
+                        : "hover:bg-gray-50 text-gray-700 border border-gray-200"
+                    }`}
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
                       <Image
-                        src={group.image}
+                        src={group.image || "/placeholder-service.png"}
                         alt={group.displayName}
                         width={32}
                         height={32}
                         className="object-cover w-14 h-14"
                       />
                     </div>
-                   <span className="font-bold text-[8px] sm:text-[10px] text-center">
-    {group.displayName}
-  </span>
-
+                    <span className="font-bold text-[8px] sm:text-[10px] text-center">
+                      {group.displayName}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -418,14 +297,12 @@ const handleSelectCity = (selectedCity) => {
             <div className="w-full md:w-[52%]">
               <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
                 <Image
-                  src={category.banner?.trim() ? category.banner : DEFAULT_BANNER}
-                  alt={`${category.category_name || "Category"} banner`}
+                  src={category.banner?.trim() || DEFAULT_BANNER}
+                  alt={`${category.category_name} banner`}
                   fill
                   className="object-cover"
                   priority
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_BANNER;
-                  }}
+                  onError={(e) => { e.currentTarget.src = DEFAULT_BANNER }}
                 />
               </div>
 
@@ -438,13 +315,10 @@ const handleSelectCity = (selectedCity) => {
                     key={serviceName}
                     ref={(el) => (groupRefs.current[serviceName] = el)}
                     id={`service-group-${serviceName}`}
-                    className={`relative space-y-6 mb-8 transition-all duration-300 ${isHighlighted
-                      ? 'ring-2 ring-blue-500 rounded-lg p-4 bg-blue-50'
-                      : ''
-                      }`}
-                    style={{
-                      scrollMarginTop: '120px'
-                    }}
+                    className={`relative space-y-6 mb-8 transition-all duration-300 ${
+                      isHighlighted ? 'ring-2 ring-blue-500 rounded-lg p-4 bg-blue-50' : ''
+                    }`}
+                    style={{ scrollMarginTop: '120px' }}
                   >
                     <h3 className="text-xl font-semibold text-gray-800 px-2">
                       {group.displayName}
@@ -476,13 +350,9 @@ const handleSelectCity = (selectedCity) => {
                               <div className="w-28 flex-shrink-0 flex flex-col items-center justify-start space-y-2">
                                 <div className="relative w-24 h-24 rounded-md overflow-hidden">
                                   <Image
-                                    src={
-                                      service.image_icon
-                                        ? service.image_icon.startsWith("http")
-                                          ? service.image_icon
-                                          : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`
-                                        : "/placeholder-service.png"
-                                    }
+                                    src={service.image_icon?.startsWith("http") 
+                                      ? service.image_icon 
+                                      : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`}
                                     alt={service.service_name}
                                     fill
                                     className="object-cover"
@@ -490,11 +360,16 @@ const handleSelectCity = (selectedCity) => {
                                 </div>
 
                                 <button
-                                  onClick={() => handleCartAction(service.service_id, "add", quantity)}
-                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${isAdded
-                                    ? "bg-green-100 text-green-800 cursor-not-allowed"
-                                    : "bg-blue-600 text-white hover:bg-blue-700"
-                                    }`}
+                                  onClick={() => handleCartAction({
+                                    serviceId: service.service_id,
+                                    operation: "add",
+                                    currentQuantity: quantity
+                                  })}
+                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${
+                                    isAdded
+                                      ? "bg-green-100 text-green-800 cursor-not-allowed"
+                                      : "bg-blue-600 text-white hover:bg-blue-700"
+                                  }`}
                                   disabled={isAdded}
                                 >
                                   {isAdded ? (
@@ -528,10 +403,7 @@ const handleSelectCity = (selectedCity) => {
 
             {/* Cart Sidebar */}
             <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
-              <Cart
-                cartLoaded={cartLoaded}
-                cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
-              />
+              <Cart cartLoaded={cartLoaded} cartLoadedToggle={() => setCartLoaded(prev => !prev)} />
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
                 <div className="bg-blue-50 rounded-xl p-6 mb-6">
@@ -540,27 +412,19 @@ const handleSelectCity = (selectedCity) => {
                     Why Choose Us
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <FiUserCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">Expert Professionals</h4>
-                        <p className="text-sm text-gray-600">Certified technicians with years of experience</p>
+                    {[
+                      { icon: <FiUserCheck />, title: "Expert Professionals", desc: "Certified technicians with years of experience" },
+                      { icon: <FiTruck />, title: "Doorstep Service", desc: "We come to you at your convenience" },
+                      { icon: <FiClock />, title: "Quick Service", desc: "Same day or next day service available" }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        {item.icon}
+                        <div>
+                          <h4 className="font-medium text-gray-800">{item.title}</h4>
+                          <p className="text-sm text-gray-600">{item.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FiTruck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">Doorstep Service</h4>
-                        <p className="text-sm text-gray-600">We come to you at your convenience</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FiClock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800">Quick Service</h4>
-                        <p className="text-sm text-gray-600">Same day or next day service available</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
@@ -568,18 +432,18 @@ const handleSelectCity = (selectedCity) => {
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Our Service Process</h3>
                   <div className="space-y-4">
                     {[
-                      { icon: <FiCheck />, text: "Choose Your Service" },
-                      { icon: <FiCheck />, text: "Expert Consultation" },
-                      { icon: <FiCheck />, text: "Schedule Appointment" },
-                      { icon: <FiCheck />, text: "Professional Service" },
-                      { icon: <FiCheck />, text: "Quality Check" },
-                      { icon: <FiCheck />, text: "Secure Payment" },
-                    ].map((step, index) => (
-                      <div key={index} className="flex items-start gap-3">
+                      "Choose Your Service",
+                      "Expert Consultation",
+                      "Schedule Appointment",
+                      "Professional Service",
+                      "Quality Check",
+                      "Secure Payment"
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-start gap-3">
                         <div className="bg-blue-100 text-blue-600 p-1 rounded-full">
-                          {step.icon}
+                          <FiCheck className="h-4 w-4" />
                         </div>
-                        <span className="text-gray-700">{step.text}</span>
+                        <span className="text-gray-700">{step}</span>
                       </div>
                     ))}
                   </div>
@@ -589,7 +453,7 @@ const handleSelectCity = (selectedCity) => {
           </main>
         </div>
         
-     <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+        <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
           <AwardCertifications />
         </section>
 
@@ -602,24 +466,17 @@ const handleSelectCity = (selectedCity) => {
               <div
                 ref={contentRef}
                 className={`prose max-w-none transition-all duration-500 ease-in-out ${
-                  !isExpanded && showReadMore ? "max-h-96 overflow-hidden" : "overflow-visible"
+                  !isExpanded && showReadMore ? "max-h-96 overflow-hidden" : ""
                 }`}
                 dangerouslySetInnerHTML={{ __html: category.category_content }}
               />
-              {showReadMore && !isExpanded && (
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-              )}
               {showReadMore && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
                 >
                   {isExpanded ? "Show Less" : "Read More"}
-                  {isExpanded ? (
-                    <FiChevronUp className="h-5 w-5 transition-transform duration-200" />
-                  ) : (
-                    <FiChevronDown className="h-5 w-5 transition-transform duration-200" />
-                  )}
+                  {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                 </button>
               )}
             </div>
@@ -658,10 +515,7 @@ const handleSelectCity = (selectedCity) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                  <Cart
-                    cartLoaded={cartLoaded}
-                    cartLoadedToggle={() => setCartLoaded((prev) => !prev)}
-                  />
+                  <Cart cartLoaded={cartLoaded} cartLoadedToggle={() => setCartLoaded(prev => !prev)} />
                 </div>
               </div>
             </motion.div>
@@ -679,7 +533,6 @@ const handleSelectCity = (selectedCity) => {
           />
         )}
       </AnimatePresence>
-
     </>
   );
 };

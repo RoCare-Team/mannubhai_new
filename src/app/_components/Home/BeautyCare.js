@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -8,19 +8,19 @@ import { db } from "../../firebaseConfig";
 import LogoLoader from "@/components/LogoLoader";
 import BeautyBrand from "./BeautyBrand";
 
-// Constants moved outside component to avoid recreation on every render
+// Constants
 const DEFAULT_IMAGE = "/BeautyCare/default.png";
-const IMAGE_MAP = Object.freeze({
-  "Women Salon At Home": "/BeautyCare/women salon at home.png",
-  "Makeup": "/BeautyCare/makeup.png",
-  "Spa For Women": "/BeautyCare/spa for women.png",
-  "Men Salon At Home": "/BeautyCare/Men Salon at Home.png",
-  "Massage For Men": "/BeautyCare/massage for men.png",
-  "Pedicure And Manicure": "/BeautyCare/pedicure and manicure.png",
-  "Hair Studio": "/BeautyCare/hair studio.png",
-});
+const IMAGE_MAP = {
+  "Women Salon At Home": "/BeautyHomeIcons/women salon at home.webp",
+  "Makeup": "/BeautyHomeIcons/makeup.webp",
+  "Spa For Women": "/BeautyHomeIcons/spa for women.webp",
+  "Men Salon At Home": "/BeautyHomeIcons/Men Salon at Home.webp",
+  "Massage For Men": "/BeautyHomeIcons/massage for men.webp",
+  "Pedicure And Manicure": "/BeautyHomeIcons/pedicure and manicure.webp",
+  "Hair Studio": "/BeautyHomeIcons/hair studio.webp",
+};
 
-const DESIRED_ORDER = Object.freeze([
+const DESIRED_ORDER = [
   "Women Salon At Home",
   "Makeup",
   "Spa For Women",
@@ -28,17 +28,7 @@ const DESIRED_ORDER = Object.freeze([
   "Massage For Men",
   "Pedicure And Manicure",
   "Hair Studio",
-]);
-
-// Precompute the order map
-const ORDER_MAP = Object.freeze(
-  DESIRED_ORDER.reduce((acc, name, idx) => {
-    acc[name] = idx;
-    return acc;
-  }, {})
-);
-
-const getSubServiceImage = (type) => IMAGE_MAP[type] || DEFAULT_IMAGE;
+];
 
 export default function BeautyCare({ hideBrightBanner = false, onServiceClick, cityUrl }) {
   const router = useRouter();
@@ -46,9 +36,20 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
 
-  // Memoized fetch function
+  // Precompute the order map
+  const orderMap = useMemo(() => 
+    DESIRED_ORDER.reduce((acc, name, idx) => {
+      acc[name] = idx;
+      return acc;
+    }, {}), 
+  []);
+
+  const getSubServiceImage = useCallback((type) => IMAGE_MAP[type] || DEFAULT_IMAGE, []);
+
+  // Fetch sub-services from Firestore
   const fetchSubServices = useCallback(async () => {
     try {
+      setLoading(true);
       const q = query(
         collection(db, "lead_type"),
         where("mannubhai_cat_id", "==", "3")
@@ -57,15 +58,15 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
         ServiceName: doc.data().type,
         ServiceIcon: getSubServiceImage(doc.data().type),
+        ...doc.data(),
       }));
 
       data.sort(
         (a, b) =>
-          (ORDER_MAP[a.ServiceName] ?? Number.MAX_SAFE_INTEGER) -
-          (ORDER_MAP[b.ServiceName] ?? Number.MAX_SAFE_INTEGER)
+          (orderMap[a.ServiceName] ?? Number.MAX_SAFE_INTEGER) -
+          (orderMap[b.ServiceName] ?? Number.MAX_SAFE_INTEGER)
       );
 
       setSubServices(data);
@@ -75,33 +76,39 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getSubServiceImage, orderMap]);
 
-  // Memoized category URL fetch
+  // Fetch category URL from Firestore
   const getCategoryUrlByLeadTypeId = useCallback(async (lead_type_id) => {
-    const q = query(
-      collection(db, "category_manage"),
-      where("lead_type_id", "==", lead_type_id)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.empty ? null : snapshot.docs[0].data().category_url;
+    try {
+      const q = query(
+        collection(db, "category_manage"),
+        where("lead_type_id", "==", lead_type_id)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.empty ? null : snapshot.docs[0].data().category_url;
+    } catch (error) {
+      console.error("Error fetching category URL:", error);
+      return null;
+    }
   }, []);
 
-  // Memoized click handler
+  // Handle service click
   const handleSubServiceClick = useCallback(async (service) => {
     setRouteLoading(true);
     try {
       const category_url = await getCategoryUrlByLeadTypeId(service.id);
-      if (category_url) {
-        if (onServiceClick) {
-          onServiceClick(category_url);
-        } else if (cityUrl) {
-          router.push(`/${cityUrl}/${category_url}`);
-        } else {
-          router.push(`/${category_url}`);
-        }
-      } else {
+      if (!category_url) {
         alert("Category URL not found!");
+        return;
+      }
+
+      if (onServiceClick) {
+        onServiceClick(category_url);
+      } else if (cityUrl) {
+        router.push(`/${cityUrl}/${category_url}`);
+      } else {
+        router.push(`/${category_url}`);
       }
     } catch (error) {
       console.error("Navigation error:", error);
@@ -110,27 +117,41 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
     }
   }, [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router]);
 
+  // Initial data fetch
   useEffect(() => {
     fetchSubServices();
   }, [fetchSubServices]);
 
+  // Skeleton loader items
+  const skeletonItems = useMemo(() => 
+    Array.from({ length: Math.min(8, DESIRED_ORDER.length) }).map((_, i) => (
+      <div
+        key={`skeleton-${i}`}
+        className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow animate-pulse"
+      >
+        <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
+        <div className="h-3 w-14 bg-blue-100 rounded" />
+      </div>
+    )), 
+  []);
+
   return (
     <main className="relative pb-5 px-3 sm:mt-6 sm:px-6 md:px-8 lg:px-20 mt-0 mb-0 sm:mt-5 sm:mb-5">
-      {/* Full-screen route loader */}
+  
       {routeLoading && (
         <div className="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
           <LogoLoader />
         </div>
       )}
 
-      {/* header */}
+      {/* Header */}
       <header className="mb-5">
-        <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
+        <h1 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
           Beauty Services
-        </h2>
+        </h1>
       </header>
 
-      {/* grid */}
+      {/* Services grid */}
       <section aria-labelledby="beauty-services" className="max-w-7xl mx-auto" id="beauty-care">
         <h2 id="beauty-services" className="sr-only">
           Beauty Sub‑Services
@@ -141,16 +162,8 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
             <p className="text-center text-sm text-gray-500 mb-4">
               Loading services…
             </p>
-            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-6">
-              {Array.from({ length: Math.min(8, DESIRED_ORDER.length) }).map((_, i) => (
-                <div
-                  key={`skeleton-${i}`}
-                  className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow animate-pulse"
-                >
-                  <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
-                  <div className="h-3 w-14 bg-blue-100 rounded" />
-                </div>
-              ))}
+            <div className="grid grid-cols-4 gap-3 sm:gap-6">
+              {skeletonItems}
             </div>
           </>
         ) : subServices.length === 0 ? (
@@ -158,13 +171,13 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
             No beauty services found.
           </p>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-6">
+          <div className="grid grid-cols-4 gap-3 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}
                 onClick={() => handleSubServiceClick(service)}
                 aria-label={`View ${service.ServiceName} services`}
-                className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg"
+                className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
                   <Image
@@ -186,17 +199,17 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
           </div>
         )}
       </section>
-   <section 
-  aria-labelledby="beauty-brands" 
-  className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" 
-  id="beauty-brands"
->
 
-  <div className="w-full">
-    <BeautyBrand />
-  </div>
-</section>
-      {/* promo banner */}
+      {/* Beauty brands section */}
+      <section 
+        aria-labelledby="beauty-brands" 
+        className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" 
+        id="beauty-brands"
+      >
+        <BeautyBrand />
+      </section>
+
+      {/* Promotional banner */}
       {!hideBrightBanner && (
         <section className="mt-0 md:mt-10 mb-0">
           <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">

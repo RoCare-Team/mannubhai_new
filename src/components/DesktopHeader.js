@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { CiLocationOn } from "react-icons/ci";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import DesktopNavigation from "./DesktopNavigation";
 import CategorySearch from "./CategorySearch";
 import UserDropdown from "./UserDropdown";
 import useCartCount from "./useCartCount";
+import LocationBar from "./LocationBar";
 import PropTypes from 'prop-types';
 
 export default function DesktopHeader({
@@ -51,30 +51,13 @@ export default function DesktopHeader({
         <div className="flex flex-wrap items-center justify-end gap-2 flex-1">
           {/* Location + Search */}
           <div className="flex items-center gap-4 flex-wrap">
-            <div className={`flex items-center text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 h-10 min-w-[200px] max-w-[240px] ${
-              isLoading ? 'bg-gray-50' : ''
-            }`}>
-              <CiLocationOn className="text-lg shrink-0" />
-              <span
-                className="truncate flex-1"
-                title={locationText || "Select location"}
-              >
-                {isLoading ? "Detecting location..." : locationText || "Select location"}
-              </span>
-              <button
-                type="button"
-                onClick={() => onLocationClick()} // Updated here
-                disabled={isLoading}
-                className="ml-1 text-xs text-blue-500 underline focus:outline-none hover:text-blue-600 transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
-                aria-label={isLoading ? "Detecting location" : "Change location"}
-              >
-                Change
-              </button>
-              {location?.error && (
-                <span className="ml-1 text-red-500 text-xs" title={location.error}>
-                  !
-                </span>
-              )}
+            <div className="min-w-[200px] max-w-[240px]">
+              <LocationBar
+                locationText={locationText}
+                onLocationClick={onLocationClick}
+                isLoading={isLoading}
+                isError={!!location?.error || !location?.city}
+              />
             </div>
 
             <CategorySearch isDesktop className="w-56" />
