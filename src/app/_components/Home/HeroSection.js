@@ -3,16 +3,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CiStar } from "react-icons/ci";
 import { PiUsersThree } from "react-icons/pi";
-import { collection, getDocs, query, where, enableIndexedDbPersistence } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
 import "./swiper-custom.css";
-import ServiceBannerSlider from "./ServiceBannerSlider";
-
 
 // Constants
 const SERVICE_IMAGES = Object.freeze({
@@ -32,24 +26,6 @@ const HeroSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
-
-   useEffect(() => {
-    // Initialize Firestore with persistence if not already done
-    const initializePersistence = async () => {
-      try {
-        const { enableIndexedDbPersistence } = await import("firebase/firestore");
-        await enableIndexedDbPersistence(db);
-      } catch (err) {
-        // Handle errors silently as persistence might already be enabled
-        console.debug("Persistence initialization:", err.message);
-      }
-    };
-
-    if (typeof window !== 'undefined') {
-      initializePersistence();
-    }
-  }, []);
   // Memoized service order map
   const serviceOrderMap = useMemo(() => 
     Object.fromEntries(SERVICE_ORDER.map((service, index) => [service, index])),
@@ -280,14 +256,7 @@ const HeroSection = () => {
         </div>
       </div>
       
-      {/* Swiper Section - Hidden on Mobile */}
-      <div className="hidden sm:block w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-          <ServiceBannerSlider />
-        </div>
-      </div>
-      
-      {/* Banner below Swiper */}
+      {/* Banner Section */}
       <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5 mt-0 md:mt-10 mb-0">
         <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
           

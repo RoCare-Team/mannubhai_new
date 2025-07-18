@@ -7,7 +7,6 @@ import { collection, getDocs, query, orderBy, startAt, endAt, limit } from "fire
 import { db } from "@/app/firebaseConfig";
 
 const GOOGLE_API_KEY = "AIzaSyCFsdnyczEGJ1qOYxUvkS6blm5Fiph5u2o";
-
 const LocationSearch = ({ onClose, onSelectCity, currentCity = "" }) => {
   const [searchTerm, setSearchTerm] = useState(currentCity);
   const [searchResults, setResults] = useState([]);
@@ -152,21 +151,21 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity = "" }) => {
     } catch (error) {
       console.error("Search error:", error);
       setResults([]);
-    } finally {
+    } finally { 
       setIsLoading(false);
     }
   }, [searchPlacesWithGoogle, searchFirestoreCities]);
 
-  const handleCitySelect = useCallback((city) => {
-    if (!city?.city_name) return;
-    
-    onSelectCity({
-      city_name: city.city_name,
-      city_url: city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-'),
-      state: city.state || ""
-    });
-    onClose();
-  }, [onClose, onSelectCity]);
+const handleCitySelect = useCallback((city) => {
+  if (!city?.city_name) return;
+  
+  onSelectCity({
+    city_name: city.city_name,
+    city_url: city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-'),
+    state: city.state || ""
+  });
+  onClose();
+}, [onClose, onSelectCity]);
 
   // Effects
   useEffect(() => {

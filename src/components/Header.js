@@ -37,27 +37,9 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   }
 }
 
-async function searchPlaces(query) {
-  try {
-    const encodedQuery = encodeURIComponent(query.trim());
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedQuery}&key=${GOOGLE_API_KEY}&language=en&region=IN`;
-    const response = await fetchWithTimeout(url);
-    const data = await response.json();
-
-    if (data.status !== 'OK') {
-      console.warn('Google Maps API returned status:', data.status);
-      return [];
-    }
-    return data.results;
-  } catch (error) {
-    console.error('Error searching places:', error);
-    return [];
-  }
-}
-
 async function getLocationFromCoords(latitude, longitude) {
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}&language=en&region=IN&result_type=locality|administrative_area_level_1|administrative_area_level_2`;
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}&language=en&region=IN&result_type=locality|administrative_area_level_1|administrative_area_level_2&no_cache=${Date.now()}`;
     const response = await fetchWithTimeout(url);
     const data = await response.json();
 
@@ -112,23 +94,8 @@ const Header = () => {
     isManualSelection: false,
   });
 
-  const persistLocation = useCallback((locationData) => {
-    try {
-      localStorage.setItem('userLocation', JSON.stringify(locationData));
-    } catch (error) {
-      console.error('Error persisting location:', error);
-    }
-  }, []);
 
-  const getPersistedLocation = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('userLocation');
-      return saved ? JSON.parse(saved) : null;
-    } catch (error) {
-      console.error('Error getting persisted location:', error);
-      return null;
-    }
-  }, []);
+
 
   const handleDetectedLocation = useCallback(async (detectedCity) => {
     if (!detectedCity) {
@@ -156,7 +123,7 @@ const Header = () => {
       };
 
       setLocation(newLocation);
-      persistLocation(newLocation);
+    
     } catch (error) {
       console.error("Error handling detected location:", error);
       setLocation({
@@ -168,101 +135,94 @@ const Header = () => {
         isManualSelection: false,
       });
     }
-  }, [persistLocation])
+  }, [])
 
 
-  const initializeLocation = useCallback(async () => {
-    const persistedLocation = getPersistedLocation();
-    if (persistedLocation) {
-      setLocation(persistedLocation);
-      return;
+const initializeLocation = useCallback(async () => {
+  try {
+    setLocation(prev => ({ ...prev, loading: true, error: null }));
+
+    // Try geolocation first
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          { timeout: 10000, maximumAge: 0 } // Set maximumAge to 0 to always get fresh location
+        );
+      });
+
+      const { latitude, longitude } = position.coords;
+      const locationData = await getLocationFromCoords(latitude, longitude);
+
+      if (locationData.success) {
+        await handleDetectedLocation(locationData.address);
+        return;
+      }
+    } catch (geoError) {
+      console.warn('Geolocation failed:', geoError);
+      if (geoError.code === geoError.PERMISSION_DENIED) {
+        setLocation(prev => ({
+          ...prev,
+          loading: false,
+          permissionDenied: true
+        }));
+      }
     }
 
+    // Fallback to IP-based location
     try {
-      setLocation(prev => ({ ...prev, loading: true, error: null }));
+      const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
+      const ipData = await ipResponse.json();
 
-      // Try geolocation first
-      try {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve,
-            reject,
-            { timeout: 10000, maximumAge: 300000 }
-          );
-        });
-
-        const { latitude, longitude } = position.coords;
-        const locationData = await getLocationFromCoords(latitude, longitude);
-
-        if (locationData.success) {
-          await handleDetectedLocation(locationData.address);
-          return;
-        }
-      } catch (geoError) {
-        console.warn('Geolocation failed:', geoError);
-        if (geoError.code === geoError.PERMISSION_DENIED) {
-          setLocation(prev => ({
-            ...prev,
-            loading: false,
-            permissionDenied: true
-          }));
-        }
+      if (ipData.city) {
+        await handleDetectedLocation(ipData.city);
+      } else {
+        throw new Error("IP location data incomplete");
       }
-
-      // Fallback to IP-based location
-      try {
-        const ipResponse = await fetchWithTimeout("https://ipapi.co/json/");
-        const ipData = await ipResponse.json();
-
-        if (ipData.city) {
-          await handleDetectedLocation(ipData.city);
-        } else {
-          throw new Error("IP location data incomplete");
-        }
-      } catch (ipError) {
-        console.error('IP location fallback failed:', ipError);
-        await handleDetectedLocation(null);
-      }
-    } catch (error) {
-      console.error('Location initialization failed:', error);
+    } catch (ipError) {
+      console.error('IP location fallback failed:', ipError);
       await handleDetectedLocation(null);
     }
-  }, [handleDetectedLocation, getPersistedLocation]);
+  } catch (error) {
+    console.error('Location initialization failed:', error);
+    await handleDetectedLocation(null);
+  }
+}, [handleDetectedLocation]);
 
   // Update handleCitySelection to not redirect automatically
-  const handleCitySelection = useCallback(async (selectedCity) => {
-    if (!selectedCity?.city_name) {
-      setShowLocationSearch(false);
-      return;
-    }
-
-    const normalizedCity = selectedCity.city_name.toLowerCase();
-    const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
-
-    const cityData = isGurgaonVariant
-      ? await findExactMatch('Gurgaon')
-      : await findExactMatch(selectedCity.city_name);
-
-    const newLocation = {
-      city: cityData?.city_name || selectedCity.city_name,
-      state: cityData?.state || selectedCity.state || "",
-      loading: false,
-      error: cityData ? null : "City not in service area",
-      permissionDenied: false,
-      isManualSelection: true,
-    };
-
-    setLocation(newLocation);
-    persistLocation(newLocation);
+const handleCitySelection = useCallback(async (selectedCity) => {
+  if (!selectedCity?.city_name) {
     setShowLocationSearch(false);
+    return;
+  }
 
-    // Only update URL if we're not already on a city page
-    if (cityData && !pathname.startsWith(`/${cityData.city_url}`)) {
-      const cityUrl = cityData.city_url ||
-        cityData.city_name.toLowerCase().replace(/\s+/g, '-');
-      router.push(`/${cityUrl}`);
-    }
-  }, [router, persistLocation, pathname]);
+  const normalizedCity = selectedCity.city_name.toLowerCase();
+  const isGurgaonVariant = ['gurgaon', 'gurugram'].includes(normalizedCity);
+
+  const cityData = isGurgaonVariant
+    ? await findExactMatch('Gurgaon')
+    : await findExactMatch(selectedCity.city_name);
+
+  const newLocation = {
+    city: cityData?.city_name || selectedCity.city_name,
+    state: cityData?.state || selectedCity.state || "",
+    loading: false,
+    error: cityData ? null : "City not in service area",
+    permissionDenied: false,
+    isManualSelection: true,
+  };
+
+  setLocation(newLocation);
+  setShowLocationSearch(false);
+
+  // Only update URL if we're not already on a city page
+  if (cityData && !pathname.startsWith(`/${cityData.city_url}`)) {
+    const cityUrl = cityData.city_url ||
+      cityData.city_name.toLowerCase().replace(/\s+/g, '-');
+    router.push(`/${cityUrl}`, undefined, { shallow: true }); // Add shallow:true to prevent page reload
+  }
+}, [router, pathname]);
 
   const handleLoginSuccess = useCallback(() => {
     setShowLogin(false);

@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import HeroSection from './_components/Home/HeroSection';
-import ToastWrapper from '@/components/ToastWrapper';
 
 // Lazy load the group components
 const ServiceGroup = dynamic(() => import('./_components/Home/ServiceGroup'));
@@ -48,17 +47,11 @@ export const metadata = {
 export default function Page() {
   return (
     <main>
-      {/* Critical content that loads immediately */}
       <HeroSection />
-      
-      {/* First group of services */}
       <ServiceGroup />
-      
-      {/* Secondary content with loading fallback */}
       <Suspense fallback={<div className="min-h-[800px] bg-gray-100 animate-pulse" />}>
         <SecondaryGroup />
       </Suspense>
-      <ToastWrapper />
     </main>
   );
 }

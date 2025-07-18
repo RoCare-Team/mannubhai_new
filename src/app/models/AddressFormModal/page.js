@@ -19,8 +19,6 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-
 function AddressFormModal({ open, handleClose, onAddressSubmit }) {
   const [addressType, setAddressType] = useState('Home');
   const [formData, setFormData] = useState({
@@ -42,15 +40,7 @@ function AddressFormModal({ open, handleClose, onAddressSubmit }) {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  // const [phoneNumber,setPhoneNumber]=localStorage.getItem('userPhone');
 
-
-//  const [phoneNumber, setPhoneNumber] = useState('');
-
-  // setPhoneNumber=;
-
- 
-  // Load states when the component first loads
   useEffect(() => {
     async function loadStates() {
       try {

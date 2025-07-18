@@ -13,7 +13,6 @@ import {
   faUser,
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
 
 function BookingSlots({ phoneNumber }) {
   const [addressOpen, setAddressOpen] = useState(false);
@@ -77,7 +76,6 @@ function BookingSlots({ phoneNumber }) {
     setSteps((prev) => ({ ...prev, timeSlot: { completed: true, data: selectedTimeSlot } }));
     localStorage.setItem("bookingTimeSlot", JSON.stringify(selectedTimeSlot));
     setShowTimeSlotModal(false);
-    toast.success("Time slot selected successfully");
   };
 
   const handleCloseTimeSlotModal = () => setShowTimeSlotModal(false);
@@ -111,24 +109,6 @@ function BookingSlots({ phoneNumber }) {
     Booking Confirmation
   </h2>
 </div>
-
-
-      {/* User Details */}
-      {/* <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm">
-        <p className="text-blue-700 font-semibold mb-2">Your Details</p>
-        <div className="space-y-1 text-sm text-gray-700">
-          <p className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faUser} className="text-blue-500" /> {userName || "Not Provided"}
-          </p>
-          <p className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faEnvelope} className="text-blue-500" /> {userEmail || "Not Provided"}
-          </p>
-          <p className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faPhone} className="text-blue-500" /> {phoneNumber || "Not Provided"}
-          </p>
-        </div>
-      </div> */}
-
       {/* Address Section */}
       <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
         <div className="flex items-center gap-3 text-blue-700 font-semibold">
@@ -156,9 +136,6 @@ function BookingSlots({ phoneNumber }) {
     </p>
   )}
 </div>
-
-
-
         <AddressModal
           setAddressOpen={setAddressOpen}
           addressOpen={addressOpen}
