@@ -111,19 +111,21 @@ const CartUI = ({ cartLoaded, cartLoadedToggle }) => {
             </div>
           ))}
 
-          <div className="cart-footer">
-            <div className="totalSection">
-              <Link href={"/checkout"}>
-                <div
-                  className="cart-total forMb"
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Total: ₹{finalTotal}</strong>
-                  <button>View Cart</button>
-                </div>
-              </Link>
-            </div>
-          </div>
+        <div className="cart-footer fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-10 ">
+  <div className="totalSection mb-10 p-4">
+    <Link href={"/checkout"}>
+      <div 
+        className="cart-total flex justify-between items-center bg-emerald-600 text-white p-3 rounded-lg"
+        style={{ cursor: "pointer" }}
+      >
+        <strong className="text-lg font-bold">Total: ₹{finalTotal}</strong>
+        <button className="bg-white text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-full text-sm font-medium transition-colors">
+          Proceed to Checkout
+        </button>
+      </div>
+    </Link>
+  </div>
+</div>
         </>
       )}
     </div>

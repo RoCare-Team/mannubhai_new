@@ -1,26 +1,22 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { MdOutlineShoppingCart } from "react-icons/md";
+import { MdOutlineShoppingCart, MdPhone } from "react-icons/md";
 import DesktopNavigation from "./DesktopNavigation";
 import CategorySearch from "./CategorySearch";
 import UserDropdown from "./UserDropdown";
 import useCartCount from "./useCartCount";
-import LocationBar from "./LocationBar";
 import PropTypes from 'prop-types';
 
 export default function DesktopHeader({
-  locationText = "Detecting location…",
-  onLocationClick, 
   setShowLogin,
   user,
   navigationItems = [],
   pathname = "/",
   handleLogout,
-  isLoading = false,
-  location = {}
 }) {
   const cartCount = useCartCount();
+  const phoneNumber = "+917065012902"; // Replace with your actual phone number
 
   return (
     <header className="hidden lg:block sticky top-0 z-30 bg-white">
@@ -47,20 +43,22 @@ export default function DesktopHeader({
           />
         </div>
 
-        {/* Search + Location + Cart + User */}
-        <div className="flex flex-wrap items-center justify-end gap-2 flex-1">
-          {/* Location + Search */}
+        {/* Search + Call + Cart + User */}
+        <div className="flex flex-wrap items-center justify-end gap-4 flex-1">
+          {/* Search */}
           <div className="flex items-center gap-4 flex-wrap">
-            <div className="min-w-[200px] max-w-[240px]">
-              <LocationBar
-                locationText={locationText}
-                onLocationClick={onLocationClick}
-                isLoading={isLoading}
-                isError={!!location?.error || !location?.city}
-              />
-            </div>
-
             <CategorySearch isDesktop className="w-56" />
+            
+            {/* Phone Button - Matches Search Bar Style */}
+            <div className="flex items-center  rounded-lg px-3 py-2 border border-gray-200 hover:border-blue-400 transition-colors">
+              <MdPhone className="text-gray-500 mr-2" />
+              <a 
+                href={`tel:${phoneNumber.replace(/\D/g, '')}`}
+                className="text-sm text-gray-700 hover:text-blue-500"
+              >
+                {phoneNumber}
+              </a>
+            </div>
           </div>
 
           {/* Cart + User */}
@@ -91,13 +89,9 @@ export default function DesktopHeader({
 }
 
 DesktopHeader.propTypes = {
-  locationText: PropTypes.string,
-  onLocationClick: PropTypes.func.isRequired, 
   setShowLogin: PropTypes.func.isRequired,
   user: PropTypes.object,
   navigationItems: PropTypes.array,
   pathname: PropTypes.string,
   handleLogout: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool,
-  location: PropTypes.object
 };

@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { FaWhatsapp, FaApple, FaGooglePlay, FaMobileAlt } from 'react-icons/fa';
-import { FiPhone } from 'react-icons/fi';
+import { FaApple, FaGooglePlay, FaMobileAlt, FaPhone } from 'react-icons/fa';
 
 export default function FloatingContactButtons() {
-  const whatsappNumber = "+919319404430";
+  const phoneNumber = "+917065012902";
   const [showDownloadOptions, setShowDownloadOptions] = useState(false);
 
   return (
@@ -56,22 +55,15 @@ export default function FloatingContactButtons() {
           )}
         </div>
 
-        {/* WhatsApp */}
-        <a
-          href={`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}?text=Hi!%20I%20would%20like%20to%20book%20your%20services.`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white transition-all shadow-lg"
-          aria-label="Contact us on WhatsApp"
-        >
-          <FaWhatsapp className="text-2xl" />
-        </a>
-
         {/* Phone */}
-      
+        <a
+          href={`tel:${phoneNumber.replace(/[^\d]/g, '')}`}
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-lg"
+          aria-label="Call us"
+        >
+          <FaPhone className="text-xl" />
+        </a>
       </div>
     </div>
-    
   );
-  
 }
