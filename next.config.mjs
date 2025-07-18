@@ -15,29 +15,50 @@ const nextConfig = {
       },
     ],
   },
-};
-
-// HTTPS configuration for local development
-if (process.env.NODE_ENV === 'development') {
-  import('fs').then(fs => {
-    import('path').then(path => {
-      const certPath = path.join(process.cwd(), 'localhost.crt');
-      const keyPath = path.join(process.cwd(), 'localhost.key');
-
-      if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-        nextConfig.server = {
-          https: {
-            key: fs.readFileSync(keyPath),
-            cert: fs.readFileSync(certPath),
-          },
-        };
-      } else {
-        console.warn('⚠️ HTTPS certificates not found. Falling back to HTTP.');
-        console.warn('Run this command to generate certificates:');
-        console.warn('openssl req -x509 -out localhost.crt -keyout localhost.key -newkey rsa:2048 -nodes -sha256 -subj \'/CN=localhost\' -extensions EXT -config <(printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")');
+  // Add redirects configuration
+  async redirects() {
+    return [
+      {
+        source: '/franchise-opportunities',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      },
+      {
+        source: '/franchise',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
       }
-    });
-  });
-}
+    ];
+  },
+  // Webpack configuration to handle internal references
+  webpack: (config, { isServer }) => {
+    // Modify webpack internal paths in development
+    if (process.env.NODE_ENV === 'development') {
+      config.output.devtoolModuleFilenameTemplate = function(info) {
+        return `file:///${info.absoluteResourcePath.replace(/\\/g, '/')}`;
+      };
+    }
+
+    return config;
+  },
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+  // Disable performance hints
+  performance: {
+    hints: false,
+  },
+  // Optional: Optimize large package imports
+  experimental: {
+    optimizePackageImports: [
+      'react',
+      'react-dom',
+      'scheduler'
+    ],
+    // Enable if you're using SWC minification
+    swcMinify: true,
+  },
+  // Enable React strict mode
+  reactStrictMode: true,
+};
 
 export default nextConfig;

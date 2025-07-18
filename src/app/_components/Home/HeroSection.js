@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { CiStar } from "react-icons/ci";
 import { PiUsersThree } from "react-icons/pi";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { db } from "@/app/firebaseConfig";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";

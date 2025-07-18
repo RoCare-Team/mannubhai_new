@@ -3,6 +3,8 @@ import React from "react";
 import Link from "next/link";
 import { FaHeadphones, FaShoppingCart, FaBookOpen } from "react-icons/fa";
 import { LuChevronRight } from "react-icons/lu";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const topics = [
   {
@@ -29,8 +31,11 @@ const topics = [
 ];
 
 const HelpCenter = () => {
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <>
+
+       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <section className="w-full max-w-xl p-6 bg-white rounded-3xl shadow-xl border border-gray-200">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">All Topics</h2>
         <div className="divide-y">
@@ -53,6 +58,9 @@ const HelpCenter = () => {
         </div>
       </section>
     </div>
+ 
+    </>
+ 
   );
 };
 

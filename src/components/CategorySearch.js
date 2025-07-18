@@ -61,36 +61,24 @@ const CategorySearch = ({ isDesktop, className }) => {
     service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Determine the correct URL structure
-  // const getServiceUrl = (serviceSlug) => {
-  //   const segments = pathname.split('/').filter(Boolean);
-    
-  //   // If we're on a city page (/city-name)
-  //   if (segments.length === 1 && !SERVICES.some(s => s.slug === segments[0])) {
-  //     return `/${segments[0]}/${serviceSlug}`;
-  //   }
-    
-  //   // Default to root-level service page
-  //   return `/${serviceSlug}`;
-  // };
 
-  const getServiceUrl = (serviceSlug) => {
+
+const getServiceUrl = (serviceSlug) => {
   const segments = pathname.split('/').filter(Boolean);
-
-  // If on franchise-opportunities page
-  if (pathname === '/franchise-opportunities') {
-    return `/${serviceSlug}`;
+  
+  // If we're on a city+service page (/city-name/service-slug)
+  if (segments.length === 2 && segments[0] !== 'franchise-opportunities') {
+    return `/${segments[0]}/${serviceSlug}`;
   }
-
-  // If on a city page (/city-name)
+  
+  // If we're on a city page (/city-name)
   if (segments.length === 1 && !SERVICES.some(s => s.slug === segments[0])) {
     return `/${segments[0]}/${serviceSlug}`;
   }
-
-  // Default fallback
+  
+  // Default to root-level service page
   return `/${serviceSlug}`;
 };
-
 
   const handleServiceClick = (slug) => {
     setIsOpen(false);

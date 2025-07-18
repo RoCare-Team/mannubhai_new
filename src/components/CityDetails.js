@@ -1,63 +1,111 @@
-"use client";
-import React, { useState, useRef } from "react";
+'use client';
+import React, { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import AboutMannuBhaiExpert from "./AboutMannuBhaiExpert";
-import 'react-toastify/dist/ReactToastify.css';
+import dynamic from 'next/dynamic';
+import Head from 'next/head';
 
-// Components
-import HeroSection from "@/app/_components/Home/HeroSection";
-import Appliances from "@/app/_components/Home/Appliances";
-import HandymanServices from "@/app/_components/Home/HandymanServices";
-import BeautyCare from "@/app/_components/Home/BeautyCare";
-import HomecareServcies from '@/app/_components/Home/HomecareServcies';
-import BrandsWeRepair from '@/components/BrandsWeRepair';
-import Services from '@/app/_components/Home/Services';
-import PopularCities from "@/app/_components/Home/PopularCities";
-import ClientReviews from "@/app/_components/Home/ClientReviews";
-import FooterLinks from "@/app/_components/Home/FooterLinks";
-import AppDownloadCard from '@/app/_components/Home/AppDownloadCard';
-import BeautyBrand from "@/app/_components/Home/BeautyBrand";
-import FloatingContactButtons from '@/components/FloatingContactButtons';
+// Component loading states
+const LoadingPlaceholder = ({ className = "" }) => (
+  <div className={`bg-gray-100 animate-pulse rounded-lg ${className}`} />
+);
 
-// UI
-import { ToastContainer } from 'react-toastify';
+// Dynamically loaded components with optimized loading states
+const DynamicComponents = {
+  AboutMannuBhaiExpert: dynamic(() => import("./AboutMannuBhaiExpert"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  HeroSection: dynamic(() => import("@/app/_components/Home/HeroSection"), {
+    loading: () => <LoadingPlaceholder className="h-96 w-full" />
+  }),
+  Appliances: dynamic(() => import("@/app/_components/Home/Appliances"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  HandymanServices: dynamic(() => import("@/app/_components/Home/HandymanServices"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  BeautyCare: dynamic(() => import("@/app/_components/Home/BeautyCare"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  HomecareServcies: dynamic(() => import('@/app/_components/Home/HomecareServcies'), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  BrandsWeRepair: dynamic(() => import('@/components/BrandsWeRepair'), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  Services: dynamic(() => import('@/app/_components/Home/Services'), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  PopularCities: dynamic(() => import("@/app/_components/Home/PopularCities"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  ClientReviews: dynamic(() => import("@/app/_components/Home/ClientReviews"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  FooterLinks: dynamic(() => import("@/app/_components/Home/FooterLinks"), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  AppDownloadCard: dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
+    loading: () => <LoadingPlaceholder className="h-64" />
+  }),
+  FloatingContactButtons: dynamic(() => import('@/components/FloatingContactButtons'), {
+    ssr: false
+  }),
+
+};
+
+// Memoized ServiceWrapper component to prevent unnecessary re-renders
+const ServiceWrapper = memo(({ children, categoryUrl, cityUrl, onServiceClick, className }) => {
+  const ChildComponent = DynamicComponents[children.type.name] || children.type;
+  
+  return (
+    <ChildComponent 
+      {...children.props} 
+      onServiceClick={onServiceClick} 
+      cityUrl={cityUrl}
+      className={className}
+    />
+  );
+});
 
 const CityDetails = ({ city }) => {
-  const [showCitySearch, setShowCitySearch] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const [selectedService, setSelectedService] = useState(null);
-  const serviceRefs = useRef({});
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigationTimeoutRef = useRef(null);
 
-  const ServiceWrapper = ({ children, categoryUrl, className = "" }) => {
-    const handleClick = (serviceUrl) => {
-      router.push(`/${city.city_url}/${serviceUrl}`);
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
     };
+  }, []);
 
-    return React.cloneElement(children, {
-      onServiceClick: handleClick,
-      cityUrl: city.city_url,
-      className
-    });
-  };
+  // Handle service navigation with loading state
+  const handleServiceClick = useCallback((serviceUrl) => {
+    setIsNavigating(true);
+    navigationTimeoutRef.current = setTimeout(() => {
+      setIsNavigating(false);
+    }, 3000); // Fallback in case navigation fails
+    
+    router.push(`/${city.city_url}/${serviceUrl}`);
+  }, [router, city?.city_url]);
 
-  const handleSelectCity = (selectedCity) => {
+  // Handle city selection with proper URL construction
+  const handleSelectCity = useCallback((selectedCity) => {
+    setIsNavigating(true);
     const segments = pathname.split('/').filter(Boolean);
+    let newUrl = `/${selectedCity.city_url}`;
+    
+    if (segments.length === 1 && segments[0] !== selectedCity.city_url) {
+      newUrl = `/${selectedCity.city_url}/${segments[0]}`;
+    }
+    
+    window.location.href = newUrl;
+  }, [pathname]);
 
-    // Case 1: On a city page (/delhi)
-    if (segments.length === 1) {
-      window.location.href = `/${selectedCity.city_url}`;
-    }
-    // Case 2: On a category page (/air-purifier-repair-service)
-    else if (segments.length === 1 && segments[0] === selectedCity.city_url) {
-      setShowCitySearch(false);
-    }
-    // Case 3: On city+category page (/delhi/air-purifier-repair-service)
-    else if (segments.length === 2) {
-      window.location.href = `/${selectedCity.city_url}/${segments[1]}`;
-    }
-  };
-
+  // Loading state
   if (!city) {
     return (
       <div className="w-full px-4 sm:px-6 py-8 md:py-12 text-center">
@@ -70,80 +118,99 @@ const CityDetails = ({ city }) => {
     );
   }
 
+  // Main render
   return (
     <>
+      <Head>
+        <title>{`${city.city_name} Services | MannuBhai`}</title>
+        <meta 
+          name="description" 
+          content={`Find expert services in ${city.city_name} - appliances repair, beauty care, home services and more`} 
+        />
+        <link rel="preload" href="/hero-image.webp" as="image" />
+      </Head>
+
+      {/* Navigation loading indicator */}
+      {isNavigating && (
+        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+
       <main className="w-full bg-white">
-        {/* Hero Section - Full width */}
         <section className="w-full mb-8 md:mb-12">
-          <HeroSection />
+          <DynamicComponents.HeroSection />
         </section>
 
-        {/* Main content container with responsive padding */}
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto">
-          {/* Services Sections with consistent spacing */}
           <div className="space-y-12 md:space-y-16 lg:space-y-20 w-full">
-            <ServiceWrapper categoryUrl="appliances">
-              <Appliances />
+            <ServiceWrapper 
+              categoryUrl="appliances" 
+              cityUrl={city.city_url}
+              onServiceClick={handleServiceClick}
+            >
+              <DynamicComponents.Appliances />
             </ServiceWrapper>
 
-            <ServiceWrapper categoryUrl="beauty-care">
-              <BeautyCare />
+            <ServiceWrapper 
+              categoryUrl="beauty-care"
+              cityUrl={city.city_url}
+              onServiceClick={handleServiceClick}
+            >
+              <DynamicComponents.BeautyCare />
             </ServiceWrapper>
 
-            
-            <ServiceWrapper categoryUrl="homecare-services">
-              <HomecareServcies />
+            <ServiceWrapper 
+              categoryUrl="homecare-services"
+              cityUrl={city.city_url}
+              onServiceClick={handleServiceClick}
+            >
+              <DynamicComponents.HomecareServcies />
             </ServiceWrapper>
 
-            <ServiceWrapper categoryUrl="handyman-services" className="mb-0">
-              <HandymanServices />
+            <ServiceWrapper 
+              categoryUrl="handyman-services" 
+              cityUrl={city.city_url}
+              onServiceClick={handleServiceClick}
+              className="mb-0"
+            >
+              <DynamicComponents.HandymanServices />
             </ServiceWrapper>
 
-            {/* App Download - Full width */}
             <section className="w-full my-8 md:my-12">
-              <AppDownloadCard />
+              <DynamicComponents.AppDownloadCard />
             </section>
 
-            {/* About Expert */}
-            <section 
-              className="w-full my-8 md:my-12"
-              aria-labelledby="expert-heading"
-            >
+            <section className="w-full my-8 md:my-12" aria-labelledby="expert-heading">
               <h2 id="expert-heading" className="sr-only">
                 About MannuBhai Expert Services in {city.city_name}
               </h2>
-              <AboutMannuBhaiExpert />
+              <DynamicComponents.AboutMannuBhaiExpert />
             </section>
 
-            {/* Client Reviews */}
             <section className="w-full my-8 md:my-12">
-              <ClientReviews />
+              <DynamicComponents.ClientReviews />
             </section>
 
-            {/* Popular Cities - Full width */}
             <section className="w-full my-8 md:my-12">
-              <PopularCities />
+              <DynamicComponents.PopularCities onSelectCity={handleSelectCity} />
             </section>
 
-            {/* Brands We Repair */}
             <section className="w-full my-8 md:my-12">
-              <BrandsWeRepair />
+              <DynamicComponents.BrandsWeRepair />
             </section>
 
-            {/* Services */}
             <section className="w-full my-8 md:my-12">
-              <Services />
+              <DynamicComponents.Services />
             </section>
           </div>
         </div>
 
-        {/* Footer Links - Full width */}
         <section className="w-full mt-12 md:mt-16">
-          <FooterLinks />
+          <DynamicComponents.FooterLinks />
         </section>
 
-        {/* Toast Notifications */}
-        <ToastContainer
+        <DynamicComponents.ToastContainer
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}
@@ -158,10 +225,9 @@ const CityDetails = ({ city }) => {
         />
       </main>
 
-      {/* Floating Contact Buttons */}
-      <FloatingContactButtons />
+      <DynamicComponents.FloatingContactButtons />
     </>
   );
 };
 
-export default CityDetails;
+export default memo(CityDetails);

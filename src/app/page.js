@@ -1,21 +1,11 @@
-import 'react-toastify/dist/ReactToastify.css';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import HeroSection from './_components/Home/HeroSection';
-import Appliances from './_components/Home/Appliances';
-import HandymanServices from './_components/Home/HandymanServices';
-import BeautyCare from './_components/Home/BeautyCare';
-import HomecareServcies from './_components/Home/HomecareServcies';
-import AboutMannuBhai from '@/components/about';
-import BrandsWeRepair from '@/components/BrandsWeRepair';
-import Services from './_components/Home/Services';
-import PopularCities from './_components/Home/PopularCities';
-import ClientReviews from './_components/Home/ClientReviews';
-import FooterLinks from './_components/Home/FooterLinks';
-import { faL } from '@fortawesome/free-solid-svg-icons';
-import AppDownloadCard from './_components/Home/AppDownloadCard';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import FloatingContactButtons from '@/components/FloatingContactButtons';
-import BeautyBrand from './_components/Home/BeautyBrand';
+
+// Lazy load the group components
+const ServiceGroup = dynamic(() => import('./_components/Home/ServiceGroup'));
+const SecondaryGroup = dynamic(() => import('./_components/Home/SecondaryGroup'));
+
 export const metadata = {
   title: {
     default: "Mannubhai - Get Expert Professional Services at Home",
@@ -54,33 +44,14 @@ export const metadata = {
     },
   },
 };
-
-
 export default function Page() {
   return (
-    <>
-      <main>
-        <HeroSection />
-        <Appliances />
-        <BeautyCare />
-       
-        <HomecareServcies />
-        <HandymanServices />
-        <AppDownloadCard />
-        <PopularCities />
-        <AboutMannuBhai />
-        <ClientReviews />
-        <BrandsWeRepair />
-        <Services />
-        <FooterLinks />
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
-          bodyClassName="!text-sm"
-        />
-       
-      </main>
-    </>
+    <main>
+      <HeroSection />
+      <ServiceGroup />
+      <Suspense fallback={<div className="min-h-[800px] bg-gray-100 animate-pulse" />}>
+        <SecondaryGroup />
+      </Suspense>
+    </main>
   );
 }

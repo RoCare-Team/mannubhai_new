@@ -27,6 +27,8 @@ import {
   FiUserCheck,
   FiMaximize2
 } from "react-icons/fi";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 function Booking() {
   const [activeTab, setActiveTab] = useState("Active");
@@ -338,6 +340,7 @@ function Booking() {
 
   return (
     <>
+ 
       <Head>
         <title>Booking History | Your Service Bookings</title>
         <meta name="description" content="View your active, completed, and cancelled service bookings." />
@@ -646,6 +649,7 @@ function Booking() {
           </div>
         </div>
       )}
+   
     </>
   );
 }

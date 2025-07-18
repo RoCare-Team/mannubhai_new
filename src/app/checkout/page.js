@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import LoginPopup from "@/components/login";
 import BookingSlots from "../BookingData/BookingSlots/page";
 import Link from "next/link";
@@ -13,6 +11,7 @@ import {
   FiShoppingCart, FiChevronRight, FiX 
 } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
+
 
 const CheckOut = () => {
   // Use auth context
@@ -39,6 +38,19 @@ const CheckOut = () => {
     addressId: null,
   });
   const [showBookingModal, setShowBookingModal] = useState(false);
+const [alertMessage, setAlertMessage] = useState("");
+const [alertType, setAlertType] = useState("success"); // 'success' | 'error'
+const AlertBox = ({ message, type, onClose }) => {
+  if (!message) return null;
+  const bgColor = type === "error" ? "bg-red-100 text-red-700 border-red-300" : "bg-green-100 text-green-700 border-green-300";
+
+  return (
+    <div className={`p-4 mb-4 border rounded-md ${bgColor} flex items-start justify-between`}>
+      <span className="text-sm">{message}</span>
+      <button onClick={onClose} className="ml-4 font-bold text-sm">×</button>
+    </div>
+  );
+};
 
   // Items to remove from localStorage after booking confirmation
   const itemsToRemove = [
@@ -155,11 +167,12 @@ const CheckOut = () => {
         localStorage.setItem("cart_total_price", data.total_main);
         displayCartData();
       } catch (error) {
-        toast.error("Error updating cart");
-        console.error("Error:", error);
+        setAlertMessage("Error updating cart");
+       setAlertType("error");
       }
     } else {
-      toast.error("You can't add more than 5 items");
+        setAlertMessage("You can't add more than 5 items");
+       setAlertType("error");
     }
   };
 
@@ -195,8 +208,11 @@ const CheckOut = () => {
         }
         displayCartData();
       } catch (error) {
-        toast.error("Error updating cart");
-        console.error("Error:", error);
+ 
+
+        setAlertMessage("Error updating cart");
+        setAlertType("error");
+   
       }
     }
   };
@@ -231,7 +247,8 @@ const CheckOut = () => {
           setShowBookingModal(false);
           handlePaymentCompleted(currentBookingItem.category_cart_id);
         } else {
-          toast.error("Please complete all booking details before proceeding");
+          setAlertMessage("Please complete all booking details before proceeding");
+          setAlertType("error");
         }
       }
     }, 200);
@@ -252,7 +269,9 @@ const CheckOut = () => {
     const source = "mannubhai website";
 
     if (!cust_id || !cust_mobile || !address_id || !cust_email || !appointment_date || !appointment_time) {
-      toast.error("Please complete all booking details before proceeding to payment", { autoClose: 3000 });
+
+      setAlertMessage("Please complete all booking details before proceeding to payment", { autoClose: 3000 });
+      setAlertType("error");
       return;
     }
 
@@ -298,28 +317,29 @@ const CheckOut = () => {
           time: appointment_time,
           amount: currentBookingItem?.total_main || 0
         });
-
         // Show confirmation
         setShowConfirmationModal(true);
         setShowBookingModal(false);
-
         if (redirect) {
           // Directly redirect to payment URL from API response
           if (data.lead_id_for_payment) {
             window.location.href = data.lead_id_for_payment;
           } else {
-            toast.error("Payment URL not provided");
-            console.error("Payment URL missing in API response:", data);
+            setAlertMessage("Payment URL not provided");
+            setAlertType("error");
           }
         } else {
-          toast.success("Team Will Contact You Soon!......");
+          setAlertMessage("Team will contact you soon!");
+          setAlertType("success");
+            
         }
       } else {
-        toast.error(data.msg || "Payment processing failed");
+            setAlertMessage("Payment processing failed");
+            setAlertType("error");
       }
     } catch (error) {
-      toast.error("Network error. Please try again.");
-      console.error("Payment error:", error);
+     setAlertMessage("Network error. Please try again.");
+            setAlertType("error");
     }
   };
 
@@ -367,10 +387,13 @@ const CheckOut = () => {
   }
   // Main render
   return (
+    <>
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">
-      <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="max-w-4xl mx-auto">
+
+      <AlertBox message={alertMessage} type={alertType} onClose={() => setAlertMessage("")} />
+
         {isLoggedIn ? (
           <>
             {cartDataArray.length > 0 ? (
@@ -518,7 +541,8 @@ const CheckOut = () => {
                       handleCloseBookingModal();
                       if (currentBookingItem) {
                         handlePaymentCompleted(currentBookingItem.category_cart_id, false);
-                        toast.success("Your booking is confirmed! Our team will contact you soon.");
+                       setAlertMessage("Your booking is confirmed! Our team will contact you soon.");
+                       setAlertType("success");
                       }
                     }}
                     className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition flex items-center justify-center"
@@ -560,6 +584,9 @@ const CheckOut = () => {
         onLoginSuccess={handleLoginSuccess}
       />
     </div>
+ 
+    </>
+    
   );
 };
 

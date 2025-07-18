@@ -2,6 +2,8 @@
 
 import React from "react";
 import Dropdown from "@/components/Dropdown";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const PrivacyPolicy = () => {
   const countries = [
@@ -12,7 +14,9 @@ const PrivacyPolicy = () => {
   ];
 
   return (
-    <section className="max-w-4xl mx-auto px-4 py-12">
+    <>
+  
+      <section className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">PRIVACY POLICY</h1>
         <Dropdown countries={countries} />
@@ -65,6 +69,9 @@ const PrivacyPolicy = () => {
         </p>
       </article>
     </section>
+
+    </>
+  
   );
 };
 

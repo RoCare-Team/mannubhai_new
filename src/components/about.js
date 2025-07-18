@@ -5,10 +5,10 @@ import Link from "next/link";
 
 const AboutMannuBhai = () => {
   const features = [
-    { icon: "/franchies/time.png", label: "ON TIME SERVICE" },
-    { icon: "/franchies/rupees.png", label: "TRANSPARENT PRICES" },
-    { icon: "/franchies/professional.png", label: "TRAINED PROFESSIONALS" },
-    { icon: "/franchies/award.png", label: "ASSURED SERVICE QUALITY" },
+    { icon: "/franchies/time.webp", label: "ON TIME SERVICE" },
+    { icon: "/franchies/rupees.webp", label: "TRANSPARENT PRICES" },
+    { icon: "/franchies/professional.webp", label: "TRAINED PROFESSIONALS" },
+    { icon: "/franchies/award.webp", label: "ASSURED SERVICE QUALITY" },
   ];
 
   return (

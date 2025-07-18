@@ -14,6 +14,8 @@ import "../_components/Home/swiper-custom.css";
 import HomecareServcies from "../_components/Home/HomecareServcies";
 import Head from "./head";
 import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 // Constants moved outside component
 const SUBSERVICE_IMAGES = {
   "Home Deep Cleaning": "/HomeCare/HOMEDEEPCLEANING.png",
@@ -221,6 +223,7 @@ const Homecare = () => {
 
   return (
     <>
+
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         {/* Hero Section */}
@@ -246,6 +249,7 @@ const Homecare = () => {
         {/* Content Sections */}
         <ContentSections />
       </main>
+    
     </>
   );
 };

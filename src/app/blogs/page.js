@@ -1,8 +1,10 @@
 import BlogImage from '@/components/BlogImage';
 import { getActiveBlogs } from '../lib/fetchBlogs';
 import Link from 'next/link';
-
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 export default async function BlogList() {
+
   const blogs = await getActiveBlogs();
 
   if (!blogs || blogs.length === 0) {
@@ -22,7 +24,9 @@ export default async function BlogList() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
+    <>
+   
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-100">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">
         <div className="absolute inset-0 bg-black opacity-10"></div>
@@ -119,5 +123,8 @@ export default async function BlogList() {
         
       </div>
     </div>
+  
+    </>
+   
   );
 }

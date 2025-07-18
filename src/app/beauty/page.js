@@ -15,6 +15,9 @@ import BeautyCare from "../_components/Home/BeautyCare";
 import Head from "./head";
 import Link from "next/link";
 import BeautyBrand from "../_components/Home/BeautyBrand";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
 // Constants moved outside component to prevent recreation on every render
 const SUBSERVICE_IMAGES = {
   "Women Salon At Home": "/BeautyCare/women salon at home.png",
@@ -196,6 +199,7 @@ const Beauty = () => {
 
   return (
     <>
+
       <Head />
       <main className="relative min-h-screen bg-gray-50" role="main">
         {/* Hero Section */}
@@ -374,6 +378,7 @@ const Beauty = () => {
         {/* Content Sections */}
         <ContentSections />
       </main>
+  
     </>
   );
 };

@@ -4,18 +4,17 @@ import { CiLocationOn } from "react-icons/ci";
 import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
 import { collection, getDocs, query, orderBy, startAt, endAt, limit } from "firebase/firestore";
-import { db } from "../app/firebaseConfig";
+import { db } from "@/app/firebaseConfig";
 
 const GOOGLE_API_KEY = "AIzaSyCFsdnyczEGJ1qOYxUvkS6blm5Fiph5u2o";
-
-const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = false }) => {
+const LocationSearch = ({ onClose, onSelectCity, currentCity = "" }) => {
   const [searchTerm, setSearchTerm] = useState(currentCity);
   const [searchResults, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasAutoSelected, setHasAutoSelected] = useState(false);
   const inputRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
+
   const fetchWithTimeout = useCallback(async (url, options = {}, timeout = 5000) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -152,67 +151,26 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = 
     } catch (error) {
       console.error("Search error:", error);
       setResults([]);
-    } finally {
+    } finally { 
       setIsLoading(false);
     }
   }, [searchPlacesWithGoogle, searchFirestoreCities]);
 
-  const handleCitySelect = useCallback((city) => {
-    if (!city?.city_name) {
-      router.push("/");
-      onClose();
-      return;
-    }
-    
-    onSelectCity({
-      city_name: city.city_name,
-      city_url: city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-'),
-      state: city.state || ""
-    });
-    onClose();
-  }, [onClose, onSelectCity, router]);
-
-  const tryAutoSelect = useCallback(async (cityName) => {
-    if (!cityName || hasAutoSelected) return;
-    
-    setIsLoading(true);
-    try {
-      const [googleResults, firestoreResults] = await Promise.all([
-        searchPlacesWithGoogle(cityName),
-        searchFirestoreCities(cityName)
-      ]);
-      
-      // Try to find exact match
-      const exactMatch = [...firestoreResults, ...googleResults].find(
-        city => city.city_name.toLowerCase() === cityName.toLowerCase()
-      );
-      
-      if (exactMatch) {
-        handleCitySelect(exactMatch);
-        return;
-      }
-      
-      // If no exact match, show suggestions
-      setResults([...firestoreResults, ...googleResults].slice(0, 10));
-      setHasAutoSelected(true);
-    } catch (error) {
-      console.error("Auto-select error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [hasAutoSelected, handleCitySelect, searchPlacesWithGoogle, searchFirestoreCities]);
+const handleCitySelect = useCallback((city) => {
+  if (!city?.city_name) return;
+  
+  onSelectCity({
+    city_name: city.city_name,
+    city_url: city.city_url || city.city_name.toLowerCase().replace(/\s+/g, '-'),
+    state: city.state || ""
+  });
+  onClose();
+}, [onClose, onSelectCity]);
 
   // Effects
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    if (currentCity && autoSelect && !hasAutoSelected) {
-      setSearchTerm(currentCity);
-      tryAutoSelect(currentCity);
-    }
-  }, [currentCity, autoSelect, hasAutoSelected, tryAutoSelect]);
 
   useEffect(() => {
     const timer = setTimeout(() => searchCities(searchTerm), 300);
@@ -297,37 +255,49 @@ const LocationSearch = ({ onClose, onSelectCity, currentCity = "", autoSelect = 
         <div className="max-h-[calc(80vh-180px)] overflow-y-auto">
           {searchResults.length > 0 ? (
             <ul className="divide-y divide-gray-100">
-              {searchResults.map((city, i) => (
-                <li
-                  key={city.id || `${city.city_name}-${i}`}
-                  id={`city-result-${i}`}
-                  tabIndex={0}
-                  className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-blue-50 focus:bg-blue-50 outline-none transition-colors"
-                  onClick={() => handleCitySelect(city)}
-                  onKeyDown={(e) => handleResultKey(e, i, city)}
-                  aria-label={`Select ${city.city_name}`}
-                >
-                  <div className="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center shrink-0">
-                    <CiLocationOn className="text-blue-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-800">
-                      {highlightMatch(city.city_name, searchTerm)}
-                    </p>
-                    {city.state && (
-                      <p className="text-xs text-gray-500">{city.state}</p>
-                    )}
-                    {city.formatted_address && city.formatted_address !== city.city_name && (
-                      <p className="text-xs text-gray-400 truncate">
-                        {city.formatted_address}
+              {searchResults.map((city, i) => {
+                const displayCityName = ['gurgaon', 'gurugram'].includes(city.city_name.toLowerCase())
+                  ? 'Gurgaon'
+                  : city.city_name;
+
+                return (
+                  <li
+                    key={city.id || `${city.city_name}-${i}`}
+                    id={`city-result-${i}`}
+                    tabIndex={0}
+                    className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-blue-50 focus:bg-blue-50 outline-none transition-colors"
+                    onClick={() => handleCitySelect(city)}
+                    onKeyDown={(e) => handleResultKey(e, i, city)}
+                    aria-label={`Select ${displayCityName}`}
+                  >
+                    <div className="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center shrink-0">
+                      <CiLocationOn className="text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-800">
+                        {highlightMatch(displayCityName, searchTerm)}
                       </p>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {city.source === 'google' ? '🌐' : '📍'}
-                  </div>
-                </li>
-              ))}
+                      {city.state && (
+                        <p className="text-xs text-gray-500">
+                          {displayCityName === 'Gurgaon' && city.state.toLowerCase().includes('haryana') 
+                            ? 'Haryana' 
+                            : city.state}
+                        </p>
+                      )}
+                      {city.formatted_address && city.formatted_address !== city.city_name && (
+                        <p className="text-xs text-gray-400 truncate">
+                          {displayCityName === 'Gurgaon'
+                            ? city.formatted_address.replace(/Gurugram/gi, 'Gurgaon')
+                            : city.formatted_address}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {city.source === 'google' ? '🌐' : '📍'}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <div className="px-4 py-8 text-center text-gray-500">

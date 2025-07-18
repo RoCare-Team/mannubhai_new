@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../app/firebaseConfig";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -114,6 +117,7 @@ export default function ContactPage() {
 
   return (
     <>
+  
       <Head>
         <title>Contact Us | Mannubhai Services</title>
         <meta name="description" content="Need help or have questions? Contact Mannubhai Services via email or chat support for quick resolution." />
@@ -350,6 +354,7 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+    
     </>
   );
 }

@@ -1,61 +1,75 @@
-import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../app/firebaseConfig";
 import dynamic from 'next/dynamic';
 
-import LogoLoader from '@/components/LogoLoader'; // Adjust path as needed
+// Client Components
+const LogoLoader = dynamic(() => import('@/components/LogoLoader'), {
+  loading: () => <div className="min-h-[200px] flex items-center justify-center">Loading...</div>
+});
 
 const FAQSection = dynamic(() => import('@/components/FAQSection'), {
   loading: () => <LogoLoader />
 });
-// Dynamically import components with your custom loading states
-const CityDetails = dynamic(() => import("@/components/CityDetails"), {
+
+const CityDetails = dynamic(() => import('@/components/CityDetails'), {
   loading: () => <LogoLoader />
 });
 
-const CategoryDetails = dynamic(() => import("@/components/CategoryDetails"), {
+const CategoryDetails = dynamic(() => import('@/components/CategoryDetails'), {
   loading: () => <LogoLoader />
 });
 
-const CityAccordion = dynamic(() => import("@/components/CityAccordion"), {
+const CityAccordion = dynamic(() => import('@/components/CityAccordion'), {
   loading: () => <LogoLoader />
 });
 
-// Simple in-memory cache implementation
+// Cache Implementation
 const cache = new Map();
 const CACHE_TTL = {
-  SHORT: 60 * 5, // 5 minutes
-  MEDIUM: 60 * 30, // 30 minutes
-  LONG: 60 * 60 // 1 hour
-};
-export const revalidate = 3600;
-const getCache = (key) => cache.get(key);
-const setCache = (key, value, ttl) => {
-  cache.set(key, value);
-  setTimeout(() => cache.delete(key), ttl * 1000);
+  SHORT: 60 * 5,
+  MEDIUM: 60 * 30,
+  LONG: 60 * 60
 };
 
-// Optimized fetchDoc function with caching
+const getCache = (key) => {
+  const entry = cache.get(key);
+  return entry && entry.expiry > Date.now() ? entry.value : null;
+};
+
+const setCache = (key, value, ttl = CACHE_TTL.MEDIUM) => {
+  cache.set(key, { value, expiry: Date.now() + ttl * 1000 });
+  if (cache.size > 100) {
+    Array.from(cache.keys()).slice(0, 20).forEach(k => cache.delete(k));
+  }
+};
+
+// Utility Functions
+const normalizeUrlSegment = (segment) => 
+  segment?.toLowerCase().trim().replace(/\s+/g, '-') || '';
+
+// Data Fetching
 const fetchDoc = async (col, field, val) => {
-  const cacheKey = `${col}-${field}-${val}`;
+  const normalizedVal = normalizeUrlSegment(val);
+  const cacheKey = `${col}-${field}-${normalizedVal}`;
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
-  const q = query(collection(db, col), where(field, "==", val));
+  const q = query(collection(db, col));
   const snap = await getDocs(q);
-  const result = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
   
+  const doc = snap.docs.find(d => {
+    const fieldValue = d.data()[field];
+    return fieldValue && normalizeUrlSegment(fieldValue) === normalizedVal;
+  });
+  
+  const result = doc ? { id: doc.id, ...doc.data() } : null;
   setCache(cacheKey, result, CACHE_TTL.MEDIUM);
   return result;
 };
 
-// New function to fetch from page_master_tb
 const fetchPageMaster = async (cityId, categoryId) => {
   const cacheKey = `page-master-${cityId}-${categoryId}`;
-
-  console.log('cat id-------------',cacheKey);
-  
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
@@ -66,30 +80,22 @@ const fetchPageMaster = async (cityId, categoryId) => {
   );
   const snap = await getDocs(q);
   const result = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
-    console.log('-----------------',result);
-    
   setCache(cacheKey, result, CACHE_TTL.MEDIUM);
   return result;
 };
-// Optimized external API call with timeout and caching
+
 const fetchServices = async (leadTypeId) => {
   const cacheKey = `services-${leadTypeId}`;
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
-
     const response = await fetch("https://waterpurifierservicecenter.in/customer/ro_customer/all_services.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lead_type: leadTypeId }),
-      signal: controller.signal,
-      next: { revalidate: 3600 } // Revalidate every hour
+      next: { revalidate: 3600 }
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
@@ -111,7 +117,6 @@ const fetchServices = async (leadTypeId) => {
   }
 };
 
-// Fetch cities with caching
 const fetchCities = async () => {
   const cacheKey = 'all-cities';
   const cached = getCache(cacheKey);
@@ -119,12 +124,11 @@ const fetchCities = async () => {
 
   const snap = await getDocs(collection(db, "city_tb"));
   const cities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  
   setCache(cacheKey, cities, CACHE_TTL.LONG);
   return cities;
 };
 
-// Cache metadata generation
+// Metadata Generation
 const metadataCache = new Map();
 
 export async function generateMetadata({ params }) {
@@ -231,7 +235,6 @@ export async function generateMetadata({ params }) {
       ]);
 
       if (cityDoc && catDoc) {
-        // Fetch from page_master_tb for combined city+category pages
         const pageMasterDoc = await fetchPageMaster(cityDoc.id, catDoc.id);
         
         const result = {
@@ -275,38 +278,38 @@ export async function generateMetadata({ params }) {
   return result;
 }
 
-export default async function DynamicRouteHandler({ params ,searchParams  }) {
+// Main Component
+export default async function DynamicRouteHandler({ params, searchParams }) {
   const { slug = [] } = params;
-   const { city: cityQueryParam } = searchParams; 
+  const { city: cityQueryParam } = searchParams;
+  const normalizedSlug = slug.map(segment => normalizeUrlSegment(segment));
+
   if (slug.length === 0) notFound();
 
   try {
-      const cities = await fetchCities();
-    // Start fetching cities immediately as they're needed in most cases
-    const citiesPromise = fetchCities();
-     
-    // Handle city query param (from LocationSearch)
+    const cities = await fetchCities();
+    
     if (cityQueryParam) {
+      const normalizedQueryParam = normalizeUrlSegment(cityQueryParam);
       const selectedCity = cities.find(c => 
-        c.city_name.toLowerCase() === decodeURIComponent(cityQueryParam).toLowerCase()
+        normalizeUrlSegment(c.city_name) === normalizedQueryParam ||
+        normalizeUrlSegment(c.city_url) === normalizedQueryParam
       );
       
       if (selectedCity) {
-        // Redirect to proper city URL format
-        const redirectUrl = `/${selectedCity.city_url}`;
-        return <Redirect to={redirectUrl} />; // Or use Next.js redirect
+        redirect(`/${selectedCity.city_url.toLowerCase()}`);
       }
     }
-    if (slug.length === 1) {
-      const [segment] = slug;
+
+    if (normalizedSlug.length === 1) {
+      const [segment] = normalizedSlug;
       
       const [cityDoc, catDoc] = await Promise.all([
         fetchDoc("city_tb", "city_url", segment),
         fetchDoc("category_manage", "category_url", segment),
       ]);
       
-      //  const cities = await citiesPromise;
-    if (cityDoc) {
+      if (cityDoc) {
         return (
           <>
             <CityDetails city={cityDoc} />
@@ -317,39 +320,37 @@ export default async function DynamicRouteHandler({ params ,searchParams  }) {
       
       if (catDoc) {
         const services = await fetchServices(catDoc.lead_type_id);
-        return <CategoryDetails category={{ ...catDoc,  services }} />;
+        return <CategoryDetails category={{ ...catDoc, services }} />;
       }
       
       notFound();
     }
-    if (slug.length === 2) {
-      const [citySeg, catSeg] = slug;
+
+    if (normalizedSlug.length === 2) {
+      const [citySeg, catSeg] = normalizedSlug;
       
-      const [cityDoc, catDoc, cities] = await Promise.all([
+      const [cityDoc, catDoc] = await Promise.all([
         fetchDoc("city_tb", "city_url", citySeg),
         fetchDoc("category_manage", "category_url", catSeg),
-        citiesPromise,
       ]);
       
       if (!cityDoc || !catDoc) notFound();
       
-      // Fetch from page_master_tb for combined city+category pages
-      const pageMasterDoc = await fetchPageMaster(cityDoc.id, catDoc.id);
-      const services = await fetchServices(catDoc.lead_type_id);
-      const prepareFAQ = (doc) => {
-        const faqs = [];
-        let i = 1;
-        while (doc[`faqquestion${i}`] && doc[`faqanswer${i}`]) {
-          faqs.push({
-            question: doc[`faqquestion${i}`],
-            answer: doc[`faqanswer${i}`]
-          });
-          i++;
-        }
-        return faqs;
-      };
+      const [pageMasterDoc, services] = await Promise.all([
+        fetchPageMaster(cityDoc.id, catDoc.id),
+        fetchServices(catDoc.lead_type_id)
+      ]);
       
-      const faqData = pageMasterDoc ? prepareFAQ(pageMasterDoc) : [];
+      const faqData = [];
+      if (pageMasterDoc) {
+        for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+          faqData.push({
+            question: pageMasterDoc[`faqquestion${i}`],
+            answer: pageMasterDoc[`faqanswer${i}`]
+          });
+        }
+      }
+      
       return (
         <>
           <CategoryDetails 
@@ -365,46 +366,33 @@ export default async function DynamicRouteHandler({ params ,searchParams  }) {
             }} 
             city={cityDoc}
           />
-           {/* FAQ Section - Updated for your data structure */}
-       {faqData.length > 0 && <FAQSection faqData={faqData} />}
-          {/* Page Content Section - Hidden since your data shows page_content is null */}
-{pageMasterDoc?.page_content && (
-  <div className="page-content my-8 px-4 max-w-6xl mx-auto">
-    <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-      About  {cityDoc.city_name} - {catDoc.category_name}
-    </h2>
-    <div 
-      className="prose max-w-none
-        [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-6 [&_h2]:pb-2 
-        [&_h2]:border-b-2 [&_h2]:border-gradient [&_h2]:from-blue-500 [&_h2]:to-purple-500
-        [&_h2]:bg-clip-text [&_h2]:text-transparent [&_h2]:bg-gradient-to-r
-        [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-4 [&_h3]:text-blue-700
-        [&_p]:my-4 [&_p]:text-gray-800 [&_p]:leading-relaxed [&_p]:text-justify
-        [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4 [&_ul]:space-y-2
-        [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4 [&_ol]:space-y-2
-        [&_li]:my-2 [&_li]:pl-2 [&_li]:transition-colors [&_li]:hover:text-blue-600
-        [&_a]:text-blue-600 [&_a]:hover:text-blue-800 [&_a]:underline [&_a]:font-medium [&_a]:transition-colors
-        [&_blockquote]:border-l-4 [&_blockquote]:border-purple-500 [&_blockquote]:pl-4 [&_blockquote]:italic 
-        [&_blockquote]:text-gray-700 [&_blockquote]:bg-purple-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg
-        [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:my-6 [&_img]:transition-all [&_img]:hover:scale-[1.02] [&_img]:hover:shadow-xl
-        [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:shadow-md [&_table]:rounded-lg [&_table]:overflow-hidden
-        [&_th]:bg-gradient-to-r [&_th]:from-blue-500 [&_th]:to-purple-500 [&_th]:p-3 [&_th]:text-left [&_th]:text-white [&_th]:font-bold
-        [&_td]:p-3 [&_td]:border [&_td]:border-gray-200 [&_td]:even:bg-gray-50
-        [&_pre]:bg-gray-800 [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
-        [&_code]:bg-gray-100 [&_code]:text-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
-        [&_hr]:my-8 [&_hr]:border-t-2 [&_hr]:border-gray-200 [&_hr]:rounded-full
-        hover:[&_img]:shadow-xl transition-all duration-300"
-      dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
-    />
-  </div>
-)}
+          
+          {faqData.length > 0 && <FAQSection faqData={faqData} />}
+          
+          {pageMasterDoc?.page_content && (
+            <div className="page-content my-8 px-4 max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                About {cityDoc.city_name} - {catDoc.category_name}
+              </h2>
+              <div 
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
+              />
+            </div>
+          )}
+          
           <CityAccordion cities={cities} currentCity={cityDoc} />
         </>
       );
     }
+    
     notFound();
   } catch (error) {
     console.error("Dynamic page error:", error);
     throw error;
   }
 }
+
+export const dynamicParams = true;
+export const revalidate = 3600;
+export const fetchCache = 'force-cache';
