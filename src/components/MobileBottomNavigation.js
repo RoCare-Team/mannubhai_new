@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 import LoginPopup from "./login";
-import { toast } from "react-toastify";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 const MobileBottomNavigation = ({ navigationItems, pathname }) => {
@@ -14,7 +13,7 @@ const MobileBottomNavigation = ({ navigationItems, pathname }) => {
 
   const handleNavigation = (url, requiresAuth = false) => {
     if (requiresAuth && !isLoggedIn) {
-      toast.info("Please login first to access this feature");
+      alert("Please login first to access this feature");
       setShowLoginPopup(true);
       return;
     }
@@ -23,7 +22,7 @@ const MobileBottomNavigation = ({ navigationItems, pathname }) => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    alert("Logged out successfully");
     router.push('/');
   };
 

@@ -50,13 +50,7 @@ const DynamicComponents = {
   FloatingContactButtons: dynamic(() => import('@/components/FloatingContactButtons'), {
     ssr: false
   }),
-  ToastContainer: dynamic(
-    () => import('react-toastify').then((c) => {
-      import('react-toastify/dist/ReactToastify.css');
-      return c.ToastContainer;
-    }),
-    { ssr: false, loading: () => null }
-  )
+
 };
 
 // Memoized ServiceWrapper component to prevent unnecessary re-renders
