@@ -106,12 +106,12 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
         key={service.id}
         onClick={() => handleSubServiceClick(service)}
         className="bg-white rounded-2xl shadow-md p-2 flex flex-col items-center transition hover:scale-105 hover:shadow-xl h-full"
-        aria-label={`View ${service.ServiceName}`}
+        aria-label={`View ${service.ServiceName} services`}
       >
         <div className="relative w-12 h-12 bg-blue-50 rounded-full mb-2">
           <Image
             src={service.ServiceIcon}
-            alt={service.ServiceName}
+            alt="" // Empty alt since service name is visible
             fill
             className="object-contain"
             loading="lazy"
@@ -131,12 +131,12 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
         <button
           className="bg-white rounded-2xl shadow-md p-4 flex flex-col items-center justify-center transition hover:scale-105 hover:shadow-xl w-full h-full"
           onClick={() => handleSubServiceClick(service)}
-          aria-label={`View ${service.ServiceName}`}
+          aria-label={`View ${service.ServiceName} services`}
         >
           <div className="relative w-32 h-32 bg-blue-50 rounded-full mb-3">
             <Image
               src={service.ServiceIcon}
-              alt={service.ServiceName}
+              alt="" // Empty alt since service name is visible
               fill
               className="object-contain"
               loading="lazy"
@@ -154,7 +154,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
   if (routeLoading) return <LogoLoader />;
 
   return (
-    <main className="bg-gray-80 pb-10 px-4 sm:px-6 lg:px-19">
+    <main className="bg-gray-50 pb-10 px-4 sm:px-6 lg:px-19">
       <header className="mb-6 sm:mb-10 mt-0">
         <h2 className="text-left text-xl sm:text-3xl font-bold text-gray-800 ml-0 sm:ml-14">
           Handyman Services
@@ -162,7 +162,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
       </header>
 
       <section aria-labelledby="handyman-services" className="relative max-w-7xl mx-auto" id="handyman">
-        <h2 id="handyman-services" className="sr-only">Handyman Sub‑Services</h2>
+        <h2 id="handyman-services" className="sr-only">Handyman Services</h2>
 
         {loading ? (
           <div className="flex justify-center items-center min-h-[200px]">
@@ -178,7 +178,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
             </div>
 
             {/* Desktop - Swiper View */}
-            <div className="hidden sm:block relative">
+            <div className="hidden sm:block relative px-10">
               <Swiper
                 ref={swiperRef}
                 modules={[Navigation]}
@@ -190,6 +190,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
                   1024: { slidesPerView: 5 },
                 }}
                 className="pb-6"
+                aria-label="Handyman services carousel"
               >
                 {desktopServiceItems}
               </Swiper>
@@ -198,16 +199,16 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
               <button
                 onClick={() => swiperRef.current?.swiper.slidePrev()}
                 aria-label="Previous services"
-                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 w-8 h-8 z-10 flex items-center justify-center"
+                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 w-10 h-10 z-10 flex items-center justify-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                &larr;
+                <span aria-hidden="true">&larr;</span>
               </button>
               <button
                 onClick={() => swiperRef.current?.swiper.slideNext()}
                 aria-label="Next services"
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 w-8 h-8 z-10 flex items-center justify-center"
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 w-10 h-10 z-10 flex items-center justify-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                &rarr;
+                <span aria-hidden="true">&rarr;</span>
               </button>
             </div>
           </>

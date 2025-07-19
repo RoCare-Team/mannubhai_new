@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { collection, getDocs, query, where} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import LogoLoader from "@/components/LogoLoader";
+
 // Constants
 const DEFAULT_IMAGE = "/ApplianceHomeIcons/default.webp";
 const IMAGE_MAP = {
@@ -51,6 +52,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
       return acc;
     }, {}), 
   []);
+
   // Memoized image getter
   const getSubServiceImage = useCallback((type) => IMAGE_MAP[type] || DEFAULT_IMAGE, []);
 
@@ -181,8 +183,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
         ) : subServices.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No services found</p>
         ) : (
-         <div className="grid grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-
+          <div className="grid grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {subServices.map((service) => (
               <ServiceCard 
                 key={service.id}
@@ -210,7 +211,7 @@ const ServiceCard = ({ service, onClick }) => (
     <div className="relative w-full aspect-square max-w-[96px] bg-blue-50 rounded-lg mb-2">
       <Image
         src={service.ServiceIcon}
-        alt={service.ServiceName}
+        alt={`${service.ServiceName} service`}
         fill
         className="object-contain"
         placeholder="blur"
@@ -227,32 +228,23 @@ const ServiceCard = ({ service, onClick }) => (
     </span>
   </button>
 );
-// Extracted Promo Banner Component
+
+// Updated Promo Banner Component with single responsive image
 const PromoBanner = () => (
-  <section className="mt-4 md:mt-10 max-w-7xl mx-auto">
-    <div className="rounded-xl overflow-hidden shadow">
-      <Image
-        src="/HomeBanner/beauty_mob.webp"
-        alt="Beauty services"
-        width={768}
-        height={300}
-        placeholder="blur"
-        blurDataURL="/blur-banner.png"
-        sizes="100vw"
-        className="block md:hidden w-full h-auto"
-        priority
-      />
-      <Image
-        src="/HomeBanner/beauty.webp"
-        alt="Beauty services"
-        width={1920}
-        height={400}
-        priority
-        placeholder="blur"
-        blurDataURL="/blur-banner.png"
-        sizes="100vw"
-        className="hidden md:block w-full h-auto"
-      />
+  <section className="mt-4 md:mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="rounded-xl overflow-hidden shadow-lg">
+      <div className="aspect-w-16 aspect-h-9 w-full relative">
+        <Image
+          src="/HomeBanner/beauty.webp"
+          alt="Beauty services promotion"
+          fill
+          className="object-cover"
+          placeholder="blur"
+          blurDataURL="/blur-banner.png"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+          priority
+        />
+      </div>
     </div>
   </section>
 );

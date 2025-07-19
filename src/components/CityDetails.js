@@ -47,7 +47,7 @@ const DynamicComponents = {
   AppDownloadCard: dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
     loading: () => <LoadingPlaceholder className="h-64" />
   }),
-  FloatingContactButtons: dynamic(() => import('@/components/FloatingContactButtons'), {
+  FloatingContactButtons: dynamic(() => import('@/components/FloatingContactButtons-old'), {
     ssr: false
   }),
 
