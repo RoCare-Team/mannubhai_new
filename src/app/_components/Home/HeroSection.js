@@ -108,8 +108,8 @@ const HeroSection = () => {
     <section className="relative pt-10">
       {/* Mobile Only - Services Section */}
       <div className="lg:hidden w-full px-2 py-3 bg-white mt-10">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-3">
             <span>Our Services</span>
             <span>👨‍🔧</span>
           </h2>
@@ -132,9 +132,9 @@ const HeroSection = () => {
                   className="object-contain"
                 />
               </div>
-              <span className="text-xs font-medium text-center">
-                {service.name}
-              </span>
+              <h3 className="text-xs font-medium text-center leading-tight">
+              {service.name}
+              </h3>
             </button>
           ))}
         </div>
@@ -246,4 +246,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default HeroSection; 

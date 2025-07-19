@@ -19,18 +19,18 @@ import Footer from "@/components/Footer";
 
 // Constants
 const SUBSERVICE_IMAGES = {
-  "Water Purifier": "/HomeIcons/water-purifier.png",
-  "Air Conditioner": "/HomeIcons/AIR-CONDITIONAR.png",
-  "Fridge": "/HomeIcons/REFRIGERATOR.png",
-  "Washing Machine": "/HomeIcons/WASHINGMACHINE.png",
-  "Microwave": "/HomeIcons/MICROWAVE.png",
-  "Kitchen Chimney": "/HomeIcons/KitchenChimney.png",
-  "LED TV": "/HomeIcons/LED-TV.png",
-  "Vacuum Cleaner": "/HomeIcons/vacuum-cleaner.png",
-  "Air Purifier": "/HomeIcons/air-purifier.png",
-  "Air Cooler": "/HomeIcons/air-cooler.png",
-  "Kitchen Appliance": "/HomeIcons/Kitchen-Appliance.png",
-  "Geyser": "/HomeIcons/geyser.png",
+ "Water Purifier": "/ApplianceHomeIcons/RO.webp",
+    "Air Conditioner": "/ApplianceHomeIcons/AIR-CONDITIONAR.webp",
+    "Fridge": "/ApplianceHomeIcons/REFRIGERATOR.webp",
+    "Washing Machine": "/ApplianceHomeIcons/WASHING-MACHINE.webp",
+    "Microwave": "/ApplianceHomeIcons/MICROWAVE.webp",
+    "Kitchen Chimney": "/ApplianceHomeIcons/KitchenChimney.webp",
+    "LED TV": "/ApplianceHomeIcons/LED-TV.webp",
+    "Vacuum Cleaner": "/ApplianceHomeIcons/vacuum-cleaner.webp",
+    "Air Purifier": "/ApplianceHomeIcons/air-purifier.webp",
+    "Air Cooler": "/ApplianceHomeIcons/air-cooler.webp",
+    "Kitchen Appliance": "/ApplianceHomeIcons/Kitchen-Appliance.webp",
+    "Geyser": "/ApplianceHomeIcons/geyser.webp",
 };
 
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default-service.png";
