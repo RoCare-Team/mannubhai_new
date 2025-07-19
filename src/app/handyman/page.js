@@ -14,17 +14,16 @@ import "../_components/Home/swiper-custom.css";
 import HandymanServics from "../_components/Home/HandymanServices";
 import Head from "./head";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+
 // Constants
 const SERVICE_CONFIG = {
   images: {
-    Carpenter: "/HandyMan/CARPENTER.png",
-    Electrician: "/HandyMan/ELECTRICIAN.png",
-    Painter: "/HandyMan/PAINTER.png",
-    Plumber: "/HandyMan/PLUMBER.png",
-    Masons: "/HandyMan/OTHER.jpeg",
-    default: "/BeautyCare/default.png"
+    Carpenter: "/HandyMan/CARPENTER.webp",
+    Electrician: "/HandyMan/ELECTRICIAN.webp",
+    Painter: "/HandyMan/PAINTER.webp",
+    Plumber: "/HandyMan/PLUMBER.webp",
+    Masons: "/HandyMan/OTHER.webp",
+    default: "/BeautyCare/default.webp",
   },
   banners: {
     main: "/All Front Banners/HandymanService.webp",

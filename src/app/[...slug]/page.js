@@ -157,74 +157,6 @@ export async function generateMetadata({ params }) {
   }
 
   try {
-    if (slug.length === 1) {
-      const [segment] = slug;
-      const canonicalUrl = `${baseUrl}/${segment}`;
-
-      const [cityDoc, catDoc] = await Promise.all([
-        fetchDoc("city_tb", "city_url", segment),
-        fetchDoc("category_manage", "category_url", segment),
-      ]);
-
-      if (cityDoc) {
-        const result = {
-          title: cityDoc.meta_title || `${cityDoc.city_name} Services | Mannu Bhai`,
-          description: cityDoc.meta_description || `Find trusted service professionals in ${cityDoc.city_name}`,
-          keywords: cityDoc.meta_keywords || `${cityDoc.city_name}, services, home repair, ${cityDoc.city_name} professionals`,
-          alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
-          openGraph: {
-            title: cityDoc.meta_title || `${cityDoc.city_name} Services | Mannu Bhai`,
-            description: cityDoc.meta_description || `Find trusted service professionals in ${cityDoc.city_name}`,
-            url: canonicalUrl,
-            images: [{ 
-              url: cityDoc.image || "/default-city.jpg", 
-              width: 1200, 
-              height: 630, 
-              alt: `Mannu Bhai services in ${cityDoc.city_name}` 
-            }],
-          },
-          twitter: {
-            card: "summary_large_image",
-            title: cityDoc.meta_title || `${cityDoc.city_name} Services | Mannu Bhai`,
-            description: cityDoc.meta_description || `Find trusted service professionals in ${cityDoc.city_name}`,
-            images: [cityDoc.image || "/default-city.jpg"],
-          },
-        };
-        metadataCache.set(cacheKey, result);
-        return result;
-      }
-
-      if (catDoc) {
-        const result = {
-          title: catDoc.meta_title || `${catDoc.category_name} Services | Mannu Bhai`,
-          description: catDoc.meta_description || `Professional ${catDoc.category_name} services nationwide`,
-          keywords: catDoc.meta_keywords || `${catDoc.category_name}, services, repair, professionals`,
-          alternates: { canonical: canonicalUrl },
-          robots: { index: true, follow: true },
-          openGraph: {
-            title: catDoc.meta_title || `${catDoc.category_name} Services | Mannu Bhai`,
-            description: catDoc.meta_description || `Professional ${catDoc.category_name} services nationwide`,
-            url: canonicalUrl,
-            images: [{ 
-              url: catDoc.image || "/default-category.jpg", 
-              width: 1200, 
-              height: 630, 
-              alt: `${catDoc.category_name} services` 
-            }],
-          },
-          twitter: {
-            card: "summary_large_image",
-            title: catDoc.meta_title || `${catDoc.category_name} Services | Mannu Bhai`,
-            description: catDoc.meta_description || `Professional ${catDoc.category_name} services nationwide`,
-            images: [catDoc.image || "/default-category.jpg"],
-          },
-        };
-        metadataCache.set(cacheKey, result);
-        return result;
-      }
-    }
-
     if (slug.length === 2) {
       const [citySeg, catSeg] = slug;
       const canonicalUrl = `${baseUrl}/${citySeg}/${catSeg}`;
@@ -237,12 +169,105 @@ export async function generateMetadata({ params }) {
       if (cityDoc && catDoc) {
         const pageMasterDoc = await fetchPageMaster(cityDoc.id, catDoc.id);
         
+        // Generate FAQ data from pageMasterDoc or use default FAQs
+        const faqData = [];
+        if (pageMasterDoc) {
+          for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+            faqData.push({
+              question: pageMasterDoc[`faqquestion${i}`],
+              answer: pageMasterDoc[`faqanswer${i}`]
+            });
+          }
+        }
+
+        // Default FAQs if none found in pageMasterDoc
+        const defaultFAQs = [
+          {
+            question: "Why should I get my water purifier serviced regularly?",
+            answer: "Regular servicing ensures clean and safe drinking water, improves purifier efficiency, and extends the life of the appliance."
+          },
+          {
+            question: "What types of water purifiers do you service in Delhi?",
+            answer: "We service all major water purifier brands and models, including RO, UV, UF, and gravity-based purifiers."
+          },
+          {
+            question: "How do I book a water purifier service with Mannubhai?",
+            answer: "You can book easily online through our website or call our customer care number for instant assistance."
+          }
+        ];
+
+        const finalFAQs = faqData.length > 0 ? faqData : defaultFAQs;
+
+        // Generate structured data
+        const structuredData = {
+          localBusiness: {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": `Mannubhai ${catDoc.category_name} Service`,
+            "image": "https://www.mannubhai.com/assets/images/logo.png",
+            "url": canonicalUrl,
+            "telephone": "+91-7065012902",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": cityDoc.city_name,
+              "addressRegion": cityDoc.city_name,
+              "addressCountry": "IN"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "10483"
+            }
+          },
+          breadcrumb: {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": `${baseUrl}/`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": cityDoc.city_name,
+                "item": `${baseUrl}/${cityDoc.city_url}/`
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": catDoc.category_name,
+                "item": canonicalUrl
+              }
+            ]
+          },
+          faqPage: {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": finalFAQs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          }
+        };
+
         const result = {
           title: pageMasterDoc?.meta_title || `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`,
           description: pageMasterDoc?.meta_description || `Top-rated ${catDoc.category_name} services in ${cityDoc.city_name}`,
           keywords: pageMasterDoc?.meta_keywords || `${catDoc.category_name}, ${cityDoc.city_name}, services, repair`,
           alternates: { canonical: canonicalUrl },
           robots: { index: true, follow: true },
+          other: {
+            'local-business-ld+json': JSON.stringify(structuredData.localBusiness),
+            'breadcrumb-ld+json': JSON.stringify(structuredData.breadcrumb),
+            'faqpage-ld+json': JSON.stringify(structuredData.faqPage)
+          },
           openGraph: {
             title: pageMasterDoc?.meta_title || `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`,
             description: pageMasterDoc?.meta_description || `Top-rated ${catDoc.category_name} services in ${cityDoc.city_name}`,
@@ -277,6 +302,9 @@ export async function generateMetadata({ params }) {
   metadataCache.set(cacheKey, result);
   return result;
 }
+
+
+
 
 // Main Component
 export default async function DynamicRouteHandler({ params, searchParams }) {
