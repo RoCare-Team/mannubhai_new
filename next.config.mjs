@@ -30,28 +30,35 @@ const nextConfig = {
       }
     ];
   },
-  // Modern JavaScript optimizations
-  compiler: {
-    // Only include necessary polyfills
-    polyfills: [
-      'fetch',
-      'url',
-      'blob'
-      // Removed Array.at, Array.flat, Object.fromEntries, etc. as they're in Baseline
-    ],
+  // Webpack configuration to handle internal references
+  webpack: (config, { isServer }) => {
+    // Modify webpack internal paths in development
+    if (process.env.NODE_ENV === 'development') {
+      config.output.devtoolModuleFilenameTemplate = function(info) {
+        return `file:///${info.absoluteResourcePath.replace(/\\/g, '/')}`;
+      };
+    }
+
+    return config;
   },
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+  // Disable performance hints
+  performance: {
+    hints: false,
+  },
+  // Optional: Optimize large package imports
   experimental: {
-    // Enable modern JavaScript output
-    modern: true,
-    // Optional: Enable SWC minification (more efficient than Terser)
+    optimizePackageImports: [
+      'react',
+      'react-dom',
+      'scheduler'
+    ],
+    // Enable if you're using SWC minification
     swcMinify: true,
   },
-  // Enable React strict mode (good practice)
+  // Enable React strict mode
   reactStrictMode: true,
-  // Environment variables if needed
-  env: {
-    // Add your environment variables here
-  }
-}
+};
 
 export default nextConfig;
