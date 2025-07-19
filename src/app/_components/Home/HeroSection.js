@@ -73,14 +73,14 @@ const HeroSection = () => {
       'Beauty Care': 'beauty-care',
       'Handyman': 'handyman',
     };
-    
+
     const sectionId = sectionMap[serviceName];
     if (sectionId) {
       const section = document.getElementById(sectionId);
       if (section) {
         const headerHeight = document.querySelector('header')?.offsetHeight || 0;
         const offsetPosition = section.offsetTop - headerHeight - 20;
-        
+
         window.scrollTo({
           top: offsetPosition,
           behavior: 'smooth'
@@ -105,29 +105,28 @@ const HeroSection = () => {
   const displayServices = loading || error ? [] : services;
 
   return (
-    <section className="relative mt-10 pt-10">
+    <section className="relative pt-10">
       {/* Mobile Only - Services Section */}
-      <div className="lg:hidden w-full px-2 py-3 bg-white">
+      <div className="lg:hidden w-full px-2 py-3 bg-white mt-10">
         <div className="flex items-center justify-between mb-2">
-           <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-5">
-                    <span>Our Services</span>
-                    <span>👨‍🔧</span>
-                  </h2>
-         
+          <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2">
+            <span>Our Services</span>
+            <span>👨‍🔧</span>
+          </h2>
+
         </div>
-        
+
         <div className="grid grid-cols-4 gap-1 border border-gray-200 rounded-lg  shadow-sm ">
           {displayServices.map((service) => (
-            <button
-              key={service.id}
-             className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
+            <button key={service.id} className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
               onClick={(e) => handleServiceClick(service, e)}
-              aria-label={`Navigate to ${service.name} services`}
+             title={`Navigate to ${service.name} services`}
+              role="button" // Explicitly define the role
             >
-            <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
+              <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
                 <Image
                   src={service.imageUrl}
-                  alt=""
+                  alt={service.name}
                   width={40}
                   height={40}
                   className="object-contain"
@@ -145,11 +144,11 @@ const HeroSection = () => {
       <div className="hidden lg:block hero-section w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0">
         <div className="hero-section-container max-w-7xl mx-auto mt-5">
           <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-12">
-            
+
             {/* Left Content */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
               <header className="flex items-center gap-3 mb-6 md:mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gradient">
+                <h1 className="text-4xl md:text-4xl font-bold leading-tight text-gradient">
                   Home services at your doorstep
                 </h1>
               </header>
@@ -166,7 +165,8 @@ const HeroSection = () => {
                         key={service.id}
                         className="flex flex-col items-center p-3 md:p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all shadow-sm group hover:shadow-md"
                         onClick={(e) => handleServiceClick(service, e)}
-                        aria-label={`Navigate to ${service.name} services`}
+                       title={`Navigate to ${service.name} services`}
+                         role="button"
                       >
                         <div className="relative w-14 h-14 md:w-16 md:h-16 mb-3 transition-transform group-hover:scale-105">
                           <Image
@@ -219,14 +219,14 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Swiper Section - Hidden on Mobile */}
       <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
         <div className="max-w-7xl mx-auto">
           <ServiceBannerSlider />
         </div>
       </div>
-      
+
       {/* Single Banner for all devices */}
       <div className="w-full px-2 lg:px-12 mt-3 lg:mt-10 mb-0">
         <div className="max-w-7xl mx-auto">
@@ -237,6 +237,7 @@ const HeroSection = () => {
               width={1820}
               height={400}
               className="object-cover w-full h-auto"
+              loading="lazy"
             />
           </div>
         </div>

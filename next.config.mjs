@@ -30,7 +30,28 @@ const nextConfig = {
       }
     ];
   },
+  // Modern JavaScript optimizations
+  compiler: {
+    // Only include necessary polyfills
+    polyfills: [
+      'fetch',
+      'url',
+      'blob'
+      // Removed Array.at, Array.flat, Object.fromEntries, etc. as they're in Baseline
+    ],
+  },
+  experimental: {
+    // Enable modern JavaScript output
+    modern: true,
+    // Optional: Enable SWC minification (more efficient than Terser)
+    swcMinify: true,
+  },
+  // Enable React strict mode (good practice)
+  reactStrictMode: true,
+  // Environment variables if needed
+  env: {
+    // Add your environment variables here
+  }
 }
-
 
 export default nextConfig;

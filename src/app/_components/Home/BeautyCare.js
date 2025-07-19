@@ -146,13 +146,13 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
       {/* Header */}
       <header className="mb-5">
-        <h1 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
+        <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
           Beauty Services
-        </h1>
+        </h2>
       </header>
 
       {/* Services grid */}
-      <section aria-labelledby="beauty-services" className="max-w-7xl mx-auto" id="beauty-care">
+      <section title="beauty-services" className="max-w-7xl mx-auto" id="beauty-care">
         <h2 id="beauty-services" className="sr-only">
           Beauty Sub-Services
         </h2>
@@ -176,7 +176,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
               <button
                 key={service.id}
                 onClick={() => handleSubServiceClick(service)}
-                aria-label={`View ${service.ServiceName} services`}
+                title={`View ${service.ServiceName} services`}
                 className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
@@ -202,7 +202,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
       {/* Beauty brands section */}
       <section 
-        aria-labelledby="beauty-brands" 
+        title="beauty-brands" 
         className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" 
         id="beauty-brands"
       >
@@ -211,7 +211,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
       {/* Promotional banner - desktop only */}
 {!hideBrightBanner && (
-  <section className="mt-0 md:mt-10 mb-0">
+  <section className="mt-0  mb-0">
     <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
       <div className="rounded-xl overflow-hidden shadow">
         <Image
@@ -219,8 +219,9 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
           alt="Professional homecare services available"
           width={1920}
           height={400}
-          priority
+       
           placeholder="blur"
+          loading="lazy"
           blurDataURL="/blur-banner.png"
           sizes="100vw"
           className="w-full h-auto"
