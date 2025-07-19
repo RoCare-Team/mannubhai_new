@@ -16,7 +16,8 @@ import {
   MdInfo,
   MdWarning,
   MdError,
-  MdCheckCircle
+  MdCheckCircle,
+  MdLogout
 } from "react-icons/md";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ const AccountDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState("update"); // 'update' or 'logout'
   const [imagePreview, setImagePreview] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
@@ -220,6 +222,12 @@ const AccountDetails = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/");
+    showAlert("You have been logged out successfully", "success");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
@@ -248,7 +256,7 @@ const AccountDetails = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4 sm:mt-10">
         <div className="max-w-2xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-8 relative">
@@ -259,6 +267,20 @@ const AccountDetails = () => {
               Account Details
             </h1>
             <p className="text-slate-600 mt-2">Manage your personal information</p>
+            
+            {/* Mobile-only Logout Button */}
+            <div className="lg:hidden absolute top-0 right-0">
+              <button
+                onClick={() => {
+                  setConfirmAction("logout");
+                  setConfirmOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition-colors duration-200"
+              >
+                <MdLogout className="w-5 h-5" />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </div>
           </div>
 
           {/* Main Card */}
@@ -466,13 +488,16 @@ const AccountDetails = () => {
                     <button
                       onClick={handleCancel}
                       disabled={isSubmitting}
-                      className="flex-1 bg-white/80 text-slate-700 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 bg-white/80 text-slate-700 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       <MdClose className="w-5 h-5" />
                       Cancel
                     </button>
                     <button
-                      onClick={() => setConfirmOpen(true)}
+                      onClick={() => {
+                        setConfirmAction("update");
+                        setConfirmOpen(true);
+                      }}
                       disabled={isSubmitting || !hasChanges() || uploadingImage}
                       className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:transform-none"
                     >
@@ -495,10 +520,12 @@ const AccountDetails = () => {
                   <MdSecurity className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-800 mb-4">
-                  Confirm Update
+                  {confirmAction === "update" ? "Confirm Update" : "Confirm Logout"}
                 </h3>
                 <p className="text-slate-600 mb-8 leading-relaxed">
-                  Are you sure you want to update your profile details? This action will save your changes permanently.
+                  {confirmAction === "update" 
+                    ? "Are you sure you want to update your profile details? This action will save your changes permanently."
+                    : "Are you sure you want to logout? You'll need to login again to access your account."}
                 </p>
                 <div className="flex gap-4">
                   <button
@@ -510,11 +537,19 @@ const AccountDetails = () => {
                   <button
                     onClick={() => {
                       setConfirmOpen(false);
-                      handleSubmit();
+                      if (confirmAction === "update") {
+                        handleSubmit();
+                      } else {
+                        handleLogout();
+                      }
                     }}
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+                    className={`flex-1 bg-gradient-to-r ${
+                      confirmAction === "update" 
+                        ? "from-blue-500 to-purple-600" 
+                        : "from-red-500 to-orange-600"
+                    } text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200`}
                   >
-                    Yes, Update
+                    {confirmAction === "update" ? "Yes, Update" : "Yes, Logout"}
                   </button>
                 </div>
               </div>

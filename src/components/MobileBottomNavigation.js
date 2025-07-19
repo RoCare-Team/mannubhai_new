@@ -13,6 +13,7 @@ import {
 const MobileBottomNavigation = ({ pathname }) => {
   const router = useRouter();
   const [showLoginPopup, setShowLoginPopup] = React.useState(false);
+  const [protectedRoute, setProtectedRoute] = React.useState(null);
   const { isLoggedIn } = useAuth();
 
   const phoneNumber = "+917065012902";
@@ -26,26 +27,35 @@ const MobileBottomNavigation = ({ pathname }) => {
     },
     {
       name: "Bookings",
-      href: "/bookings",
+      href: "/my-bookings",
       icon: <CalendarIcon className="w-6 h-6" />,
-      current: pathname === "/bookings",
+      current: pathname === "/my-bookings",
       requiresAuth: true,
     },
     {
       name: "Profile",
-      href: "/profile",
+      href: "/account",
       icon: <UserIcon className="w-6 h-6" />,
-      current: pathname === "/profile",
+      current: pathname === "/account",
       requiresAuth: true,
     },
   ];
 
   const handleNavigation = (url, requiresAuth = false) => {
     if (requiresAuth && !isLoggedIn) {
+      setProtectedRoute(url); // Store the intended route
       setShowLoginPopup(true);
       return;
     }
     router.push(url);
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginPopup(false);
+    if (protectedRoute) {
+      router.push(protectedRoute);
+      setProtectedRoute(null); // Clear the stored route
+    }
   };
 
   return (
@@ -90,7 +100,7 @@ const MobileBottomNavigation = ({ pathname }) => {
       <LoginPopup
         show={showLoginPopup}
         onClose={() => setShowLoginPopup(false)}
-        onLoginSuccess={() => setShowLoginPopup(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
     </>
   );
