@@ -136,7 +136,7 @@ export default function HomecareServices({
       <button
         key={service.id}
         onClick={() => handleSubServiceClick(service)}
-        aria-label={`View ${service.ServiceName} services`}
+        title={`View ${service.ServiceName} services`}
         className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg"
       >
         <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
@@ -173,7 +173,7 @@ export default function HomecareServices({
       </header>
 
       <section 
-        aria-labelledby="homecare-services" 
+        title="homecare-services" 
         className="max-w-7xl mx-auto" 
         id="home-care"
       >
@@ -210,10 +210,11 @@ export default function HomecareServices({
                 alt="Professional home care services available"
                 width={1920}
                 height={400}
-                priority
+            
                 placeholder="blur"
                 blurDataURL="/blur-banner.png"
                 sizes="100vw"
+                loading="lazy"
                 className="w-full h-auto"
               />
             </div>

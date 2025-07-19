@@ -165,14 +165,15 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
   return (
     <main className="pb-5 px-4 sm:px-6 lg:px-20">
       <section 
-        aria-labelledby="appliance-services" 
+        titleledby="appliance-services" 
         className="max-w-7xl mx-auto"
         id="appliances-care"
+          role="region" 
       >
         <header className="my-5">
-          <h1 className="text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
+          <h2 className="text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
             Appliance Services
-          </h1>
+          </h2>
         </header>
 
         {loading ? (
@@ -204,14 +205,21 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
 const ServiceCard = ({ service, onClick }) => (
   <button
     onClick={() => onClick(service)}
-    aria-label={`View ${service.ServiceName} services`}
-    className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all"
-    style={{ aspectRatio: '1/1.2' }}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); // Prevent scroll on Space key
+        onClick(service);
+      }
+    }}
+    title={`View ${service.ServiceName} services`}
+    className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    style={{ aspectRatio: '1/1.2', minWidth: '120px' }} // Ensures touch target size
+    tabIndex={0} // Ensure keyboard focus
   >
     <div className="relative w-full aspect-square max-w-[96px] bg-blue-50 rounded-lg mb-2">
       <Image
         src={service.ServiceIcon}
-        alt={`${service.ServiceName} service`}
+        alt="" // Empty alt since the button's title covers it
         fill
         className="object-contain"
         placeholder="blur"
@@ -221,6 +229,7 @@ const ServiceCard = ({ service, onClick }) => (
         onError={(e) => {
           e.currentTarget.src = DEFAULT_IMAGE;
         }}
+      // Image is decorative (redundant with button's label)
       />
     </div>
     <span className="text-xs font-semibold text-center text-gray-700">
@@ -228,7 +237,6 @@ const ServiceCard = ({ service, onClick }) => (
     </span>
   </button>
 );
-
 // Updated Promo Banner Component with single responsive image
 const PromoBanner = () => (
   <section className="mt-4 md:mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,11 +246,11 @@ const PromoBanner = () => (
           src="/HomeBanner/beauty.webp"
           alt="Beauty services promotion"
           fill
+          loading="lazy"
           className="object-cover"
           placeholder="blur"
           blurDataURL="/blur-banner.png"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-          priority
         />
       </div>
     </div>
