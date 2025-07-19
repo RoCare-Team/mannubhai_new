@@ -80,7 +80,6 @@ export default function Services() {
                         onClick={() => toggleExpand(title)}
                         className="text-blue-600 text-sm font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                         aria-expanded={isExpanded}
-                        aria-controls={`${anchor}-content`}
                       >
                         {isExpanded ? "Read less ▲" : "Read more ▼"}
                       </button>

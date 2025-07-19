@@ -11,7 +11,6 @@ import LoginPopup from "./login";
 import MobileBottomNavigation from "./MobileBottomNavigation";
 import navigationItems from "./navigationItems";
 import { useAuth } from "@/app/contexts/AuthContext";
-import FloatingContactButtons from "./FloatingContactButtons";
 
 const AddToCart = dynamic(() => import("../app/checkout/page.js"), { ssr: false });
 
@@ -103,7 +102,7 @@ const Header = () => {
         onClose={() => setShowLogin(false)}
         onLoginSuccess={handleLoginSuccess}
       />
-      <FloatingContactButtons />
+  
 
       <style jsx global>{`
         @media (min-width: 1024px) {

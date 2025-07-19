@@ -142,7 +142,7 @@ export default function HomecareServices({
         <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
           <Image
             src={service.ServiceIcon}
-            alt={service.ServiceName}
+            alt="" // Empty alt since the service name is already visible
             fill
             className="object-contain"
             placeholder="blur"
@@ -206,26 +206,15 @@ export default function HomecareServices({
           <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
             <div className="rounded-xl overflow-hidden shadow mt-5">
               <Image
-                src="/HomeBanner/handy_mob.webp"
-                alt="Promotional banner for homecare services - mobile"
-                width={768}
-                height={300}
-                priority
-                placeholder="blur"
-                blurDataURL="/blur-banner.png"
-                sizes="100vw"
-                className="block md:hidden w-full h-auto"
-              />
-              <Image
                 src="/HomeBanner/handyman.webp"
-                alt="Promotional banner for homecare services"
+                alt="Professional home care services available"
                 width={1920}
                 height={400}
                 priority
                 placeholder="blur"
                 blurDataURL="/blur-banner.png"
                 sizes="100vw"
-                className="hidden md:block w-full h-auto"
+                className="w-full h-auto"
               />
             </div>
           </div>

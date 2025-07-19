@@ -111,7 +111,7 @@ const CartUI = ({ cartLoaded, cartLoadedToggle }) => {
             </div>
           ))}
 
-        <div className="cart-footer fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-10 ">
+  <div className="cart-footer fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-10 ">
   <div className="totalSection mb-10 p-4">
     <Link href={"/checkout"}>
       <div 
@@ -128,7 +128,7 @@ const CartUI = ({ cartLoaded, cartLoadedToggle }) => {
 </div>
         </>
       )}
-    </div>
+    </div>                                                      
   );
 };
 

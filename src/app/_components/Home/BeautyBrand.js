@@ -11,7 +11,7 @@ const beautyBrands = [
 
 const BeautyBrand = () => {
   return (
-    <section className="w-full py-10 sm:py-14 bg-gradient-to-b from-white">
+    <section className="w-full  sm:py-14 bg-gradient-to-b from-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         {/* Heading with better hierarchy */}
         <div className="text-center mb-10 sm:mb-14">
@@ -46,11 +46,6 @@ const BeautyBrand = () => {
               </span>
             </div>
           ))}
-        </div>
-
-        {/* Optional decorative element */}
-        <div className="mt-12 flex justify-center">
-          <div className="h-1 w-20 bg-purple-100 rounded-full"></div>
         </div>
       </div>
     </section>

@@ -154,13 +154,13 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       {/* Services grid */}
       <section aria-labelledby="beauty-services" className="max-w-7xl mx-auto" id="beauty-care">
         <h2 id="beauty-services" className="sr-only">
-          Beauty Sub‑Services
+          Beauty Sub-Services
         </h2>
 
         {loading ? (
           <>
             <p className="text-center text-sm text-gray-500 mb-4">
-              Loading services…
+              Loading services...
             </p>
             <div className="grid grid-cols-4 gap-3 sm:gap-6">
               {skeletonItems}
@@ -182,7 +182,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
                 <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
                   <Image
                     src={service.ServiceIcon}
-                    alt={service.ServiceName}
+                    alt="" // Decorative image, alt can be empty since the service name is visible
                     fill
                     className="object-contain"
                     placeholder="blur"
@@ -209,37 +209,26 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         <BeautyBrand />
       </section>
 
-      {/* Promotional banner */}
-      {!hideBrightBanner && (
-        <section className="mt-0 md:mt-10 mb-0">
-          <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-            <div className="rounded-xl overflow-hidden shadow mt-5">
-              <Image
-                src="/HomeBanner/homecare_mbo.webp"
-                alt="Promotional banner for homecare services – mobile"
-                width={768}
-                height={300}
-                priority
-                placeholder="blur"
-                blurDataURL="/blur-banner.png"
-                sizes="100vw"
-                className="block md:hidden w-full h-auto"
-              />
-              <Image
-                src="/HomeBanner/homecare.webp"
-                alt="Promotional banner for homecare services"
-                width={1920}
-                height={400}
-                priority
-                placeholder="blur"
-                blurDataURL="/blur-banner.png"
-                sizes="100vw"
-                className="hidden md:block w-full h-auto"
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Promotional banner - desktop only */}
+{!hideBrightBanner && (
+  <section className="mt-0 md:mt-10 mb-0">
+    <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+      <div className="rounded-xl overflow-hidden shadow">
+        <Image
+          src="/HomeBanner/homecare.webp"
+          alt="Professional homecare services available"
+          width={1920}
+          height={400}
+          priority
+          placeholder="blur"
+          blurDataURL="/blur-banner.png"
+          sizes="100vw"
+          className="w-full h-auto"
+        />
+      </div>
+    </div>
+  </section>
+)}
     </main>
   );
 }

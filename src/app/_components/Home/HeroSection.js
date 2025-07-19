@@ -14,10 +14,10 @@ import "./swiper-custom.css";
 import ServiceBannerSlider from "./ServiceBannerSlider";
 
 const SERVICE_IMAGES = {
-  "Appliances Care": "/HomeIcons/home appliances.png",
-  "Home Care": "/HomeIcons/sofa-bathroom-and-kitchen-cleaning.png",
-  "Beauty Care": "/HomeIcons/BEAUTY CARE.png",
-  "Handyman": "/HomeIcons/Electrician.png",
+  "Appliances Care": "/herosection/home appliances.webp",
+  "Home Care": "/herosection/sofa-bathroom-and-kitchen-cleaning.webp",
+  "Beauty Care": "/herosection/BEAUTY CARE.webp",
+  "Handyman": "/herosection/Electrician.webp",
 };
 
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default-service.png";
@@ -76,29 +76,26 @@ const HeroSection = () => {
     
     const sectionId = sectionMap[serviceName];
     if (sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-      // Calculate the position considering any fixed headers
-      const headerHeight = document.querySelector('header')?.offsetHeight || 0;
-      const offsetPosition = section.offsetTop - headerHeight - 20; // 20px extra padding
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      const section = document.getElementById(sectionId);
+      if (section) {
+        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+        const offsetPosition = section.offsetTop - headerHeight - 20;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
 
-      // Highlight effect
-      section.classList.add('highlight-section');
-      setTimeout(() => {
-        section.classList.remove('highlight-section');
-      }, 2000);
+        section.classList.add('highlight-section');
+        setTimeout(() => {
+          section.classList.remove('highlight-section');
+        }, 2000);
 
-      // Focus for accessibility
-      section.setAttribute('tabindex', '-1');
-      section.focus();
+        section.setAttribute('tabindex', '-1');
+        section.focus();
+      }
     }
-  }
-};
+  };
 
   const handleServiceClick = (service, e) => {
     if (e) e.preventDefault();
@@ -108,165 +105,114 @@ const HeroSection = () => {
   const displayServices = loading || error ? [] : services;
 
   return (
-    <section className="relative mt-0 pt-0">
-      {/* Hero Section */}
-      <div className="hero-section w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0">
-        <div className="hero-section-container max-w-7xl mx-auto mt-5">
-          
-          {/* Mobile Header - Hidden on mobile */}
-          <header className="hidden">
-            <h1 className="text-base sm:text-lg text[20px]font-bold leading-tight text-center text-gradient mt-4">
-              Home services at your doorstep
-            </h1>
-          </header>
+    <section className="relative mt-10 pt-10">
+      {/* Mobile Only - Services Section */}
+      <div className="lg:hidden w-full px-2 py-3 bg-white">
+        <div className="flex items-center justify-between mb-2">
+           <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-5">
+                    <span>Our Services</span>
+                    <span>👨‍🔧</span>
+                  </h2>
+         
+        </div>
+        
+        <div className="grid grid-cols-4 gap-1 border border-gray-200 rounded-lg  shadow-sm ">
+          {displayServices.map((service) => (
+            <button
+              key={service.id}
+             className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
+              onClick={(e) => handleServiceClick(service, e)}
+              aria-label={`Navigate to ${service.name} services`}
+            >
+            <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
+                <Image
+                  src={service.imageUrl}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-xs font-medium text-center">
+                {service.name}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {/* Desktop View */}
+      <div className="hidden lg:block hero-section w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0">
+        <div className="hero-section-container max-w-7xl mx-auto mt-5">
           <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 xl:gap-12">
             
             {/* Left Content */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
-              
-              {/* Desktop Header - Hidden on mobile */}
-              <header className="hidden md:flex items-center gap-3 mb-6 lg:mb-8">
-                <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-gradient">
+              <header className="flex items-center gap-3 mb-6 md:mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-gradient">
                   Home services at your doorstep
-                </h2>
+                </h1>
               </header>
 
-              {/* Services Section */}
-              <section className="services-part mb-6 lg:mb-8 mt-4 sm:mt-6 md:mt-0">
-                
-                {/* Mobile Only Heading */}
-                <div className="sm:hidden text-center mb-4">
-                  <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-5">
-                    <span>Our Services</span>
-                    <span>👨‍🔧</span>
-                  </h2>
-                </div>
-
-                {/* Desktop Heading */}
-                <h2 className="hidden md:block text-lg md:text-xl lg:text-2xl font-semibold mb-4">
+              <section className="services-part mb-6 lg:mb-8">
+                <h2 className="text-xl md:text-2xl font-semibold mb-4">
                   What are you looking for?
                 </h2>
 
-                {/* Services Grid - Single Row Layout */}
-                <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 lg:p-5 shadow-sm mt-6 sm:mt-8 md:mt-0">
-                  
-                  {/* Mobile: Single Row with 4 columns - INCREASED IMAGE SIZE */}
-                  <div className="grid grid-cols-4 gap-2 sm:hidden">
-                    {displayServices
-                      .sort((a, b) => {
-                        const order = [
-                          "Appliances Care",
-                          "Home Care",
-                          "Beauty Care",
-                          "Handyman",
-                        ];
-                        return order.indexOf(a.name) - order.indexOf(b.name);
-                      })
-                      .map((service) => (
-                        <article
-                          key={service.id}
-                          className="flex flex-col items-center p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
-                          onClick={(e) => handleServiceClick(service, e)}
-                        >
-                          <div className="relative w-14 h-14 mb-2 transition-transform duration-200 group-hover:scale-105">
-                            <Image
-                              src={service.imageUrl}
-                              alt={`${service.name} service`}
-                              width={56}
-                              height={56}
-                              className="object-contain"
-                              priority
-                            />
-                          </div>
-                          <h3 className="text-xs font-medium text-center leading-tight">
-                            {service.name}
-                          </h3>
-                        </article>
-                      ))}
-                  </div>
-
-                  {/* Tablet & Desktop: Single Row */}
-                  <div className="hidden sm:grid sm:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
-                    {displayServices
-                      .sort((a, b) => {
-                        const order = [
-                          "Appliances Care",
-                          "Home Care",
-                          "Beauty Care",
-                          "Handyman",
-                        ];
-                        return order.indexOf(a.name) - order.indexOf(b.name);
-                      })
-                      .map((service) => (
-                        <article
-                          key={service.id}
-                          className="flex flex-col items-center p-3 md:p-3 lg:p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md"
-                          onClick={(e) => handleServiceClick(service, e)}
-                        >
-                          <div className="relative w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 mb-2 md:mb-3 transition-transform duration-200 group-hover:scale-105">
-                            <Image
-                              src={service.imageUrl}
-                              alt={`${service.name} service`}
-                              width={64}
-                              height={64}
-                              className="object-contain"
-                              priority
-                            />
-                          </div>
-                          <h3 className="text-xs md:text-sm font-medium text-center leading-tight relative after:content-[''] after:block after:h-[1px] after:bg-blue-500 after:scale-x-0 after:transition-transform after:duration-200 group-hover:after:scale-x-100 after:origin-left">
-                            {service.name}
-                          </h3>
-                        </article>
-                      ))}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 shadow-sm">
+                  <div className="grid grid-cols-4 gap-4 md:gap-5">
+                    {displayServices.map((service) => (
+                      <button
+                        key={service.id}
+                        className="flex flex-col items-center p-3 md:p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all shadow-sm group hover:shadow-md"
+                        onClick={(e) => handleServiceClick(service, e)}
+                        aria-label={`Navigate to ${service.name} services`}
+                      >
+                        <div className="relative w-14 h-14 md:w-16 md:h-16 mb-3 transition-transform group-hover:scale-105">
+                          <Image
+                            src={service.imageUrl}
+                            alt=""
+                            width={64}
+                            height={64}
+                            className="object-contain"
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-center">
+                          {service.name}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </section>
 
-              {/* Stats Section - Hidden on mobile */}
-              <div className="hidden sm:flex flex-row justify-center lg:justify-start gap-4 md:gap-6 lg:gap-8 mb-6 mt-6 lg:mt-0">
-                <article className="flex items-center gap-3 md:gap-4 p-3 md:p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 shadow-sm">
-                  <CiStar className="text-yellow-500 text-xl md:text-2xl lg:text-3xl" />
+              <div className="flex flex-row justify-start gap-6 md:gap-8 mb-6 mt-6">
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors shadow-sm">
+                  <CiStar className="text-yellow-500 text-2xl lg:text-3xl" />
                   <div>
-                    <h3 className="text-sm md:text-base lg:text-lg font-bold">
-                      4.5
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      Service Rating
-                    </p>
+                    <h3 className="text-base lg:text-lg font-bold">4.5</h3>
+                    <p className="text-sm text-gray-600">Service Rating</p>
                   </div>
-                </article>
-                <article className="flex items-center gap-3 md:gap-4 p-3 md:p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 shadow-sm">
-                  <PiUsersThree className="text-blue-500 text-xl md:text-2xl lg:text-3xl" />
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors shadow-sm">
+                  <PiUsersThree className="text-blue-500 text-2xl lg:text-3xl" />
                   <div>
-                    <h3 className="text-sm md:text-base lg:text-lg font-bold">
-                      30 Lacs+
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      Customer Globally
-                    </p>
+                    <h3 className="text-base lg:text-lg font-bold">30 Lacs+</h3>
+                    <p className="text-sm text-gray-600">Customer Globally</p>
                   </div>
-                </article>
+                </div>
               </div>
             </div>
 
-            {/* Right Image - Hidden on mobile */}
-            <div className="hidden lg:block w-full lg:flex-1 lg:max-w-2xl">
-              <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-[340px] xl:h-[380px] 2xl:h-[420px] border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200" style={{ height: '550px' }}>
+            {/* Right Image */}
+            <div className="w-full lg:flex-1 lg:max-w-2xl">
+              <div className="relative w-full h-[550px] border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                 <Image
                   src={MAIN_BANNER}
-                  alt="Professional home services"
+                  alt="Professional home services team working"
                   fill
                   className="object-cover"
-                  unoptimized={false}  
-                priority={true}
-                    loading="eager"     
-            quality={80}      
-            fetchPriority="high"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
-                  style={{
-                    objectPosition: "center 30%",
-                  }}
+                  style={{ objectPosition: "center 30%" }}
                 />
               </div>
             </div>
@@ -275,47 +221,22 @@ const HeroSection = () => {
       </div>
       
       {/* Swiper Section - Hidden on Mobile */}
-      <div className="hidden sm:block w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
-        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+      <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5">
+        <div className="max-w-7xl mx-auto">
           <ServiceBannerSlider />
         </div>
       </div>
       
-      {/* Banner below Swiper - Aligned to container */}
-      <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-5 mt-0 md:mt-10 mb-0">
-        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-          
-          {/* Mobile Banner */}
-          <div className="block sm:hidden relative w-full rounded-lg overflow-hidden">
-           <Image
-            src="/HomeBanner/app_mob.webp"
-            alt="Mobile promotional banner"
-            width={768}
-            height={300}
-            className="object-contain w-full h-auto rounded-lg"
-            priority={true}
-            fetchPriority="high"
-            loading="eager"     
-            quality={80}        
-            sizes="100vw"       
-            unoptimized={false}  
-          />
-          </div>
-
-          {/* Desktop Banner */}
-          <div className="hidden sm:block mt-4 shadow-lg rounded-lg overflow-hidden dark:shadow-xl dark:shadow-gray-800/50">
+      {/* Single Banner for all devices */}
+      <div className="w-full px-2 lg:px-12 mt-3 lg:mt-10 mb-0">
+        <div className="max-w-7xl mx-auto">
+          <div className="shadow-lg rounded-lg overflow-hidden">
             <Image
               src="/HomeBanner/appliance.webp"
-              alt="Desktop promotional banner"
+              alt="Professional home appliance services"
               width={1820}
               height={400}
               className="object-cover w-full h-auto"
-               priority={true}
-              fetchPriority="high"  
-              loading="eager"      
-              quality={80}    
-              sizes="100vw"     
-              unoptimized={false}
             />
           </div>
         </div>
