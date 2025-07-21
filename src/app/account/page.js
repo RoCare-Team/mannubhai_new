@@ -256,24 +256,27 @@ const AccountDetails = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-4 sm:py-8 px-4 sm:px-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4 sm:mt-10">
         <div className="max-w-2xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-6 sm:mb-8 relative">
+         <div className="text-center mb-6 sm:mb-8 relative">
             <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-3 sm:mb-4 shadow-lg">
               <MdPerson className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mt-10 sm:mt-0">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mt-10 sm:mt-0">
               Account Details
             </h1>
-            <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage your personal information</p>  
+          <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage your personal information</p>
+  
+            {/* Mobile-only Logout Button */}
+          
           </div>
 
           {/* Main Card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl border border-white/20 p-5 sm:p-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-2xl sm:rounded-3xl"></div>
-            <div className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-2xl sm:blur-3xl"></div>
-              <div className="lg:hidden absolute top-5 right-5">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-3xl"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
+              <div className="sm:hidden absolute top-5 right-5">
               <button
                 onClick={() => {
                   setConfirmAction("logout");
@@ -287,9 +290,9 @@ const AccountDetails = () => {
             </div>
             <div className="relative z-10">
               {/* Profile Picture Section */}
-              <div className="flex justify-center mb-6 sm:mb-8">
+              <div className="flex justify-center mb-8">
                 <div className="relative group">
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-lg ring-2 sm:ring-4 ring-white">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden shadow-lg ring-4 ring-white">
                     {imagePreview ? (
                       <Image
                         src={imagePreview}
@@ -300,7 +303,7 @@ const AccountDetails = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <span className="text-xl sm:text-2xl font-bold text-white">
+                        <span className="text-2xl font-bold text-white">
                           {formData.name ? formData.name.charAt(0).toUpperCase() : "U"}
                         </span>
                       </div>
@@ -308,13 +311,13 @@ const AccountDetails = () => {
                     
                     {isEditing && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <MdCameraAlt className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <MdCameraAlt className="w-6 h-6 text-white" />
                       </div>
                     )}
                   </div>
 
-                  <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center border-2 sm:border-4 border-white shadow-md sm:shadow-lg">
-                    <MdCheck className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                    <MdCheck className="w-4 h-4 text-white" />
                   </div>
 
                   {isEditing && (
@@ -322,12 +325,12 @@ const AccountDetails = () => {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="absolute -bottom-1 -left-1 sm:-bottom-2 sm:-left-2 w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center border-2 sm:border-4 border-white shadow-md sm:shadow-lg transition-colors duration-200 disabled:opacity-50"
+                      className="absolute -bottom-2 -left-2 w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-colors duration-200 disabled:opacity-50"
                     >
                       {uploadingImage ? (
-                        <div className="w-2 h-2 sm:w-3 sm:h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
                       ) : (
-                        <MdEdit className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                        <MdEdit className="w-3 h-3 text-white" />
                       )}
                     </button>
                   )}
@@ -336,9 +339,9 @@ const AccountDetails = () => {
                     <button
                       type="button"
                       onClick={handleRemoveImage}
-                      className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md sm:shadow-lg transition-colors duration-200"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-lg transition-colors duration-200"
                     >
-                      <MdClose className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                      <MdClose className="w-3 h-3 text-white" />
                     </button>
                   )}
                 </div>
@@ -353,24 +356,24 @@ const AccountDetails = () => {
               />
 
               {isEditing && (
-                <div className="flex justify-center mb-4 sm:mb-6">
+                <div className="flex justify-center mb-6">
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg sm:rounded-xl transition-colors duration-200 disabled:opacity-50 text-sm sm:text-base"
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors duration-200 disabled:opacity-50"
                     >
-                      <MdImage className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <MdImage className="w-4 h-4" />
                       {uploadingImage ? "Uploading..." : "Change Photo"}
                     </button>
                     {imagePreview && (
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg sm:rounded-xl transition-colors duration-200 text-sm sm:text-base"
+                        className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl transition-colors duration-200"
                       >
-                        <MdDelete className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <MdDelete className="w-4 h-4" />
                         Remove
                       </button>
                     )}
@@ -379,18 +382,18 @@ const AccountDetails = () => {
               )}
 
               {errors.image && (
-                <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4 text-red-600 text-xs sm:text-sm bg-red-50 rounded-lg p-2 sm:p-3">
-                  <MdClose className="w-3 h-3 sm:w-4 sm:h-4" />
+                <div className="flex items-center justify-center gap-2 mb-4 text-red-600 text-sm bg-red-50 rounded-lg p-3">
+                  <MdClose className="w-4 h-4" />
                   {errors.image}
                 </div>
               )}
 
               {/* Form Fields */}
-              <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-6">
                 {/* Full Name Field */}
                 <div className="group">
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                    <MdPerson className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                    <MdPerson className="w-4 h-4" />
                     Full Name
                   </label>
                   <div className="relative">
@@ -400,7 +403,7 @@ const AccountDetails = () => {
                       value={formData.name}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`w-full px-3 py-3 sm:px-4 sm:py-4 bg-white/80 border-2 rounded-xl sm:rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-blue-500/20 ${
+                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${
                         errors.name 
                           ? "border-red-300 bg-red-50/50" 
                           : isEditing 
@@ -410,8 +413,8 @@ const AccountDetails = () => {
                       placeholder="Enter your full name"
                     />
                     {errors.name && (
-                      <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-red-600 text-xs sm:text-sm">
-                        <MdClose className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <div className="flex items-center gap-2 mt-2 text-red-600 text-sm">
+                        <MdClose className="w-4 h-4" />
                         {errors.name}
                       </div>
                     )}
@@ -420,8 +423,8 @@ const AccountDetails = () => {
 
                 {/* Email Field */}
                 <div className="group">
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                    <MdEmail className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                    <MdEmail className="w-4 h-4" />
                     Email Address
                   </label>
                   <div className="relative">
@@ -431,7 +434,7 @@ const AccountDetails = () => {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`w-full px-3 py-3 sm:px-4 sm:py-4 bg-white/80 border-2 rounded-xl sm:rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-blue-500/20 ${
+                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${
                         errors.email 
                           ? "border-red-300 bg-red-50/50" 
                           : isEditing 
@@ -441,8 +444,8 @@ const AccountDetails = () => {
                       placeholder="Enter your email address"
                     />
                     {errors.email && (
-                      <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-red-600 text-xs sm:text-sm">
-                        <MdClose className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <div className="flex items-center gap-2 mt-2 text-red-600 text-sm">
+                        <MdClose className="w-4 h-4" />
                         {errors.email}
                       </div>
                     )}
@@ -451,8 +454,8 @@ const AccountDetails = () => {
 
                 {/* Mobile Field */}
                 <div className="group">
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                    <MdPhone className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                    <MdPhone className="w-4 h-4" />
                     Mobile Number
                   </label>
                   <div className="relative">
@@ -460,10 +463,10 @@ const AccountDetails = () => {
                       type="text"
                       value={user.mobile || "-"}
                       disabled
-                      className="w-full px-3 py-3 sm:px-4 sm:py-4 bg-slate-100/80 border-2 border-slate-200 rounded-xl sm:rounded-2xl cursor-not-allowed opacity-60"
+                      className="w-full px-4 py-4 bg-slate-100/80 border-2 border-slate-200 rounded-2xl cursor-not-allowed opacity-60"
                     />
-                    <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-slate-500 text-xs sm:text-sm">
-                      <MdSecurity className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <div className="flex items-center gap-2 mt-2 text-slate-500 text-sm">
+                      <MdSecurity className="w-4 h-4" />
                       To change phone number, please contact support
                     </div>
                   </div>
@@ -471,23 +474,23 @@ const AccountDetails = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200/50">
+              <div className="mt-8 pt-6 border-t border-slate-200/50">
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg hover:shadow-lg sm:hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
                   >
-                    <MdEdit className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <MdEdit className="w-5 h-5" />
                     Edit Profile
                   </button>
                 ) : (
-                  <div className="flex gap-3 sm:gap-4">
+                  <div className="flex gap-4">
                     <button
                       onClick={handleCancel}
                       disabled={isSubmitting}
-                      className="flex-1 bg-white/80 text-slate-700 font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:bg-slate-50 transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 disabled:opacity-50 text-sm sm:text-base"
+                      className="flex-1 bg-white/80 text-slate-700 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      <MdClose className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <MdClose className="w-5 h-5" />
                       Cancel
                     </button>
                     <button
@@ -496,9 +499,9 @@ const AccountDetails = () => {
                         setConfirmOpen(true);
                       }}
                       disabled={isSubmitting || !hasChanges() || uploadingImage}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg hover:shadow-lg sm:hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
+                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:transform-none"
                     >
-                      <MdSave className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <MdSave className="w-5 h-5" />
                       {isSubmitting ? "Updating..." : "Save Changes"}
                     </button>
                   </div>
@@ -511,23 +514,23 @@ const AccountDetails = () => {
         {/* Confirmation Modal */}
         {confirmOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl max-w-md w-full p-6 sm:p-8 transform scale-100 animate-in">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-100 animate-in">
               <div className="text-center">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                  <MdSecurity className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MdSecurity className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-3 sm:mb-4">
+                <h3 className="text-2xl font-bold text-slate-800 mb-4">
                   {confirmAction === "update" ? "Confirm Update" : "Confirm Logout"}
                 </h3>
-                <p className="text-slate-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
+                <p className="text-slate-600 mb-8 leading-relaxed">
                   {confirmAction === "update" 
                     ? "Are you sure you want to update your profile details? This action will save your changes permanently."
                     : "Are you sure you want to logout? You'll need to login again to access your account."}
                 </p>
-                <div className="flex gap-3 sm:gap-4">
+                <div className="flex gap-4">
                   <button
                     onClick={() => setConfirmOpen(false)}
-                    className="flex-1 bg-slate-100 text-slate-700 font-semibold py-2 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl hover:bg-slate-200 transition-colors duration-200 text-sm sm:text-base"
+                    className="flex-1 bg-slate-100 text-slate-700 font-semibold py-3 px-4 rounded-xl hover:bg-slate-200 transition-colors duration-200"
                   >
                     Cancel
                   </button>
@@ -544,7 +547,7 @@ const AccountDetails = () => {
                       confirmAction === "update" 
                         ? "from-blue-500 to-purple-600" 
                         : "from-red-500 to-orange-600"
-                    } text-white font-semibold py-2 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl hover:shadow-md sm:hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 text-sm sm:text-base`}
+                    } text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200`}
                   >
                     {confirmAction === "update" ? "Yes, Update" : "Yes, Logout"}
                   </button>
@@ -556,19 +559,19 @@ const AccountDetails = () => {
 
         {/* Alert Notification */}
         {alertOpen && (
-          <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs sm:max-w-md`}>
+          <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md`}>
             <div 
-              className={`flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg border ${alertColors[alertType]} transition-all duration-300 animate-in`}
+              className={`flex items-center justify-between p-4 rounded-2xl shadow-lg border ${alertColors[alertType]} transition-all duration-300 animate-in`}
             >
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-3">
                 {alertIcons[alertType]}
-                <span className="font-medium text-xs sm:text-sm">{alertMessage}</span>
+                <span className="font-medium">{alertMessage}</span>
               </div>
               <button 
                 onClick={() => setAlertOpen(false)}
                 className="p-1 rounded-full hover:bg-black/10 transition-colors"
               >
-                <MdClose className="w-4 h-4 sm:w-5 sm:h-5" />
+                <MdClose className="w-5 h-5" />
               </button>
             </div>
           </div>
