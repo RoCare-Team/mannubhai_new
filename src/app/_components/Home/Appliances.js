@@ -5,8 +5,6 @@
   import Image from "next/image";
   import { collection, getDocs, query, where } from "firebase/firestore";
   import { db } from "../../firebaseConfig";
-  import LogoLoader from "@/components/LogoLoader";
-
   // Constants
   const DEFAULT_IMAGE = "/ApplianceHomeIcons/default.webp";
   const IMAGE_MAP = {
@@ -159,10 +157,6 @@
       ))}
     </div>
   ), []);
-
-
-    if (routeLoading) return <LogoLoader fullScreen />;
-
     return (
       <main className="pb-5 px-4 sm:px-6 lg:px-20">
         <section 

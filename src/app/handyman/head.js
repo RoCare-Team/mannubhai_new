@@ -12,7 +12,7 @@ export default function Head() {
 
       <meta
         name="keywords"
-        content=":handyman services, handyman near me, local handyman, professional handyman, best handyman services, handyman at home, furniture, electrical services ,plumbing handyman services, home maintenance, wall painting, AC repair, carpentry services, home renovation, Masons Service, Electrician Service, Carpenter Service, Plumber Service, Painter Service
+        content="handyman services, handyman near me, local handyman, professional handyman, best handyman services, handyman at home, furniture, electrical services ,plumbing handyman services, home maintenance, wall painting, AC repair, carpentry services, home renovation, Masons Service, Electrician Service, Carpenter Service, Plumber Service, Painter Service
 "/>
 
      <meta name="robots" content="index, follow" />

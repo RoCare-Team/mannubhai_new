@@ -47,9 +47,7 @@ const DynamicComponents = {
   AppDownloadCard: dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
     loading: () => <LoadingPlaceholder className="h-64" />
   }),
-  FloatingContactButtons: dynamic(() => import('@/components/FloatingContactButtons-old'), {
-    ssr: false
-  }),
+
 
 };
 
@@ -209,23 +207,9 @@ const CityDetails = ({ city }) => {
         <section className="w-full mt-12 md:mt-16">
           <DynamicComponents.FooterLinks />
         </section>
-
-        <DynamicComponents.ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          toastClassName="!rounded-lg !shadow-md !w-fit !min-w-[200px] !max-w-[80vw] !px-4 !py-2 !text-sm !text-gray-800 !bg-white"
-          bodyClassName="!text-sm"
-        />
       </main>
 
-      <DynamicComponents.FloatingContactButtons />
+
     </>
   );
 };

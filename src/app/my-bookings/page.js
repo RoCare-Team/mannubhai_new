@@ -393,7 +393,7 @@ function Booking() {
                     {tab === "Active" ? <FiClock /> : 
                      tab === "Completed" ? <FiCheckCircle /> : <FiXCircle />}
                     <span className="hidden xs:inline">{tab}</span>
-                    <span className="xs:hidden">{tab.slice(0, 3)}</span>
+                    <span className="xs:hidden">{tab}</span>
                     {activeTab === tab && (
                       <span className={`bg-white text-${
                         tab === "Active" ? "purple" : 

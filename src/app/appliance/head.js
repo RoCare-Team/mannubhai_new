@@ -11,7 +11,7 @@ export default function Head() {
         content="Mannu Bhai is one of the most trusted service providers in India. We provide excellent services for several home appliance care like water purifie repair service, ac, Washing Machine Services, Refrigerator Services"/>
       <meta
         name="keywords"
-        content="Home care services, Home care service near me, At-home caregiving, Best home care services, water purifie repair service, air conditioner repair service ,Washing Machine repair Services, Refrigerator repair Services, Microwave & Kitchen Appliances repair service and TV & Electronics repair service"/>
+        content="Home Appliances  services, Home Appliances  service near me, At-home caregiving, Best home care services, water purifie repair service, air conditioner repair service ,Washing Machine repair Services, Refrigerator repair Services, Microwave & Kitchen Appliances repair service and TV & Electronics repair service"/>
 
       <meta name="robots" content="index, follow" />
  

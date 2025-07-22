@@ -8,8 +8,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import LogoLoader from "@/components/LogoLoader";
-
 // Constants
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default.png";
 const SUBSERVICE_IMAGES = {
@@ -150,9 +148,6 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
       </SwiperSlide>
     ))
   ), [subServices, handleSubServiceClick]);
-
-  if (routeLoading) return <LogoLoader />;
-
   return (
     <main className="bg-gray-50 pb-10 px-4 sm:px-6 lg:px-19">
       <header className="mb-6 sm:mb-10 mt-0">
