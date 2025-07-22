@@ -4,7 +4,7 @@ import { FaStore, FaMoneyBillWave, FaRupeeSign, FaChartLine, FaMoneyCheckAlt, Fa
 
 export default function FranchiseeDetails() {
   return (
-    <section className="py-16 bg-pink-50">
+    <section className="py-8 bg-pink-50">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Franchisee Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
