@@ -2,7 +2,6 @@
 import React, { useState, useRef, useCallback, memo, useEffect, useMemo, Suspense } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import dynamic from 'next/dynamic';
-import Head from 'next/head';
 
 // Optimized loading placeholder with different sizes
 const LoadingPlaceholder = memo(({ className = "", height = "h-64" }) => (
@@ -276,12 +275,6 @@ const CityDetails = ({ city }) => {
         </div>
 
         {/* Footer with lazy loading */}
-        <LazySection 
-          fallback={<LoadingPlaceholder />}
-          className="w-full mt-12 md:mt-16"
-        >
-          <LazyComponents.FooterLinks />
-        </LazySection>
       </main>
     </>
   );
