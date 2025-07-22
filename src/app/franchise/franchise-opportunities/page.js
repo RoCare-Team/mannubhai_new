@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import ServicesWeProvide from "./franchiesServices/page";
 import FranchiseeDetails from "./franchiseeDetails/page";
-import Testimonials from "./OnboardingFranchise/page";
 import ProfitSection from "./profitSection/page";
 import FranchiseContactForm from "./franchiseContactForm/page";
-
 const LandingContent = () => {
     const [activeFaq, setActiveFaq] = useState(null);
     const toggleFaq = (index) => {
@@ -15,7 +13,6 @@ const LandingContent = () => {
     };
     return (
         <>
-
             <main className="w-full font-sans overflow-x-hidden">
                 {/* Hero Banner Section */}
                 <header
@@ -367,18 +364,22 @@ const LandingContent = () => {
                 <FranchiseeDetails />
                 {/* FAQ Section */}
                 <section
-                    className="py-12 md:py-16 bg-gradient-to-br from-indigo-50 to-purple-50"
+                    className="md:py-16 bg-gradient-to-br from-indigo-50 to-purple-50"
                     aria-labelledby="faq-heading"
                 >
                     <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center gap-8 md:gap-12">
-                        <div className="flex-shrink-0 w-full lg:w-1/3">
-                            <Image
-                                src="/franchies/Faq.webp"
-                                alt="Frequently asked questions illustration"
-                                width={400}
-                                height={400}
-                                className="w-56 md:w-72 mx-auto"
-                            />
+                        <div className="pt-0 lg:pt-8 flex-shrink-0 w-full lg:w-1/3 hidden lg:block">
+                        <Image
+                            src="/franchies/Faq.webp"
+                            alt="Frequently asked questions illustration"
+                            width={400}
+                            height={400}
+                            className="w-56 md:w-72 mx-auto"
+                            priority={false}
+                            loading="lazy"
+                            quality={80}
+                            sizes="(max-width: 1023px) 0px, (min-width: 1024px) 33vw"
+                        />
                         </div>
 
                         <div className="flex-1 w-full">
@@ -460,7 +461,7 @@ const LandingContent = () => {
                 </section>
                 {/* Contact Section */}
 
-                <section className="py-12 md:py-16 bg-white" id="franchise-form">
+                <section className="md:py-16 bg-white" id="franchise-form">
                     <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
                         <FranchiseContactForm />
                     </div>

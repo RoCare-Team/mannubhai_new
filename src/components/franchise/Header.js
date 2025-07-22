@@ -1,6 +1,7 @@
 'use client';
 import { FaWhatsapp, FaHome, FaPhone } from 'react-icons/fa';
-
+import Link from 'next/link';
+import Image from 'next/image';
 export default function FranchiseHeader() {
   const whatsappNumber = "+919319408430";
   const phoneNumber = "+917827506245";
@@ -20,7 +21,6 @@ export default function FranchiseHeader() {
       }, 3000);
     }
   };
-
   return (
     <>
       {/* Main Header */}
@@ -28,13 +28,18 @@ export default function FranchiseHeader() {
         <div className="container mx-auto px-4">
           {/* Mobile Header */}
           <div className="flex items-center justify-between py-4 md:hidden">
-            <div className="flex-shrink-0">
-              <img
-                src="/logo.png"
-                alt="Your Brand Logo"
-                className="h-10 w-auto"
-              />
-            </div>
+           <div className="flex-shrink-0">
+              <Link href="/" className="shrink-0" title="Go to home page">
+                <Image
+                  src="/logo.png"
+                  alt="Your Brand Logo"
+                  className="h-12 w-auto"
+                  width={120} 
+                  height={40} 
+                  priority
+                />
+              </Link>
+          </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={scrollToForm}

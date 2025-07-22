@@ -1,20 +1,26 @@
 import dynamic from 'next/dynamic';
-import React, { memo } from 'react';
-// Lazy load components with loading states
+import React, { memo, useMemo } from 'react';
+
+// Shared loading component for better consistency and reduced bundle size
+const LoadingPlaceholder = ({ height = "h-64" }) => (
+  <div className={`${height} bg-gray-100 animate-pulse rounded-lg`} />
+);
+
+// Lazy load components with optimized loading states
 const CityDetails = dynamic(() => import("./CityDetails"), {
-  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+  loading: () => <LoadingPlaceholder />
 });
 
 const CategoryDetails = dynamic(() => import("./CategoryDetails"), {
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
+  loading: () => <LoadingPlaceholder height="h-96" />
 });
 
 const CityAccordion = dynamic(() => import('./CityAccordion'), {
-  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+  loading: () => <LoadingPlaceholder />
 });
 
 const FooterLinks = dynamic(() => import('@/app/_components/Home/FooterLinks'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />
+  loading: () => <LoadingPlaceholder height="h-32" />
 });
 
 const CityCategoryView = memo(({
@@ -28,40 +34,52 @@ const CityCategoryView = memo(({
   cities,
   pageContent
 }) => {
-  if (pageType !== "city-category" || !city || !category) {
+  // Early return with memoized condition check
+  const isValidPage = useMemo(() => 
+    pageType === "city-category" && city && category,
+    [pageType, city, category]
+  );
+
+  if (!isValidPage) {
     return null;
   }
 
+  // Memoize city service status to prevent unnecessary re-renders
+  const showServices = useMemo(() => city.status === 1, [city.status]);
+
+  // Memoize cart-related props to prevent unnecessary re-renders of CategoryDetails
+  const cartProps = useMemo(() => ({
+    cartItems,
+    addToCart,
+    increaseQuantity,
+    decreaseQuantity
+  }), [cartItems, addToCart, increaseQuantity, decreaseQuantity]);
+
   return (
     <>
-   
       <CityDetails
-        city={city} 
-        showServices={city.status === 1}
+        city={city}
+        showServices={showServices}
       />
       
       <CategoryDetails
         category={category}
         city={city}
-        cartItems={cartItems}
-        addToCart={addToCart}
-        increaseQuantity={increaseQuantity}
-        decreaseQuantity={decreaseQuantity}
+        {...cartProps}
         cities={cities}
         pageContent={pageContent}
       />
-
-      <CityAccordion 
-        cities={cities} 
-        currentCity={city} 
+      
+      <CityAccordion
+        cities={cities}
+        currentCity={city}
       />
+      
       <FooterLinks />
- 
     </>
   );
 });
 
-// Add display name for debugging
 CityCategoryView.displayName = 'CityCategoryView';
 
 export default CityCategoryView;

@@ -27,7 +27,6 @@ const components = {
     loading: () => <components.LogoLoader />
   })
 };
-
 // Enhanced Cache Implementation
 class AppCache {
   static instance = new Map();
