@@ -199,7 +199,6 @@ const CityDetails = ({ city }) => {
         <section className="w-full mt-12 md:mt-16">
           <DynamicComponents.FooterLinks />
         </section>
-
       </main>
     </>
   );
