@@ -5,9 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import LogoLoader from "@/components/LogoLoader";
 import BeautyBrand from "./BeautyBrand";
-
 // Constants
 const DEFAULT_IMAGE = "/BeautyCare/default.png";
 const IMAGE_MAP = {
@@ -137,12 +135,6 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
   return (
     <main className="relative pb-5 px-3 sm:mt-6 sm:px-6 md:px-8 lg:px-20 mt-0 mb-0 sm:mt-5 sm:mb-5">
-  
-      {routeLoading && (
-        <div className="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
-          <LogoLoader />
-        </div>
-      )}
 
       {/* Header */}
       <header className="mb-5">

@@ -4,8 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import LogoLoader from "@/components/LogoLoader";
-
 /* ---------- Constants & Helpers ---------- */
 const DEFAULT_IMAGE = "/HomeIcons/default.png";
 const IMAGE_MAP = {
@@ -160,12 +158,6 @@ export default function HomecareServices({
 
   return (
     <main className="relative pb-5 px-3 sm:mt-6 sm:px-6 md:px-8 lg:px-20 mt-0 mb-0 sm:mt-5 sm:mb-5">
-      {routeLoading && (
-        <div className="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
-          <LogoLoader />
-        </div>
-      )}
-
       <header className="mb-5">
         <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 ml-0 lg:ml-10">
           Home Care Services

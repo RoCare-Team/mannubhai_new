@@ -47,7 +47,7 @@ const DynamicComponents = {
   AppDownloadCard: dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
     loading: () => <LoadingPlaceholder className="h-64" />
   }),
- 
+
 
 };
 
@@ -207,9 +207,6 @@ const CityDetails = ({ city }) => {
         <section className="w-full mt-12 md:mt-16">
           <DynamicComponents.FooterLinks />
         </section>
-
-      
-      </main>
 
     </>
   );
