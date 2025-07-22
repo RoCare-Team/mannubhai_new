@@ -274,14 +274,9 @@ const CityDetails = ({ city }) => {
             </LazySection>
           </div>
         </div>
-
-        {/* Footer with lazy loading */}
-        <LazySection 
-          fallback={<LoadingPlaceholder />}
-          className="w-full mt-12 md:mt-16"
-        >
-          <LazyComponents.FooterLinks />
-        </LazySection>
+        <section className="w-full mt-12 md:mt-16">
+          <DynamicComponents.FooterLinks />
+        </section>
       </main>
     </>
   );
