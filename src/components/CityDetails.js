@@ -3,12 +3,10 @@ import React, { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-
 // Component loading states
 const LoadingPlaceholder = ({ className = "" }) => (
   <div className={`bg-gray-100 animate-pulse rounded-lg ${className}`} />
 );
-
 // Dynamically loaded components with optimized loading states
 const DynamicComponents = {
   AboutMannuBhaiExpert: dynamic(() => import("./AboutMannuBhaiExpert"), {
@@ -47,8 +45,6 @@ const DynamicComponents = {
   AppDownloadCard: dynamic(() => import('@/app/_components/Home/AppDownloadCard'), {
     loading: () => <LoadingPlaceholder className="h-64" />
   }),
-
-
 };
 
 // Memoized ServiceWrapper component to prevent unnecessary re-renders
@@ -64,13 +60,11 @@ const ServiceWrapper = memo(({ children, categoryUrl, cityUrl, onServiceClick, c
     />
   );
 });
-
 const CityDetails = ({ city }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
   const navigationTimeoutRef = useRef(null);
-
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
@@ -139,7 +133,6 @@ const CityDetails = ({ city }) => {
         <section className="w-full mb-8 md:mb-12">
           <DynamicComponents.HeroSection />
         </section>
-
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto">
           <div className="space-y-12 md:space-y-16 lg:space-y-20 w-full">
             <ServiceWrapper 
@@ -203,15 +196,11 @@ const CityDetails = ({ city }) => {
             </section>
           </div>
         </div>
-
         <section className="w-full mt-12 md:mt-16">
           <DynamicComponents.FooterLinks />
         </section>
       </main>
-
-
     </>
   );
 };
-
 export default memo(CityDetails);
