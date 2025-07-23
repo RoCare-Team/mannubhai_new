@@ -5,17 +5,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
 import '../styles/globals.css';
-
-// Lazy load the LogoLoader component
-// const LogoLoader = dynamic(() => import('../components/LogoLoader'), {
-//   ssr: false,
-//   loading: () => null
-// });
-
-// Define paths where Header/Footer should be hidden
 const HIDDEN_LAYOUT_PATHS = new Set([
   '/franchise/franchise-opportunities',
-  // Add other paths here if needed
 ]);
 
 export default function RootLayout({ children }) {
@@ -23,6 +14,7 @@ export default function RootLayout({ children }) {
   const shouldHideLayout = HIDDEN_LAYOUT_PATHS.has(pathname);
   return (
     <html lang="en">
+      <meta charset="UTF-8"></meta>
       <head>
       <script
       type="application/ld+json"

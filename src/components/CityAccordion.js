@@ -373,7 +373,6 @@ export default function CityAccordion({ cities, currentCity }) {
           </p>
         </div>
       )}
-      
       <FooterLinks />
     </div>
   );
