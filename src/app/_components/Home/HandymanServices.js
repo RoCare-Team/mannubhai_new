@@ -9,7 +9,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 // Constants
-const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default.png";
+const DEFAULT_SERVICE_IMAGE = "/default-images/deafult.jpeg";
 const SUBSERVICE_IMAGES = {
   Painter: "/HandyMan/PAINTER.webp",
   Plumber: "/HandyMan/PLUMBER.webp",
@@ -109,7 +109,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
         <div className="relative w-12 h-12 bg-blue-50 rounded-full mb-2">
           <Image
             src={service.ServiceIcon}
-            alt="" // Empty alt since service name is visible
+            alt={service.ServiceName} // Empty alt since service name is visible
             fill
             className="object-contain"
             loading="lazy"
@@ -134,7 +134,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
           <div className="relative w-32 h-32 bg-blue-50 rounded-full mb-3">
             <Image
               src={service.ServiceIcon}
-              alt="" // Empty alt since service name is visible
+              alt={service.ServiceName} // Empty alt since service name is visible
               fill
               className="object-contain"
               loading="lazy"

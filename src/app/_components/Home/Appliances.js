@@ -141,22 +141,22 @@
     useEffect(() => {
       fetchSubServices();
     }, [fetchSubServices]);
-
     // Skeleton loader
-  const SkeletonLoader = useMemo(() => (
-    <div className="grid grid-cols-4 md:grid-cols-5 gap-4 sm:gap-6">
-      {Array.from({ length: Math.min(8, SERVICE_ORDER.length) }).map((_, i) => (
-        <div
-          key={`skeleton-${i}`}
-          className="bg-white rounded-xl p-4 flex flex-col items-center justify-center shadow animate-pulse"
-          style={{ aspectRatio: '1/1.2' }}
-        >
-          <div className="w-full aspect-square max-w-[80px] bg-blue-100 mb-2 rounded-md" />
-          <div className="h-4 w-20 bg-blue-100 rounded" />
-        </div>
-      ))}
-    </div>
-  ), []);
+    const SkeletonLoader = useMemo(() => (
+      <div className="grid grid-cols-4 md:grid-cols-5 gap-4 sm:gap-6">
+        {Array.from({ length: Math.min(8, SERVICE_ORDER.length) }).map((_, i) => (
+          <div
+            key={`skeleton-${i}`}
+            className="bg-white rounded-xl p-2 flex flex-col items-center justify-center shadow animate-pulse"
+            style={{ aspectRatio: '1/1.2' }}
+          >
+            <div className="w-full aspect-square max-w-[50px] bg-blue-100 mb-1.5 rounded-md" />
+            <div className="bg-blue-100 rounded" />
+          </div>
+        ))}
+      </div>
+    ), []);
+
     return (
       <main className="pb-5 px-4 sm:px-6 lg:px-20">
         <section 
@@ -190,12 +190,31 @@
             </div>
           )}
         </section>
-
-        {!hideBeautyBanner && <PromoBanner />}
+          {!hideBeautyBanner && (
+            <section className="mt-0  mb-0">
+              <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+                <div className="rounded-xl overflow-hidden shadow">
+                  <Image
+                  src="/HomeBanner/beauty.webp"
+                    alt="Beauty services promotion"
+                    width={1920}
+                    height={400}
+                    loading="lazy"
+                    sizes="100vw"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </section>
+)}
       </main>
     );
-  }
 
+
+    
+
+
+  }
   // Extracted Service Card Component
   const ServiceCard = ({ service, onClick }) => (
     <button
@@ -214,16 +233,11 @@
       <div className="relative w-full aspect-square max-w-[96px] bg-blue-50 rounded-lg mb-2">
         <Image
           src={service.ServiceIcon}
-          alt=""
+          alt={`${service.ServiceName} icon`}
           fill
           className="object-contain"
-          placeholder="blur"
-          blurDataURL="/blur.png"
           loading="lazy"
           sizes="(max-width: 640px) 96px, 80px"
-          onError={(e) => {
-            e.currentTarget.src = DEFAULT_IMAGE;
-          }}
         />
       </div>
       <span className="text-xs font-semibold text-center text-gray-700">
@@ -232,22 +246,4 @@
     </button>
   );
 
-  // Updated Promo Banner Component with single responsive image
-  const PromoBanner = () => (
-    <section className="mt-4 md:mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="rounded-xl overflow-hidden shadow-lg">
-        <div className="aspect-w-16 aspect-h-9 w-full relative">
-          <Image
-            src="/HomeBanner/beauty.webp"
-            alt="Beauty services promotion"
-            fill
-            loading="lazy"
-            className="object-cover"
-            placeholder="blur"
-            blurDataURL="/blur-banner.png"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-          />
-        </div>
-      </div>
-    </section>
-  );
+
