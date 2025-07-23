@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 // Constants
 const BASE_URL = "https://www.mannubhai.com";
 const DEFAULT_IMAGE = "/default-service.jpg";
-const LOGO_IMAGE = `${BASE_URL}/assets/images/logo.png`;
+const LOGO_IMAGE = `${BASE_URL}/logo.png`;
 const CONTACT_NUMBER = "+91-7065012902";
 
 // Client Components with improved loading states
@@ -31,9 +31,9 @@ const components = {
 class AppCache {
   static instance = new Map();
   static TTL = {
-    SHORT: 300,    // 5 minutes
-    MEDIUM: 1800,  // 30 minutes
-    LONG: 3600     // 1 hour
+    SHORT: 300,  
+    MEDIUM: 1800, 
+    LONG: 3600     
   };
 
   static get(key) {
@@ -143,27 +143,33 @@ class DataService {
 class MetadataService {
   static cache = new Map();
 
-  static getDefaultMetadata() {
-    return {
-      title: "Home Services | Mannu Bhai",
-      description: "Find trusted home service professionals near you",
-      keywords: "home services, professionals, Mannu Bhai",
-      robots: { index: true, follow: true },
-      openGraph: {
-        type: "website",
-        images: [{
-          url: DEFAULT_IMAGE,
-          width: 1200,
-          height: 630,
-          alt: "Mannu Bhai Home Services",
-        }],
-      },
-      twitter: {
-        card: "summary_large_image",
-      }
-    };
-  }
-
+static getDefaultMetadata() {
+  return {
+    title: "Home Services | Mannu Bhai",
+    description: "Find trusted home service professionals near you",
+    keywords: "home services, professionals, Mannu Bhai",
+    charset: 'utf-8',
+    viewport: {
+      width: 'device-width',
+      initialScale: 1,
+      maximumScale: 5,
+      userScalable: true,
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: "website",
+      images: [{
+        url: DEFAULT_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "Mannu Bhai Home Services",
+      }],
+    },
+    twitter: {
+      card: "summary_large_image",
+    }
+  };
+}
   static generateFAQSchema(faqData) {
     return {
       "@context": "https://schema.org",
@@ -234,7 +240,12 @@ static async generateForCity(slug, cityDoc) {
     return {
       title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
       description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
-      keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,
+      keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,  charset: 'utf-8',  viewport: {
+      width: 'device-width',
+      initialScale: 1,
+      maximumScale: 5,
+      userScalable: true,
+    },
       alternates: { canonical: canonicalUrl },
       robots: { index: true, follow: true },
       openGraph: {
@@ -403,7 +414,6 @@ static async generateForCity(slug, cityDoc) {
         console.error("Metadata generation error:", error);
       }
     }
-
     // Fallback case
     const result = {
       ...this.getDefaultMetadata(),
@@ -413,22 +423,17 @@ static async generateForCity(slug, cityDoc) {
     return result;
   }
 }
-
 export async function generateMetadata({ params }) {
   return MetadataService.generate({ params });
 }
-
 // Main Page Component
 export default async function DynamicRouteHandler({ params, searchParams }) {
   const { slug = [] } = params;
   const { city: cityQueryParam } = searchParams;
   const normalizedSlug = slug.map(normalizeUrlSegment);
-
   if (slug.length === 0) notFound();
-
   try {
     const cities = await DataService.fetchCities();
-    
     // Handle city query parameter redirect
     if (cityQueryParam) {
       const normalizedQueryParam = normalizeUrlSegment(cityQueryParam);
@@ -441,7 +446,6 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
         redirect(`/${selectedCity.city_url.toLowerCase()}`);
       }
     }
-
     // City page (e.g., /delhi)
     if (normalizedSlug.length === 1) {
       const [segment] = normalizedSlug;
@@ -450,7 +454,6 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
         DataService.fetchDocument("city_tb", "city_url", segment),
         DataService.fetchDocument("category_manage", "category_url", segment),
       ]);
-      
       if (cityDoc) {
         return (
           <>
@@ -464,21 +467,15 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
         const services = await DataService.fetchServices(catDoc.lead_type_id);
         return <components.CategoryDetails category={{ ...catDoc, services }} />;
       }
-      
       notFound();
     }
-
-    // City + Category page (e.g., /delhi/water-purifier-repair)
     if (normalizedSlug.length === 2) {
       const [citySeg, catSeg] = normalizedSlug;
-      
       const [cityDoc, catDoc] = await Promise.all([
         DataService.fetchDocument("city_tb", "city_url", citySeg),
         DataService.fetchDocument("category_manage", "category_url", catSeg),
       ]);
-      
       if (!cityDoc || !catDoc) notFound();
-      
       const [pageMasterDoc, services] = await Promise.all([
         DataService.fetchPageMaster(cityDoc.id, catDoc.id),
         DataService.fetchServices(catDoc.lead_type_id)
@@ -494,7 +491,6 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
           });
         }
       }
-      
       return (
         <>
           <components.CategoryDetails 
@@ -524,12 +520,10 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
               />
             </div>
           )}
-          
           <components.CityAccordion cities={cities} currentCity={cityDoc} />
         </>
       );
-    }
-    
+    } 
     notFound();
   } catch (error) {
     console.error("Dynamic page error:", error);
