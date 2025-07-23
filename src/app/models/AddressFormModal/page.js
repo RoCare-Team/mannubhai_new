@@ -206,7 +206,8 @@ const handleSubmit = async (event) => {
   // Save individual values
   localStorage.setItem("booking_ads", data.full_address || "");
   localStorage.setItem("address_id", JSON.stringify(data.address_id || newAddress.id));
-  toast.success(data.msg || "Address saved successfully!");
+alert(data.msg || "Address saved successfully!");
+  
 
   // Send address to parent
   if (onAddressSubmit) {
