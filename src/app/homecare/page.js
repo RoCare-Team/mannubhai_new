@@ -42,29 +42,34 @@ const DESIRED_ORDER = [
 
 const FEATURED_SERVICES = [
   {
-    src: "/HomeCare/deepcleaning-services-banner.png",
+    src: "/HomeCareBanner/deep home cleaning.webp",
     alt: "Deep cleaning services",
     href: "/home-deep-cleaning",
   },
   {
-    src: "/HomeCare/kitchen-cleaning-service-banner.png",
+    src: "/HomeCareBanner/kitchen cleaning.webp",
     alt: "Kitchen cleaning service",
     href: "/kitchen-cleaning",
   },
   {
-    src: "/HomeCare/pest-control-service-banner.png",
+    src: "/HomeCareBanner/pest control.webp",
     alt: "Pest control service",
     href: "/pest-control-service",
   },
   {
-    src: "/HomeCare/sofa-cleaning-service-banner.png",
+    src: "/HomeCareBanner/sofa cleaning.webp",
     alt: "Sofa cleaning service",
     href: "/sofa-cleaning",
   },
   {
-    src: "/HomeCare/Bathroom-service-banner.png",
+    src: "/HomeCareBanner/bathroom cleaning.webp",
     alt: "Bathroom cleaning service",
     href: "/bathroom-cleaning",
+  },
+  {
+    src: "/HomeCareBanner/tank cleaning.webp",
+    alt: "tank cleaning service",
+    href: "/tank-cleaning-service",
   },
 ];
 const CONTENT_SECTIONS = [
