@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 /* ---------- Constants & Helpers ---------- */
-const DEFAULT_IMAGE = "/HomeIcons/default.png";
+const DEFAULT_IMAGE = "/default-images/deafult.jpeg";
 const IMAGE_MAP = {
   "Sofa Cleaning": "/HomeCareHomeIcon/SOFA-CLEANING.webp",
   "Bathroom Cleaning": "/HomeCareHomeIcon/BATHROOM-CLEANING.webp",
@@ -14,7 +14,6 @@ const IMAGE_MAP = {
   "Pest Control": "/HomeCareHomeIcon/PEST-CONTROL.webp",
   "Tank Cleaning": "/HomeCareHomeIcon/TANK-CLEANING.webp",
 };
-
 const DESIRED_ORDER = [
   "Sofa Cleaning",
   "Bathroom Cleaning",
@@ -23,14 +22,11 @@ const DESIRED_ORDER = [
   "Pest Control",
   "Water Tank Cleaning",
 ];
-
 const ORDER_MAP = DESIRED_ORDER.reduce((obj, name, i) => {
   obj[name] = i;
   return obj;
 }, {});
-
 const getSubServiceImage = (type) => IMAGE_MAP[type] || DEFAULT_IMAGE;
-
 /* ---------- Component ---------- */
 export default function HomecareServices({ 
   hideBrightBanner = false, 
@@ -41,7 +37,6 @@ export default function HomecareServices({
   const [subServices, setSubServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
-
   // Fetch category URL by lead type ID
   const getCategoryUrlByLeadTypeId = useCallback(async (lead_type_id) => {
     try {
@@ -66,7 +61,6 @@ export default function HomecareServices({
         console.error("Category URL not found for service:", service.id);
         return;
       }
-
       if (onServiceClick) {
         onServiceClick(category_url);
       } else {
@@ -79,7 +73,6 @@ export default function HomecareServices({
       setRouteLoading(false);
     }
   }, [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router]);
-
   // Fetch sub-services
   useEffect(() => {
     const fetchSubServices = async () => {
@@ -102,7 +95,6 @@ export default function HomecareServices({
             (ORDER_MAP[a.ServiceName] ?? Infinity) - 
             (ORDER_MAP[b.ServiceName] ?? Infinity)
         );
-
         setSubServices(data);
       } catch (error) {
         console.error("Error fetching sub-services:", error);
@@ -111,11 +103,8 @@ export default function HomecareServices({
         setLoading(false);
       }
     };
-
     fetchSubServices();
   }, []);
-
-  // Memoized skeleton items
   const skeletonItems = useMemo(() => (
     Array.from({ length: Math.min(6, DESIRED_ORDER.length) }).map((_, i) => (
       <div
@@ -127,7 +116,6 @@ export default function HomecareServices({
       </div>
     ))
   ), []);
-
   // Memoized service items
   const serviceItems = useMemo(() => (
     subServices.map((service) => (
@@ -140,13 +128,10 @@ export default function HomecareServices({
         <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
           <Image
             src={service.ServiceIcon}
-            alt="" // Empty alt since the service name is already visible
+            alt={service.ServiceName}
             fill
             className="object-contain"
-            placeholder="blur"
-            blurDataURL="/blur.png"
             loading="lazy"
-            sizes="(max-width: 640px) 80px, 96px"
           />
         </div>
         <span className="text-[10px] font-semibold text-center text-gray-700 leading-tight">
@@ -163,16 +148,11 @@ export default function HomecareServices({
           Home Care Services
         </h2>
       </header>
-
       <section 
         title="homecare-services" 
         className="max-w-7xl mx-auto" 
         id="home-care"
       >
-        <h2 id="homecare-services" className="sr-only">
-          Home Care Sub-Services
-        </h2>
-
         {loading ? (
           <>
             <p className="text-center text-sm text-gray-500 mb-4">
@@ -202,9 +182,6 @@ export default function HomecareServices({
                 alt="Professional home care services available"
                 width={1920}
                 height={400}
-            
-                placeholder="blur"
-                blurDataURL="/blur-banner.png"
                 sizes="100vw"
                 loading="lazy"
                 className="w-full h-auto"
