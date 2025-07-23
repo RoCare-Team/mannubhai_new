@@ -31,13 +31,13 @@ const extractFirstWords = (str) => {
   return match ? match[0] : "other";
 };
 
-const CategoryDetails = ({
+  export default function CategoryDetails  ({
   meta_title,
   meta_description,
   meta_keywords,
   category,
   city = {}
-}) => {
+}) {
   // State
   const [selectedService, setSelectedService] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -537,4 +537,3 @@ const CategoryDetails = ({
   );
 };
 
-export default CategoryDetails;

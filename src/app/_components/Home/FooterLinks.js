@@ -7,7 +7,7 @@ import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 const FooterLinks = () => {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openIndex, setOpenIndex] = useState(null); // For toggling accordion
+  const [openIndex, setOpenIndex] = useState(null);
 
   useEffect(() => {
     const fetchLinks = async () => {

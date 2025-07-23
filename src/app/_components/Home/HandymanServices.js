@@ -68,7 +68,6 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
     const snapshot = await getDocs(q);
     return snapshot.docs[0]?.data()?.category_url || null;
   }, []);
-
   // Memoized click handler
   const handleSubServiceClick = useCallback(async (service) => {
     setRouteLoading(true);
@@ -78,7 +77,6 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
         alert("Category URL not found!");
         return;
       }
-
       if (onServiceClick) {
         onServiceClick(category_url);
       } else {

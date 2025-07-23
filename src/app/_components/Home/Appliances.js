@@ -1,12 +1,11 @@
   "use client";
-
   import { useState, useEffect, useCallback, useMemo } from "react";
   import { useRouter } from "next/navigation";
   import Image from "next/image";
   import { collection, getDocs, query, where } from "firebase/firestore";
   import { db } from "../../firebaseConfig";
   // Constants
-  const DEFAULT_IMAGE = "/ApplianceHomeIcons/default.webp";
+  const DEFAULT_IMAGE = "/default-images/deafult.jpeg";
   const IMAGE_MAP = {
     "Water Purifier": "/ApplianceHomeIcons/RO.webp",
     "Air Conditioner": "/ApplianceHomeIcons/AIR-CONDITIONAR.webp",
@@ -21,7 +20,6 @@
     "Kitchen Appliance": "/ApplianceHomeIcons/Kitchen-Appliance.webp",
     "Geyser": "/ApplianceHomeIcons/geyser.webp",
   };
-
   const SERVICE_ORDER = [
     "Water Purifier",
     "Air Conditioner",
@@ -36,24 +34,19 @@
     "Small Appliances",
     "Geyser",
   ];
-
   export default function Appliances({ hideBeautyBanner = false, onServiceClick, cityUrl }) {
     const router = useRouter();
     const [subServices, setSubServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [routeLoading, setRouteLoading] = useState(false);
-
-    // Memoized service order map
     const serviceOrderMap = useMemo(() => 
       SERVICE_ORDER.reduce((acc, service, index) => {
         acc[service] = index;
         return acc;
       }, {}), 
     []);
-
     // Memoized image getter
     const getSubServiceImage = useCallback((type) => IMAGE_MAP[type] || DEFAULT_IMAGE, []);
-
     // Fetch services with error boundary
     const fetchSubServices = useCallback(async () => {
       try {
@@ -63,7 +56,6 @@
           where("mannubhai_cat_id", "==", "1")
         );
         const snapshot = await getDocs(q);
-
         const services = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -73,12 +65,10 @@
             ...data,
           };
         });
-
         services.sort((a, b) => 
           (serviceOrderMap[a.ServiceName] ?? Infinity) - 
           (serviceOrderMap[b.ServiceName] ?? Infinity)
         );
-
         setSubServices(services);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -87,7 +77,6 @@
         setLoading(false);
       }
     }, [getSubServiceImage, serviceOrderMap]);
-
     // Cached category URL fetcher
     const getCategoryUrl = useCallback(async (lead_type_id) => {
       try {
@@ -111,7 +100,6 @@
         return null;
       }
     }, []);
-
     // Optimized navigation handler
     const handleServiceClick = useCallback(async (service) => {
       setRouteLoading(true);
@@ -121,9 +109,7 @@
           alert("Service not available");
           return;
         }
-
         const targetUrl = cityUrl ? `/${cityUrl}/${categoryUrl}` : `/${categoryUrl}`;
-        
         if (onServiceClick) {
           onServiceClick(categoryUrl);
         } else {
@@ -136,7 +122,6 @@
         setRouteLoading(false);
       }
     }, [getCategoryUrl, cityUrl, onServiceClick, router]);
-
     // Initial data fetch
     useEffect(() => {
       fetchSubServices();
@@ -156,7 +141,6 @@
         ))}
       </div>
     ), []);
-
     return (
       <main className="pb-5 px-4 sm:px-6 lg:px-20">
         <section 
@@ -199,21 +183,16 @@
                     alt="Beauty services promotion"
                     width={1920}
                     height={400}
-                    loading="lazy"
+                   priority={true}
                     sizes="100vw"
                     className="w-full h-auto"
                   />
                 </div>
               </div>
             </section>
-)}
+          )}
       </main>
     );
-
-
-    
-
-
   }
   // Extracted Service Card Component
   const ServiceCard = ({ service, onClick }) => (
