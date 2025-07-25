@@ -1,9 +1,7 @@
 'use client';
-
 import dynamic from 'next/dynamic';
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-
 // Optimized loading component with accessibility features
 const LoadingPlaceholder = ({ height = "h-64", className = "" }) => (
   <div 
@@ -12,7 +10,6 @@ const LoadingPlaceholder = ({ height = "h-64", className = "" }) => (
     aria-label="Loading content"
   />
 );
-
 // Dynamic imports with error boundaries and optimized loading
 const createDynamicComponent = (loader, displayName) => {
   return dynamic(() => loader()
@@ -31,13 +28,11 @@ const createDynamicComponent = (loader, displayName) => {
     }
   );
 };
-
 // Lazy-loaded components
 const CityDetails = createDynamicComponent(() => import("./CityDetails"), 'CityDetails');
 const CategoryDetails = createDynamicComponent(() => import("./CategoryDetails"), 'CategoryDetails');
 const CityAccordion = createDynamicComponent(() => import('./CityAccordion'), 'CityAccordion');
 const FooterLinks = createDynamicComponent(() => import('@/app/_components/Home/FooterLinks'), 'FooterLinks');
-
 const CityCategoryView = memo(({
   pageType,
   city,
@@ -73,14 +68,12 @@ const CityCategoryView = memo(({
       </div>
     );
   }
-
   return (
     <div className="space-y-8">
       <CityDetails
         city={city}
         showServices={showServices}
       />
-      
       <CategoryDetails
         category={category}
         city={city}
@@ -88,18 +81,14 @@ const CityCategoryView = memo(({
         cities={cities}
         pageContent={pageContent}
       />
-      
       <CityAccordion
         cities={cities}
         currentCity={city}
       />
-      
       <FooterLinks />
     </div>
   );
 });
-
-// PropTypes for better development experience
 CityCategoryView.propTypes = {
   pageType: PropTypes.string.isRequired,
   city: PropTypes.shape({
@@ -114,7 +103,6 @@ CityCategoryView.propTypes = {
   cities: PropTypes.array,
   pageContent: PropTypes.string
 };
-
 CityCategoryView.displayName = 'CityCategoryView';
-
 export default CityCategoryView;
+export const fetchCache = 'force-cache';
