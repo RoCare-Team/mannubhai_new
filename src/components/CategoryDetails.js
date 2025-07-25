@@ -199,7 +199,6 @@ const extractFirstWords = (str) => {
       console.error("Cart update failed:", error);
     }
   }, []);
-
   const isServiceInCart = useCallback((serviceId) => {
     try {
       const cartData = localStorage.getItem("checkoutState");
@@ -236,7 +235,6 @@ const extractFirstWords = (str) => {
       </div>
     );
   }
-
   return (
     <>
       <Head>
@@ -244,7 +242,6 @@ const extractFirstWords = (str) => {
         <meta name="description" content={meta_description || ""} />
         <meta name="keywords" content={meta_keywords || ""} />
       </Head>
-
       <div className="mx-auto px-4 sm:px-6 py-8">
         <div className="w-full flex flex-col lg:flex-row gap-8">
           {/* Filter Sidebar */}
@@ -291,7 +288,6 @@ const extractFirstWords = (str) => {
               </div>
             </div>
           </aside>
-
           {/* Main Content */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
@@ -400,7 +396,6 @@ const extractFirstWords = (str) => {
                 );
               })}
             </div>
-
             {/* Cart Sidebar */}
             <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
               <Cart cartLoaded={cartLoaded} cartLoadedToggle={() => setCartLoaded(prev => !prev)} />
@@ -452,11 +447,9 @@ const extractFirstWords = (str) => {
             </aside>
           </main>
         </div>
-        
         <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
           <AwardCertifications />
         </section>
-
         {category.category_content && (
           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -483,7 +476,6 @@ const extractFirstWords = (str) => {
           </section>
         )}
       </div>
-
       {/* Mobile Cart Panel */}
       <AnimatePresence>
         {isCartOpen && (
@@ -522,7 +514,6 @@ const extractFirstWords = (str) => {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Login Popup */}
       <AnimatePresence>
         {showLoginPopup && (
@@ -536,4 +527,4 @@ const extractFirstWords = (str) => {
     </>
   );
 };
-
+export const fetchCache = 'force-cache';
