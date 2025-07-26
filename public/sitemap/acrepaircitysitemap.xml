@@ -1,9 +1,5 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>full_url</loc>
-    <changefreq>daily</changefreq>
-    <priority>1</priority>
-  </url>
+  <script src="chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant/frame_ant.js"/>
   <url>
     <loc>https://www.mannubhai.com/mumbai/ac-service</loc>
     <changefreq>daily</changefreq>
@@ -11874,5 +11870,4 @@
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
-  </urlset>
   
