@@ -6,6 +6,7 @@ import ServicesWeProvide from "./franchiesServices/page";
 import FranchiseeDetails from "./franchiseeDetails/page";
 import ProfitSection from "./profitSection/page";
 import FranchiseContactForm from "./franchiseContactForm/page";
+import Head from "./head";
 const LandingContent = () => {
     const [activeFaq, setActiveFaq] = useState(null);
     const toggleFaq = (index) => {
@@ -13,6 +14,7 @@ const LandingContent = () => {
     };
     return (
         <>
+        <Head />
             <main className="w-full font-sans overflow-x-hidden">
                 {/* Hero Banner Section */}
                 <header
@@ -40,7 +42,7 @@ const LandingContent = () => {
                                 </div>
                                 <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
                                     <span className="text-xl sm:text-2xl font-bold text-pink-300">
-                                        3 Million+
+                                        30 Million+
                                     </span>
                                     <span className="text-xs sm:text-sm md:text-base">Satisfied Customers</span>
                                 </div>
@@ -108,7 +110,7 @@ const LandingContent = () => {
                                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                                     {[
                                         { value: "2.5 Million+", label: "Orders Completed" },
-                                        { value: "3.62 Lakh+", label: "Happy Customers" },
+                                        { value: "30 million+", label: "Happy Customers" },
                                         { value: "3000+", label: "Verified Partners" },
                                         { value: "PAN India", label: "Service Coverage" },
                                     ].map((stat, idx) => (
@@ -467,7 +469,6 @@ const LandingContent = () => {
                     </div>
                 </section>
             </main>
-
         </>
 
     );

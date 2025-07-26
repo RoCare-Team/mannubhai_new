@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-
 export default function FranchiseContactForm() {
   const [formData, setFormData] = useState({
     name: '',
@@ -333,21 +332,22 @@ export default function FranchiseContactForm() {
         <div className="bg-indigo-700 text-white rounded-lg p-6 mb-8 md:mb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">150+</p>
-              <p className="text-sm md:text-base">Service Centers</p>
+              <p className="text-2xl md:text-3xl font-bold">50+</p>
+              <p className="text-sm md:text-base">Service Outlets</p>
             </div>
             <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">100+</p>
-              <p className="text-sm md:text-base">Cities Nationwide</p>
+              <p className="text-2xl md:text-3xl font-bold">10,000</p>
+              <p className="text-sm md:text-base">Verified Experts</p>
             </div>
             <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">95%</p>
-              <p className="text-sm md:text-base">Year-on-Year ROI</p>
+              <p className="text-2xl md:text-3xl font-bold">50+</p>
+              <p className="text-sm md:text-base">Live Services</p>
             </div>
             <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">3M+</p>
-              <p className="text-sm md:text-base">Satisfied Customers</p>
+              <p className="text-2xl md:text-3xl font-bold">30 Lac+</p>
+              <p className="text-sm md:text-base">Customers Served</p>
             </div>
+            
           </div>
         </div>
 
@@ -408,7 +408,7 @@ export default function FranchiseContactForm() {
           </div>
 
           {/* Contact Form */}
-          <div className="order-1 lg:order-2 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg">
+          <div className="order-1 lg:order-2 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg mb-5">
             {/* Status Messages */}
             {successMessage && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 md:px-4 md:py-3 rounded mb-3 md:mb-4 text-sm md:text-base">
@@ -428,7 +428,9 @@ export default function FranchiseContactForm() {
                 {errors.general}
               </div>
             )}
-
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-indigo-700 text-center mt-2 mb-4 md:mb-6">
+  Apply Now
+</h2>
             {/* Progress Steps */}
             <div className="mb-4 md:mb-6">
               <div className="flex items-center justify-between space-x-1 md:space-x-2">

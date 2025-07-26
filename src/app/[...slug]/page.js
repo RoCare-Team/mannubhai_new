@@ -303,21 +303,52 @@ static async generateForCity(slug, cityDoc) {
   }
 
 
-  static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
+
+
+
+static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
     const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
     
-    // Determine which meta fields to use (pageMasterDoc takes precedence, then catDoc, then cityDoc)
+    // Always prioritize page_master_tb fields when available (for slug length 2)
     const metaTitle = pageMasterDoc?.meta_title || 
                      catDoc.meta_title || 
-                     `${catDoc.category_name} Services in ${cityDoc.city_name} | Mannu Bhai`;
+                     `${catDoc.category_name} Services in ${cityDoc.city_name} | MannuBhai`;
     
     const metaDescription = pageMasterDoc?.meta_description || 
-                           catDoc.meta_description || 
-                           `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
+                          catDoc.meta_description || 
+                          `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
     
     const metaKeywords = pageMasterDoc?.meta_keywords || 
-                        catDoc.meta_keywords || 
-                        `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
+                       catDoc.meta_keywords || 
+                       `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
+
+    // Determine image - prioritize pageMasterDoc image first
+    const imageUrl = pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE;
+
+    // Generate FAQ schema only when pageMasterDoc exists (slug length 2)
+    let faqSchema = null;
+    if (pageMasterDoc) {
+      const faqData = [];
+      for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+        faqData.push({
+          question: pageMasterDoc[`faqquestion${i}`],
+          answer: pageMasterDoc[`faqanswer${i}`]
+        });
+      }
+      if (faqData.length > 0) {
+        faqSchema = this.generateFAQSchema(faqData);
+      }
+    }
+
+    // Generate breadcrumb schema (only relevant for slug length 2)
+    const breadcrumbSchema = this.generateBreadcrumbSchema(slug, cityDoc, catDoc);
+
+    // Generate local business schema
+    const localBusinessSchema = this.generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl);
+
+    // Combine all schemas
+    const schemas = [breadcrumbSchema, localBusinessSchema];
+    if (faqSchema) schemas.push(faqSchema);
 
     return {
       title: metaTitle,
@@ -330,7 +361,7 @@ static async generateForCity(slug, cityDoc) {
         description: metaDescription,
         url: canonicalUrl,
         images: [{
-          url: pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE,
+          url: imageUrl,
           width: 1200,
           height: 630,
           alt: `${catDoc.category_name} services in ${cityDoc.city_name}`,
@@ -340,7 +371,13 @@ static async generateForCity(slug, cityDoc) {
         card: "summary_large_image",
         title: metaTitle,
         description: metaDescription,
-        images: [pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE],
+        images: [imageUrl],
+      },
+      other: {
+        // Include all schemas in the metadata
+        ...(schemas.length > 0 && {
+          schemaJson: schemas
+        })
       }
     };
 }
@@ -469,61 +506,71 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
       }
       notFound();
     }
-    if (normalizedSlug.length === 2) {
-      const [citySeg, catSeg] = normalizedSlug;
-      const [cityDoc, catDoc] = await Promise.all([
-        DataService.fetchDocument("city_tb", "city_url", citySeg),
-        DataService.fetchDocument("category_manage", "category_url", catSeg),
-      ]);
-      if (!cityDoc || !catDoc) notFound();
-      const [pageMasterDoc, services] = await Promise.all([
-        DataService.fetchPageMaster(cityDoc.id, catDoc.id),
-        DataService.fetchServices(catDoc.lead_type_id)
-      ]);
+
+
+ if (normalizedSlug.length === 2) {
+  const [citySeg, catSeg] = normalizedSlug;
+  const [cityDoc, catDoc] = await Promise.all([
+    DataService.fetchDocument("city_tb", "city_url", citySeg),
+    DataService.fetchDocument("category_manage", "category_url", catSeg),
+  ]);
+  
+  if (!cityDoc || !catDoc) notFound();
+  
+  const [pageMasterDoc, services] = await Promise.all([
+    DataService.fetchPageMaster(cityDoc.id, catDoc.id),
+    DataService.fetchServices(catDoc.lead_type_id)
+  ]);
+  
+  // Generate FAQ data (only for slug length 2)
+  const faqData = [];
+  if (pageMasterDoc) {
+    for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+      faqData.push({
+        question: pageMasterDoc[`faqquestion${i}`],
+        answer: pageMasterDoc[`faqanswer${i}`]
+      });
+    }
+  }
+
+  return (
+    <>
+      <components.CategoryDetails 
+        category={{ 
+          ...(pageMasterDoc || catDoc), // Spread pageMasterDoc first to prioritize its fields
+          services,
+          category_name: catDoc.category_name,
+          banner: catDoc.banner,
+          cityDoc,
+          // Meta fields from pageMasterDoc take precedence
+          meta_title: pageMasterDoc?.meta_title || catDoc.meta_title,
+          meta_description: pageMasterDoc?.meta_description || catDoc.meta_description,
+          meta_keywords: pageMasterDoc?.meta_keywords || catDoc.meta_keywords,
+        }} 
+        city={cityDoc}
+      />
       
-      // Generate FAQ data
-      const faqData = [];
-      if (pageMasterDoc) {
-        for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
-          faqData.push({
-            question: pageMasterDoc[`faqquestion${i}`],
-            answer: pageMasterDoc[`faqanswer${i}`]
-          });
-        }
-      }
-      return (
-        <>
-          <components.CategoryDetails 
-            category={{ 
-              ...(pageMasterDoc || catDoc),
-              services,
-              category_name: catDoc.category_name,
-              banner: catDoc.banner,
-              cityDoc,
-              meta_title: pageMasterDoc?.meta_title || catDoc.meta_title,
-              meta_description: pageMasterDoc?.meta_description || catDoc.meta_description,
-              meta_keywords: pageMasterDoc?.meta_keywords || catDoc.meta_keywords,
-            }} 
-            city={cityDoc}
+      {/* Only show FAQ section if we have FAQ data */}
+      {faqData.length > 0 && <components.FAQSection faqData={faqData} />}
+      
+      {/* Only show page content if we have it from page_master_tb */}
+      {pageMasterDoc?.page_content && (
+        <div className="page-content my-8 px-4 max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            About {cityDoc.city_name} - {catDoc.category_name}
+          </h2>
+          <div 
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
           />
-          
-          {faqData.length > 0 && <components.FAQSection faqData={faqData} />}
-          
-          {pageMasterDoc?.page_content && (
-            <div className="page-content my-8 px-4 max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                About {cityDoc.city_name} - {catDoc.category_name}
-              </h2>
-              <div 
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
-              />
-            </div>
-          )}
-          <components.CityAccordion cities={cities} currentCity={cityDoc} />
-        </>
-      );
-    } 
+        </div>
+      )}
+      
+      <components.CityAccordion cities={cities} currentCity={cityDoc} />
+    </>
+  );
+}
+
     notFound();
   } catch (error) {
     console.error("Dynamic page error:", error);
