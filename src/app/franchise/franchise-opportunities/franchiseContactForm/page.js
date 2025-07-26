@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+
 export default function FranchiseContactForm() {
   const [formData, setFormData] = useState({
     name: '',
@@ -45,6 +46,9 @@ export default function FranchiseContactForm() {
     let filteredValue = value;
     if (id === 'phone' || id === 'pincode') {
       filteredValue = value.replace(/\D/g, '').slice(0, id === 'phone' ? 10 : 6);
+    }
+    if (id === 'otp') {
+      filteredValue = value.replace(/\D/g, '').slice(0, 4); // Changed to 4 digits
     }
     
     setFormData(prev => ({
@@ -94,12 +98,12 @@ export default function FranchiseContactForm() {
     },
     otp: (value) => {
       if (!value.trim()) return "OTP is required";
-      if (!/^\d{6}$/.test(value)) return "Please enter a valid 6-digit OTP";
+      if (!/^\d{4}$/.test(value)) return "Please enter a valid 4-digit OTP"; // Changed to 4 digits
       return null;
     }
   };
 
-  // Send SMS
+  // Send SMS - Fixed implementation
   const sendSms = async (phone, message) => {
     try {
       const params = new URLSearchParams({
@@ -107,10 +111,23 @@ export default function FranchiseContactForm() {
         body: message
       });
 
-      const response = await fetch(`/api/sendSms?${params}`);
+      const response = await fetch(`/api/sendSms?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+    
       const result = await response.text();
-      console.log('SMS Sent:', result);
-      return true;
+      
+      // Check if the response indicates success
+      // You may need to adjust this based on your SMS API's response format
+      if (response.ok) {
+        return true;
+      } else {
+        console.error('SMS API Error:', result);
+        return false;
+      }
     } catch (error) {
       console.error('SMS Error:', error);
       return false;
@@ -150,7 +167,7 @@ export default function FranchiseContactForm() {
     }, 1000);
   };
 
-  // Send OTP
+  // Send OTP - Updated for 4-digit OTP
   const handleSendOtp = async () => {
     const phoneError = validations.phone(formData.phone);
     
@@ -160,13 +177,14 @@ export default function FranchiseContactForm() {
     }
 
     setIsSubmitting(true);
+    setErrors({}); // Clear any previous errors
     
     try {
-      // Generate 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000);
+      // Generate 4-digit OTP
+      const otp = Math.floor(1000 + Math.random() * 9000);
       setGeneratedOtp(otp);
-      
-      const message = `Dear ${formData.name}, ${otp} is OTP to verify your mobile number for confirm request. Regards RO Care India.`;
+      // Updated message for 4-digit OTP
+      const message = `Dear,${otp} is OTP to verify your mobile number for confirm request. Regards RO Care India.`;
       
       const smsResult = await sendSms(formData.phone, message);
       
@@ -191,17 +209,15 @@ export default function FranchiseContactForm() {
     }
   };
 
-  // Verify OTP
+  // Verify OTP - Updated for 4-digit OTP
   const handleVerifyOtp = async () => {
     const otpError = validations.otp(formData.otp);
     if (otpError) {
       setErrors({ otp: otpError });
       return;
     }
-
     setIsSubmitting(true);
-
-    if (formData.otp === generatedOtp.toString()) {
+    if (formData.otp === generatedOtp?.toString()) {
       setOtpVerified(true);
       setCurrentStep(3);
       setErrors({});
@@ -347,7 +363,6 @@ export default function FranchiseContactForm() {
               <p className="text-2xl md:text-3xl font-bold">30 Lac+</p>
               <p className="text-sm md:text-base">Customers Served</p>
             </div>
-            
           </div>
         </div>
 
@@ -428,9 +443,11 @@ export default function FranchiseContactForm() {
                 {errors.general}
               </div>
             )}
+            
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-indigo-700 text-center mt-2 mb-4 md:mb-6">
-  Apply Now
-</h2>
+              Apply Now
+            </h2>
+            
             {/* Progress Steps */}
             <div className="mb-4 md:mb-6">
               <div className="flex items-center justify-between space-x-1 md:space-x-2">
@@ -467,7 +484,7 @@ export default function FranchiseContactForm() {
               <div className="space-y-4 md:space-y-6">
                 <div>
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-4">Enter Your Phone Number</h3>
-                  <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4">We'll send you an OTP to verify your phone number.</p>
+                  <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4">We'll send you a 4-digit OTP to verify your phone number.</p>
                 </div>
                 
                 <div>
@@ -503,7 +520,7 @@ export default function FranchiseContactForm() {
               <div className="space-y-4 md:space-y-6">
                 <div>
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-4">Verify Your Phone Number</h3>
-                  <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4">Enter the 6-digit OTP sent to {formData.phone}</p>
+                  <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4">Enter the 4-digit OTP sent to {formData.phone}</p>
                 </div>
                 
                 <div>
@@ -515,8 +532,8 @@ export default function FranchiseContactForm() {
                     id="otp"
                     value={formData.otp}
                     onChange={handleChange}
-                    placeholder="Enter 6-digit OTP"
-                    maxLength={6}
+                    placeholder="Enter 4-digit OTP"
+                    maxLength={4}
                     className={`w-full px-3 py-2 md:px-4 md:py-3 rounded-lg border ${
                       errors.otp ? 'border-red-500' : 'border-gray-300'
                     } focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm md:text-base`}

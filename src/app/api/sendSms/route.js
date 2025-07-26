@@ -4,7 +4,8 @@ export async function GET(request) {
   
   try {
     const url = `https://api.savshka.co.in/api/sms?${new URLSearchParams({
-      key: 'zjMHYmSl',
+      // key: 'zjMHYmSl',
+      key:'dVHOFwEe',
       from: 'TLGCRO',
       to: searchParams.get('to'),
       body: searchParams.get('body'),

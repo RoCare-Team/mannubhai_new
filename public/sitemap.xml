@@ -21,10 +21,6 @@
 <loc>https://www.mannubhai.com/sitemap/geyser.xml</loc>
 </sitemap>
 <sitemap>
-<loc>https://www.mannubhai.com/sitemap/washing-machine-repair.xml</loc>
-</sitemap>
-
-<sitemap>
 <loc>https://www.mannubhai.com/sitemap/blog.xml</loc>
 </sitemap>
 <sitemap>
@@ -50,6 +46,15 @@
 </sitemap>
 <sitemap>
 <loc>https://www.mannubhai.com/sitemap/electricansitemap.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/carpentersitemap.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/washingmachinelocality.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/washingmachinesitemap.xml</loc>
 </sitemap>
 </sitemapindex>
 
