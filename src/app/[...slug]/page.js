@@ -122,7 +122,7 @@ class DataService {
       AppCache.set(cacheKey, services);
       return services;
     } catch (error) {
-      console.error("Error fetching services:", error);
+
       return [];
     }
   }
@@ -427,7 +427,7 @@ static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null
           return result;
         }
       } catch (error) {
-        console.error("Metadata generation error:", error);
+
       }
     }
 
@@ -448,7 +448,7 @@ static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null
           return result;
         }
       } catch (error) {
-        console.error("Metadata generation error:", error);
+    
       }
     }
     // Fallback case
@@ -573,7 +573,7 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
 
     notFound();
   } catch (error) {
-    console.error("Dynamic page error:", error);
+ 
     throw error;
   }
 }

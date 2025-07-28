@@ -15,7 +15,6 @@ const createDynamicComponent = (loader, displayName) => {
   return dynamic(() => loader()
     .then(mod => mod.default || mod[displayName])
     .catch(() => {
-      console.error(`Failed to load ${displayName}`);
       return () => <div className="text-red-500 p-4">Failed to load {displayName}</div>;
     }), 
     {
