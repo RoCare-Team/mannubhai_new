@@ -508,68 +508,68 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
     }
 
 
- if (normalizedSlug.length === 2) {
-  const [citySeg, catSeg] = normalizedSlug;
-  const [cityDoc, catDoc] = await Promise.all([
-    DataService.fetchDocument("city_tb", "city_url", citySeg),
-    DataService.fetchDocument("category_manage", "category_url", catSeg),
-  ]);
-  
-  if (!cityDoc || !catDoc) notFound();
-  
-  const [pageMasterDoc, services] = await Promise.all([
-    DataService.fetchPageMaster(cityDoc.id, catDoc.id),
-    DataService.fetchServices(catDoc.lead_type_id)
-  ]);
-  
-  // Generate FAQ data (only for slug length 2)
-  const faqData = [];
-  if (pageMasterDoc) {
-    for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
-      faqData.push({
-        question: pageMasterDoc[`faqquestion${i}`],
-        answer: pageMasterDoc[`faqanswer${i}`]
-      });
-    }
-  }
+      if (normalizedSlug.length === 2) {
+        const [citySeg, catSeg] = normalizedSlug;
+        const [cityDoc, catDoc] = await Promise.all([
+          DataService.fetchDocument("city_tb", "city_url", citySeg),
+          DataService.fetchDocument("category_manage", "category_url", catSeg),
+        ]);
+        
+        if (!cityDoc || !catDoc) notFound();
+        
+        const [pageMasterDoc, services] = await Promise.all([
+          DataService.fetchPageMaster(cityDoc.id, catDoc.id),
+          DataService.fetchServices(catDoc.lead_type_id)
+        ]);
+        
+        // Generate FAQ data (only for slug length 2)
+        const faqData = [];
+        if (pageMasterDoc) {
+          for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+            faqData.push({
+              question: pageMasterDoc[`faqquestion${i}`],
+              answer: pageMasterDoc[`faqanswer${i}`]
+            });
+          }
+        }
 
-  return (
-    <>
-      <components.CategoryDetails 
-        category={{ 
-          ...(pageMasterDoc || catDoc), // Spread pageMasterDoc first to prioritize its fields
-          services,
-          category_name: catDoc.category_name,
-          banner: catDoc.banner,
-          cityDoc,
-          // Meta fields from pageMasterDoc take precedence
-          meta_title: pageMasterDoc?.meta_title || catDoc.meta_title,
-          meta_description: pageMasterDoc?.meta_description || catDoc.meta_description,
-          meta_keywords: pageMasterDoc?.meta_keywords || catDoc.meta_keywords,
-        }} 
-        city={cityDoc}
-      />
-      
-      {/* Only show FAQ section if we have FAQ data */}
-      {faqData.length > 0 && <components.FAQSection faqData={faqData} />}
-      
-      {/* Only show page content if we have it from page_master_tb */}
-      {pageMasterDoc?.page_content && (
-        <div className="page-content my-8 px-4 max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            About {cityDoc.city_name} - {catDoc.category_name}
-          </h2>
-          <div 
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
-          />
-        </div>
-      )}
-      
-      <components.CityAccordion cities={cities} currentCity={cityDoc} />
-    </>
-  );
-}
+        return (
+          <>
+            <components.CategoryDetails 
+              category={{ 
+                ...(pageMasterDoc || catDoc), // Spread pageMasterDoc first to prioritize its fields
+                services,
+                category_name: catDoc.category_name,
+                banner: catDoc.banner,
+                cityDoc,
+                // Meta fields from pageMasterDoc take precedence
+                meta_title: pageMasterDoc?.meta_title || catDoc.meta_title,
+                meta_description: pageMasterDoc?.meta_description || catDoc.meta_description,
+                meta_keywords: pageMasterDoc?.meta_keywords || catDoc.meta_keywords,
+              }} 
+              city={cityDoc}
+            />
+            
+            {/* Only show FAQ section if we have FAQ data */}
+            {faqData.length > 0 && <components.FAQSection faqData={faqData} />}
+            
+            {/* Only show page content if we have it from page_master_tb */}
+            {pageMasterDoc?.page_content && (
+              <div className="page-content my-8 px-4 max-w-6xl mx-auto">
+                <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  About {cityDoc.city_name} - {catDoc.category_name}
+                </h2>
+                <div 
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: pageMasterDoc.page_content }} 
+                />
+              </div>
+            )}
+            
+            <components.CityAccordion cities={cities} currentCity={cityDoc} />
+          </>
+        );
+      }
 
     notFound();
   } catch (error) {
