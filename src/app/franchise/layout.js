@@ -5,6 +5,7 @@ export default function FranchiseLayout({ children }) {
   return (
     <>
       <FranchiseHeader />
+        <FacebookPixel />
       <main>{children}</main>
       <FranchiseFooter />
     </>
