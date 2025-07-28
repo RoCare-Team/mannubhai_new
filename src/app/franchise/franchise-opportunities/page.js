@@ -7,6 +7,7 @@ import FranchiseeDetails from "./franchiseeDetails/page";
 import ProfitSection from "./profitSection/page";
 import FranchiseContactForm from "./franchiseContactForm/page";
 import Head from "./head";
+import FranchiseFeedback from "./franchiesfeedback/page";
 const LandingContent = () => {
     const [activeFaq, setActiveFaq] = useState(null);
     const toggleFaq = (index) => {
@@ -317,6 +318,8 @@ const LandingContent = () => {
                     </div>
 
                 </section>
+                <FranchiseFeedback />
+
 
                 {/* Industry Comparison Section */}
                 <section className="py-8 sm:py-10 md:py-14 bg-[#faf9f6]" aria-labelledby="comparison-heading">
@@ -348,18 +351,20 @@ const LandingContent = () => {
                             </span>
                         </h2>
 
-                        <div className="w-full overflow-x-auto">
-                            <Image
-                                src="/franchies/road-img.webp"
-                                alt="MannuBhai franchise growth timeline showing expansion milestones"
-                                width={1200}
-                                height={400}
-                                className="w-full h-auto max-w-none sm:max-w-full mx-auto"
-                                priority
-                            />
-                        </div>
+                     <div className="w-full overflow-x-auto">
+  <Image
+    src="/franchies/road-img.webp"
+    alt="MannuBhai franchise growth timeline showing expansion milestones"
+    width={2400} // doubled for high-resolution screens
+    height={800}
+    className="w-full h-auto mx-auto max-w-[100%] sm:max-w-screen-lg"
+    priority
+  />
+</div>
+
                     </div>
                 </section>
+
                 {/* Profit Section */}
                 <ProfitSection />
                 {/* Franchise Details */}
