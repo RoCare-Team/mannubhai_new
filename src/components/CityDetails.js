@@ -1,14 +1,11 @@
 'use client';
-
 import React, { useState, useRef, useCallback, memo, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-
 // Cache for city data to prevent redundant fetches
 const cityDataCache = new Map();
-
-// Enhanced LoadingPlaceholder with better accessibility and animation
+// Enhanced LoadingPlaceholder with better accessibility and animation  
 const LoadingPlaceholder = ({ className = "", ariaLabel = "Loading..." }) => (
   <div 
     className={`bg-gray-100 animate-pulse rounded-lg ${className}`}
@@ -20,23 +17,20 @@ const LoadingPlaceholder = ({ className = "", ariaLabel = "Loading..." }) => (
     <span className="sr-only">{ariaLabel}</span>
   </div>
 );
-
-// Optimized dynamic imports with proper error handling and prefetching
+// Modify your createDynamicComponent function to include loading states in the cache
 const createDynamicComponent = (loader, componentName, options = {}) => {
-  if (typeof window !== 'undefined') {
+  // Prefetch in the background
+  if (typeof window !== 'undefined' && !cityDataCache.has(componentName)) {
     loader().then(mod => {
       if (mod.default) {
         cityDataCache.set(componentName, mod.default);
       }
     }).catch(() => {});
   }
-
   return dynamic(() => {
-    // Check cache first
     if (cityDataCache.has(componentName)) {
       return Promise.resolve({ default: cityDataCache.get(componentName) });
     }
-
     return loader()
       .then(mod => {
         if (!mod.default) {
@@ -55,7 +49,6 @@ const createDynamicComponent = (loader, componentName, options = {}) => {
     ...options
   });
 };
-
 // Move DynamicComponents inside the component or make it a regular object
 const DynamicComponents = {
   AboutMannuBhaiExpert: createDynamicComponent(() => import("./AboutMannuBhaiExpert"), "AboutMannuBhaiExpert"),
@@ -73,40 +66,30 @@ const DynamicComponents = {
 };
 
 const ServiceWrapper = memo(({ children, categoryUrl, cityUrl, onServiceClick, className }) => {
-  const [hasError, setHasError] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(true);
   const ChildComponent = useMemo(() => {
-    try {
-      return DynamicComponents[children.type.name] || children.type;
-    } catch (error) {
-      console.error('Error resolving component:', error);
-      setHasError(true);
-      return () => <div className="text-red-500 p-4">Component error</div>;
-    }
+    const component = DynamicComponents[children.type.name] || children.type;
+    if (component.preload) component.preload(); // Trigger preload if available
+    return component;
   }, [children]);
 
-  if (hasError) {
-    return (
-      <section className={className}>
-        <div className="text-red-500 p-4">Failed to load component</div>
-      </section>
-    );
-  }
-
   return (
-    <section 
-      className={className}
-      aria-labelledby={`${categoryUrl}-heading`}
-    >
+    <section className={className} aria-labelledby={`${categoryUrl}-heading`}>
       <h2 id={`${categoryUrl}-heading`} className="sr-only">
         {categoryUrl.replace(/-/g, ' ')} services in {cityUrl}
       </h2>
-      <React.Suspense fallback={<LoadingPlaceholder className="h-64" ariaLabel={`Loading ${categoryUrl.replace(/-/g, ' ')} services`} />}>
+      <React.Suspense fallback={<LoadingPlaceholder className="h-64" />}>
         <ChildComponent 
           {...children.props} 
           onServiceClick={onServiceClick} 
           cityUrl={cityUrl}
+          onLoad={() => setIsLoading(false)}
         />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LoadingPlaceholder className="h-64" />
+          </div>
+        )}
       </React.Suspense>
     </section>
   );
@@ -202,7 +185,7 @@ const CityDetails = ({ city }) => {
       title: 'Home Care Services'
     },
     {
-      id: 'handyman-services',
+      id: 'handyman-services', 
       component: DynamicComponents.HandymanServices,
       show: city?.handyman_services === 1,
       title: 'Handyman Services'
