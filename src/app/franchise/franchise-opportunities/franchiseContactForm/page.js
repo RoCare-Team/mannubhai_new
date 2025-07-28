@@ -260,71 +260,127 @@ export default function FranchiseContactForm() {
     setErrors(newErrors);
     return isValid;
   };
+const handleFinalSubmit = async () => {
+  if (!validateFinalForm()) return;
 
-  const handleFinalSubmit = async () => {
-    if (!validateFinalForm()) return;
-
-    setIsSubmitting(true);
-    
-    const params = new URLSearchParams({
-      name: formData.name,
-      pincode: formData.pincode,
+  setIsSubmitting(true);
+  
+  // Track form submission attempt
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'Lead', {
+      content_name: 'Franchise Application Submit',
+      content_category: 'Form Submission',
+      value: getInvestmentValue(formData.investment), // Add this helper function
+      currency: 'INR',
       city: formData.city,
-      invst_rang: formData.investment,
-      email: formData.email,
-      mobile: formData.phone,
-      message: formData.message,
-      site_url: 'https://mannubhai.com'
+      pincode: formData.pincode
     });
+  }
 
-    try {
-      const response = await fetch(
-        `https://waterpurifierservicecenter.in/wizard/app/mannubhai_enquery.php?${params}`
-      );
-      
-      const responseText = await response.text();
-      
-      try {
-        const data = JSON.parse(responseText);
-        
-        if (data.status === 1) {
-          setSuccessMessage('Thank you! We have received your request and will get back to you soon.');
-          
-          // Reset form
-          setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            city: '',
-            pincode: '',
-            investment: '',
-            message: '',
-            otp: ''
-          });
-          
-          setCurrentStep(1);
-          setOtpSent(false);
-          setOtpVerified(false);
-          setFailedAttempts(0);
-          setErrors({});
-          setGeneratedOtp(null);
-          
-          // Clear timers
-          if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
-          if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current);
-        } else {
-          setErrors({ general: data.message || 'Something went wrong. Please try again.' });
+  const params = new URLSearchParams({
+    name: formData.name,
+    pincode: formData.pincode,
+    city: formData.city,
+    invst_rang: formData.investment,
+    email: formData.email,
+    mobile: formData.phone,
+    message: formData.message,
+    site_url: 'https://mannubhai.com'
+  });
+
+  try {
+    const response = await fetch(
+      `https://waterpurifierservicecenter.in/wizard/app/mannubhai_enquery.php?${params}`,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
         }
-      } catch (e) {
-        setErrors({ general: 'Unexpected response format from server' });
       }
-    } catch (error) {
-      setErrors({ general: error.message || 'Error processing request. Please try again.' });
-    } finally {
-      setIsSubmitting(false);
+    );
+    
+    const responseText = await response.text();
+    const data = parseResponse(responseText); // Add this helper function
+    
+    if (data.status === 1) {
+      // Track successful submission
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'CompleteRegistration', {
+          value: getInvestmentValue(formData.investment),
+          currency: 'INR',
+          content_name: 'Franchise Application Success'
+        });
+      }
+      
+      setSuccessMessage('Thank you! We have received your request and will get back to you soon.');
+      resetForm(); // Extract this to a separate function
+    } else {
+      // Track failed submission
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('trackCustom', 'FormSubmissionFailed', {
+          error: data.message || 'unknown_error',
+          content_name: 'Franchise Application Failed'
+        });
+      }
+      
+      setErrors({ general: data.message || 'Something went wrong. Please try again.' });
     }
-  };
+  } catch (error) {
+    // Track error
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('trackCustom', 'FormSubmissionError', {
+        error: error.message || 'network_error',
+        content_name: 'Franchise Application Error'
+      });
+    }
+    
+    setErrors({ general: error.message || 'Error processing request. Please try again.' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
+// Helper function to extract investment value (add this outside your component)
+const getInvestmentValue = (investmentText) => {
+  if (!investmentText) return 0;
+  const match = investmentText.match(/Rs\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)/i);
+  if (match) {
+    return parseFloat(match[1].replace(/,/g, ''));
+  }
+  return 0;
+};
+
+// Helper function to parse response (add this outside your component)
+const parseResponse = (responseText) => {
+  try {
+    return JSON.parse(responseText);
+  } catch (e) {
+    return { status: 0, message: 'Invalid response format' };
+  }
+};
+
+// Helper function to reset form (add this inside your component)
+const resetForm = () => {
+  setFormData({
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    pincode: '',
+    investment: '',
+    message: '',
+    otp: ''
+  });
+  setCurrentStep(1);
+  setOtpSent(false);
+  setOtpVerified(false);
+  setFailedAttempts(0);
+  setErrors({});
+  setGeneratedOtp(null);
+  
+  // Clear timers
+  if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
+  if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current);
+};
   // Go back to phone step
   const handleBackToPhone = () => {
     setCurrentStep(1);
