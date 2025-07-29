@@ -184,8 +184,9 @@ export default function FranchiseContactForm() {
       const otp = Math.floor(1000 + Math.random() * 9000);
       setGeneratedOtp(otp);
       // Updated message for 4-digit OTP
-      const message = `Dear,${otp} is OTP to verify your mobile number for confirm request. Regards RO Care India.`;
-      
+      const message = `Dear Customer, Your OTP for Mannu Bhai profile verification is ${otp}. Regards, Mannubhai Service Expert`;
+
+  
       const smsResult = await sendSms(formData.phone, message);
       
       if (smsResult) {
