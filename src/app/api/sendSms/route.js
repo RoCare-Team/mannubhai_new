@@ -9,8 +9,8 @@ export async function GET(request) {
       from: 'TLGCRO',
       to: searchParams.get('to'),
       body: searchParams.get('body'),
-      entityid: '1401519300000012435',
-      templateid: '1007396380615496861'
+      entityid: '1001762193665245675',
+      templateid: '1007963727820356167'
     })}`;
 
     const response = await fetch(url);
