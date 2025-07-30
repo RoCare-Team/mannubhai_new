@@ -15,7 +15,7 @@ export default function PageGone() {
 
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          This Page is No Longer Available
+          Page Not Found
         </h1>
 
         {/* Message */}

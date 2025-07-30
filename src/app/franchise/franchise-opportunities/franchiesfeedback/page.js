@@ -123,7 +123,7 @@ export default function FranchiseFeedback() {
           <div className="flex items-center justify-center mb-4">
             <FaUserTie className="text-2xl sm:text-3xl lg:text-4xl text-pink-600 mr-2 sm:mr-3" />
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">
-              Our Onboarding Franchise Partners
+             Our Recently Onboarded Franchise Partners
             </h2>
           </div>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto px-4">

@@ -14,12 +14,6 @@ export default function NotFound() {
         </div>
         
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          Page Not Found
-        </h1>
-        
-      
-        
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button 
