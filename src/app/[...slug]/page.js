@@ -59,41 +59,24 @@ const generateCacheKey = (prefix, ...args) =>
 
 // Data Services
 class DataService {
-static async fetchDocument(collectionName, field, value) {
-  const normalizedValue = normalizeUrlSegment(value);
-  const cacheKey = generateCacheKey(`${collectionName}-doc`, field, normalizedValue);
-  const cached = AppCache.get(cacheKey);
-  if (cached) return cached;
+  static async fetchDocument(collectionName, field, value) {
+    const normalizedValue = normalizeUrlSegment(value);
+    const cacheKey = generateCacheKey(`${collectionName}-doc`, field, normalizedValue);
+    const cached = AppCache.get(cacheKey);
+    if (cached) return cached;
 
-  // For city_tb, add additional conditions
-  if (collectionName === "city_tb") {
-    const q = query(
-      collection(db, collectionName),
-      where(field, "==", value),
-      where("personal_care", "==", 0),
-      where("status", "==", "1")
-    );
+    const q = query(collection(db, collectionName));
     const snap = await getDocs(q);
-    const doc = snap.docs[0]; // Get first matching document
+    
+    const doc = snap.docs.find(d => {
+      const fieldValue = d.data()[field];
+      return fieldValue && normalizeUrlSegment(fieldValue) === normalizedValue;
+    });
     
     const result = doc ? { id: doc.id, ...doc.data() } : null;
     AppCache.set(cacheKey, result);
     return result;
   }
-
-  // Original logic for other collections
-  const q = query(collection(db, collectionName));
-  const snap = await getDocs(q);
-  
-  const doc = snap.docs.find(d => {
-    const fieldValue = d.data()[field];
-    return fieldValue && normalizeUrlSegment(fieldValue) === normalizedValue;
-  });
-  
-  const result = doc ? { id: doc.id, ...doc.data() } : null;
-  AppCache.set(cacheKey, result);
-  return result;
-}
 
   static async fetchPageMaster(cityId, categoryId) {
     const cacheKey = generateCacheKey('page-master', cityId, categoryId);
@@ -144,21 +127,16 @@ static async fetchDocument(collectionName, field, value) {
     }
   }
 
- static async fetchCities() {
-  const cacheKey = 'all-cities';
-  const cached = AppCache.get(cacheKey);
-  if (cached) return cached;
+  static async fetchCities() {
+    const cacheKey = 'all-cities';
+    const cached = AppCache.get(cacheKey);
+    if (cached) return cached;
 
-  const q = query(
-    collection(db, "city_tb"),
-    where("personal_care", "==", 0),
-    where("status", "==", "1")
-  );
-  const snap = await getDocs(q);
-  const cities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  AppCache.set(cacheKey, cities, AppCache.TTL.LONG);
-  return cities;
-}
+    const snap = await getDocs(collection(db, "city_tb"));
+    const cities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    AppCache.set(cacheKey, cities, AppCache.TTL.LONG);
+    return cities;
+  }
 }
 
 // Metadata Service
@@ -258,6 +236,7 @@ static getDefaultMetadata() {
 
 static async generateForCity(slug, cityDoc) {
     const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+    
     return {
       title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
       description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
@@ -287,8 +266,7 @@ static async generateForCity(slug, cityDoc) {
         images: [cityDoc.image || DEFAULT_IMAGE],
       }
     };
-}
-
+  }
 
   static async generateForCategory(slug, catDoc, pageMasterDoc = null) {
     const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
@@ -328,46 +306,80 @@ static async generateForCity(slug, cityDoc) {
 
 
 
-static async generateForCity(slug, cityDoc) {
-  const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-  
-  // Check if city should be indexed (personal_care === 0 and status === "1")
-  const shouldIndex = cityDoc.personal_care === 0 && cityDoc.status === "1";
-  
-  return {
-    title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-    description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
-    keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,
-    charset: 'utf-8',
-    viewport: {
-      width: 'device-width',
-      initialScale: 1,
-      maximumScale: 5,
-      userScalable: true,
-    },
-    alternates: { canonical: canonicalUrl },
-    robots: { 
-      index: shouldIndex, 
-      follow: shouldIndex 
-    },
-    openGraph: {
-      title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-      description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-      url: canonicalUrl,
-      images: [{
-        url: cityDoc.image || DEFAULT_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: `Home services in ${cityDoc.city_name}`,
-      }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-      description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-      images: [cityDoc.image || DEFAULT_IMAGE],
+static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
+    const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+    
+    // Always prioritize page_master_tb fields when available (for slug length 2)
+    const metaTitle = pageMasterDoc?.meta_title || 
+                     catDoc.meta_title || 
+                     `${catDoc.category_name} Services in ${cityDoc.city_name} | MannuBhai`;
+    
+    const metaDescription = pageMasterDoc?.meta_description || 
+                          catDoc.meta_description || 
+                          `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
+    
+    const metaKeywords = pageMasterDoc?.meta_keywords || 
+                       catDoc.meta_keywords || 
+                       `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
+
+    // Determine image - prioritize pageMasterDoc image first
+    const imageUrl = pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE;
+
+    // Generate FAQ schema only when pageMasterDoc exists (slug length 2)
+    let faqSchema = null;
+    if (pageMasterDoc) {
+      const faqData = [];
+      for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+        faqData.push({
+          question: pageMasterDoc[`faqquestion${i}`],
+          answer: pageMasterDoc[`faqanswer${i}`]
+        });
+      }
+      if (faqData.length > 0) {
+        faqSchema = this.generateFAQSchema(faqData);
+      }
     }
-  };
+
+    // Generate breadcrumb schema (only relevant for slug length 2)
+    const breadcrumbSchema = this.generateBreadcrumbSchema(slug, cityDoc, catDoc);
+
+    // Generate local business schema
+    const localBusinessSchema = this.generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl);
+
+    // Combine all schemas
+    const schemas = [breadcrumbSchema, localBusinessSchema];
+    if (faqSchema) schemas.push(faqSchema);
+
+    return {
+      title: metaTitle,
+      description: metaDescription,
+      keywords: metaKeywords,
+      alternates: { canonical: canonicalUrl },
+      robots: { index: true, follow: true },
+      openGraph: {
+        title: metaTitle,
+        description: metaDescription,
+        url: canonicalUrl,
+        images: [{
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${catDoc.category_name} services in ${cityDoc.city_name}`,
+        }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: metaTitle,
+        description: metaDescription,
+        images: [imageUrl],
+      },
+      other: {
+        // Include all schemas in the metadata
+        ...(schemas.length > 0 && {
+          schemaJson: schemas
+        })
+      }
+    };
 }
   static async generate({ params }) {
     const { slug = [] } = params;
