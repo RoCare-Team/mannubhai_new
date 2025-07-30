@@ -1,19 +1,27 @@
 'use client'; // Mark this as a Client Component
-import { useRouter } from 'next/navigation'; // Updated import
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; // Updated imports
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { FaStar } from 'react-icons/fa';
 
 export default function ReviewPage() {
   const router = useRouter();
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
   const review_id = searchParams.get('review_id');
   
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cmpl_id, setCmplId] = useState('');
   
+  useEffect(() => {
+    if (review_id) {
+      const decoded = decodeString(review_id);
+      setCmplId(`CMPL${decoded}`);
+    }
+  }, [review_id]);
+
   const decodeString = (encodedString) => {
     if (!encodedString) return '';
     
@@ -35,9 +43,7 @@ export default function ReviewPage() {
       return '';
     }
   };
-  
-  const cmpl_id = `CMPL${decodeString(review_id)}`;
-  
+
   const handleSubmit = async () => {
     if (!rating) {
       alert('Please Select Star To Rate Us!');
