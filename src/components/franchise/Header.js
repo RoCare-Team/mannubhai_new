@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 export default function FranchiseHeader() {
   const whatsappNumber = "+919319408430";
-  const phoneNumber = "+917827506245";
+  const phoneNumber = "7827506245";
   const whatsappMessage = "Hi! I'm interested in franchise opportunities.";
 
   const scrollToForm = () => {
