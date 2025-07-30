@@ -1,10 +1,19 @@
-'use client'; // Mark this as a Client Component
-import { useRouter, useSearchParams } from 'next/navigation'; // Updated imports
-import { useState, useEffect } from 'react';
+'use client';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import Head from 'next/head';
 import { FaStar } from 'react-icons/fa';
 
+// Wrap the main component with Suspense
 export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ReviewContent />
+    </Suspense>
+  );
+}
+
+function ReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const review_id = searchParams.get('review_id');
@@ -26,10 +35,7 @@ export default function ReviewPage() {
     if (!encodedString) return '';
     
     try {
-      // Replace the URL-safe characters back to base64 standard
       const base64String = encodedString.replace(/-/g, '+').replace(/_/g, '/').replace(/,/g, '=');
-      
-      // Decode base64 (works in browser environment)
       const allstring = atob(base64String);
       
       const removed_suffix_with_prefix = allstring.substring(0, allstring.indexOf('#'));
