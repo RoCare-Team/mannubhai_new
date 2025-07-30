@@ -52,20 +52,27 @@ const nextConfig = {
   },
 
   // Redirects configuration
-  async redirects() {
-    return [
-      {
-        source: '/franchise-opportunities',
-        destination: '/franchise/franchise-opportunities',
-        permanent: true,
-      },
-      {
-        source: '/franchise',
-        destination: '/franchise/franchise-opportunities',
-        permanent: true,
-      }
-    ];
-  },
+// Redirects configuration
+async redirects() {
+  return [
+    {
+      source: '/franchise-opportunities',
+      destination: '/franchise/franchise-opportunities',
+      permanent: true,
+    },
+    {
+      source: '/franchise',
+      destination: '/franchise/franchise-opportunities',
+      permanent: true,
+    },
+    {
+      source: '/beauty-care',
+      destination: '/beauty',
+      permanent: true,
+    },
+  ];
+}
+
 
 };
 
