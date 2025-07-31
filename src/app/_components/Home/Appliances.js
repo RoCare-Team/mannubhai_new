@@ -37,7 +37,7 @@ const SERVICE_ORDER = [
   "Geyser",
 ];
 
-// Memoized Service Card Component - Clean square design
+// Memoized Service Card Component - Fixed square design for mobile
 const ServiceCard = memo(({ service, onClick }) => (
   <div className="group">
     <button
@@ -49,39 +49,43 @@ const ServiceCard = memo(({ service, onClick }) => (
         }
       }}
       title={`View ${service.ServiceName} services`}
-      className="w-full  rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className="w-full aspect-square rounded-xl p-2 sm:p-3 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-white"
       tabIndex={0}
     >
-      {/* Image Container - Square with light radius */}
-      <div className="w-full h-20 sm:h-24 lg:h-28 mb-2 sm:mb-3 flex items-center justify-center overflow-hidden rounded-lg">
+      {/* Image Container - Takes up most of the space */}
+      <div className="flex-1 w-full flex items-center justify-center">
         <Image
           src={service.ServiceIcon}
           alt={`${service.ServiceName} service`}
           width={100}
           height={100}
-          className="object-contain w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 group-hover:scale-105 transition-transform duration-300"
+          className="object-contain w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
+          sizes="(max-width: 640px) 32px, (max-width: 1024px) 48px, 64px"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
         />
       </div>
       
-      {/* Service Name */}
-      <span className="text-xs sm:text-sm font-medium text-center text-gray-700 leading-tight px-1 line-clamp-2">
-        {service.ServiceName}
-      </span>
+      {/* Service Name - Fixed height area */}
+      <div className="h-8 sm:h-10 lg:h-12 flex items-center justify-center px-1">
+        <span className="text-xs sm:text-sm font-medium text-center text-gray-700 leading-tight line-clamp-2">
+          {service.ServiceName}
+        </span>
+      </div>
     </button>
   </div>
 ), (prevProps, nextProps) => prevProps.service.id === nextProps.service.id);
 
 ServiceCard.displayName = 'ServiceCard';
 
-// Skeleton Loader Component
+// Skeleton Loader Component - Also square
 const SkeletonCard = memo(() => (
-  <div className="bg-white rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center shadow-sm animate-pulse">
-    <div className="w-full h-20 sm:h-24 lg:h-28 bg-gray-200 mb-2 sm:mb-3 rounded-lg" />
-    <div className="h-3 bg-gray-200 rounded w-16" />
+  <div className="bg-white rounded-xl p-2 sm:p-3 lg:p-4 flex flex-col items-center justify-center shadow-sm animate-pulse aspect-square">
+    <div className="flex-1 w-full bg-gray-200 rounded-lg" />
+    <div className="h-8 sm:h-10 lg:h-12 flex items-center justify-center">
+      <div className="h-3 bg-gray-200 rounded w-16" />
+    </div>
   </div>
 ));
 
