@@ -59,9 +59,9 @@ const ServiceCard = memo(({ service, onClick }) => (
           alt={`${service.ServiceName} service`}
           width={100}
           height={100}
-          className="object-contain w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 group-hover:scale-105 transition-transform duration-300"
+          className="object-contain w-12 h-12 sm:w-16 sm:h-16 lg:w-30 lg:h-30 group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          sizes="(max-width: 640px) 32px, (max-width: 1024px) 48px, 64px"
+          sizes="(max-width: 640px) 60px, (max-width: 1024px) 80px, 90px"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
         />
@@ -213,9 +213,9 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
         <header className="mb-6 sm:mb-8">
           <h2 
             id="appliance-services-heading"
-            className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center lg:text-left"
+            className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mt-3 lg:text-left"
           >
-            Home Appliance Services
+           Appliance Services
           </h2>
         </header>
 
