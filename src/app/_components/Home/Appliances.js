@@ -37,9 +37,9 @@ const SERVICE_ORDER = [
   "Geyser",
 ];
 
-// Memoized Service Card Component
+// Memoized Service Card Component - Clean square design
 const ServiceCard = memo(({ service, onClick }) => (
-  <div className="group relative">
+  <div className="group">
     <button
       onClick={() => onClick(service)}
       onKeyDown={(e) => {
@@ -49,27 +49,26 @@ const ServiceCard = memo(({ service, onClick }) => (
         }
       }}
       title={`View ${service.ServiceName} services`}
-      className="w-full h-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100/50 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:-translate-y-2 hover:scale-[1.02] backdrop-blur-sm"
+      className="w-full  rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       tabIndex={0}
     >
-      {/* Icon Container with gradient background */}
-      <div className="relative w-20 h-20 mb-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl group-hover:from-blue-100 group-hover:via-indigo-100 group-hover:to-purple-100 transition-all duration-500 shadow-inner">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent rounded-2xl" />
+      {/* Image Container - Square with light radius */}
+      <div className="w-full h-20 sm:h-24 lg:h-28 mb-2 sm:mb-3 flex items-center justify-center overflow-hidden rounded-lg">
         <Image
           src={service.ServiceIcon}
           alt={`${service.ServiceName} service`}
-          width={150}
-          height={150}
-          className="object-contain group-hover:scale-110 transition-transform duration-500 relative z-10"
+          width={100}
+          height={100}
+          className="object-contain w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          sizes="56px"
+          sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
         />
       </div>
       
       {/* Service Name */}
-      <span className="text-sm font-semibold text-center text-gray-800 leading-tight group-hover:text-blue-700 transition-colors duration-300 line-clamp-2">
+      <span className="text-xs sm:text-sm font-medium text-center text-gray-700 leading-tight px-1 line-clamp-2">
         {service.ServiceName}
       </span>
     </button>
@@ -80,8 +79,8 @@ ServiceCard.displayName = 'ServiceCard';
 
 // Skeleton Loader Component
 const SkeletonCard = memo(() => (
-  <div className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm animate-pulse">
-    <div className="w-full h-32 sm:h-40 lg:h-44 bg-gray-200 mb-3 rounded-xl" />
+  <div className="bg-white rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center shadow-sm animate-pulse">
+    <div className="w-full h-20 sm:h-24 lg:h-28 bg-gray-200 mb-2 sm:mb-3 rounded-lg" />
     <div className="h-3 bg-gray-200 rounded w-16" />
   </div>
 ));
@@ -191,7 +190,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
 
   // Memoized skeleton loader
   const SkeletonLoader = useMemo(() => (
-    <div className="grid grid-cols-4 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
       {Array.from({ length: Math.min(12, SERVICE_ORDER.length) }).map((_, i) => (
         <SkeletonCard key={`skeleton-${i}`} />
       ))}
@@ -199,7 +198,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
   ), []);
 
   return (
-    <main className="pb-8 px-4 sm:px-6 lg:px-8">
+    <main className="pb-5 px-4 sm:px-6 lg:px-8">
       <section 
         id="appliances-care"
         className="max-w-7xl mx-auto"
@@ -236,7 +235,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
             <p className="text-gray-600">Please check back later for available services.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
             {subServices.map((service) => (
               <ServiceCard 
                 key={service.id}
