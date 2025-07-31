@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -24,7 +24,7 @@ const IMAGE_MAP = {
 
 const SERVICE_ORDER = [
   "Water Purifier",
-  "Air Conditioner",
+  "Air Conditioner", 
   "Fridge",
   "Washing Machine",
   "Microwave",
@@ -36,6 +36,57 @@ const SERVICE_ORDER = [
   "Small Appliances",
   "Geyser",
 ];
+
+// Memoized Service Card Component
+const ServiceCard = memo(({ service, onClick }) => (
+  <div className="group relative">
+    <button
+      onClick={() => onClick(service)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(service);
+        }
+      }}
+      title={`View ${service.ServiceName} services`}
+      className="w-full h-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100/50 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:-translate-y-2 hover:scale-[1.02] backdrop-blur-sm"
+      tabIndex={0}
+    >
+      {/* Icon Container with gradient background */}
+      <div className="relative w-20 h-20 mb-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl group-hover:from-blue-100 group-hover:via-indigo-100 group-hover:to-purple-100 transition-all duration-500 shadow-inner">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent rounded-2xl" />
+        <Image
+          src={service.ServiceIcon}
+          alt={`${service.ServiceName} service`}
+          width={150}
+          height={150}
+          className="object-contain group-hover:scale-110 transition-transform duration-500 relative z-10"
+          loading="lazy"
+          sizes="56px"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
+        />
+      </div>
+      
+      {/* Service Name */}
+      <span className="text-sm font-semibold text-center text-gray-800 leading-tight group-hover:text-blue-700 transition-colors duration-300 line-clamp-2">
+        {service.ServiceName}
+      </span>
+    </button>
+  </div>
+), (prevProps, nextProps) => prevProps.service.id === nextProps.service.id);
+
+ServiceCard.displayName = 'ServiceCard';
+
+// Skeleton Loader Component
+const SkeletonCard = memo(() => (
+  <div className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm animate-pulse">
+    <div className="w-full h-32 sm:h-40 lg:h-44 bg-gray-200 mb-3 rounded-xl" />
+    <div className="h-3 bg-gray-200 rounded w-16" />
+  </div>
+));
+
+SkeletonCard.displayName = 'SkeletonCard';
 
 export default function Appliances({ hideBeautyBanner = false, onServiceClick, cityUrl }) {
   const router = useRouter();
@@ -138,44 +189,54 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
     fetchSubServices();
   }, [fetchSubServices]);
 
-  // Skeleton loader
+  // Memoized skeleton loader
   const SkeletonLoader = useMemo(() => (
-    <div className="grid grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-      {Array.from({ length: Math.min(8, SERVICE_ORDER.length) }).map((_, i) => (
-        <div
-          key={`skeleton-${i}`}
-          className="bg-white rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 animate-pulse min-h-[140px] sm:min-h-[160px] lg:min-h-[180px]"
-        >
-          <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gray-100 mb-3 rounded-lg" />
-          <div className="h-3 bg-gray-100 rounded w-16 sm:w-20" />
-        </div>
+    <div className="grid grid-cols-4 lg:grid-cols-5 gap-4">
+      {Array.from({ length: Math.min(12, SERVICE_ORDER.length) }).map((_, i) => (
+        <SkeletonCard key={`skeleton-${i}`} />
       ))}
     </div>
   ), []);
 
   return (
-    <main className="pb-5 px-4 sm:px-6 lg:px-8">
+    <main className="pb-8 px-4 sm:px-6 lg:px-8">
       <section 
-        titleledby="appliance-services" 
-        className="max-w-7xl mx-auto"
         id="appliances-care"
-        role="region" 
+        className="max-w-7xl mx-auto"
+        role="region"
+        aria-labelledby="appliance-services-heading"
       >
+        {/* Header */}
         <header className="mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800  lg:text-left">
+          <h2 
+            id="appliance-services-heading"
+            className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-center lg:text-left"
+          >
             Home Appliance Services
           </h2>
         </header>
 
+        {/* Services Grid */}
         {loading ? (
-          <>
-            <p className="text-center text-gray-500 mb-6">Loading services…</p>
+          <div className="space-y-6">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Loading services...</span>
+            </div>
             {SkeletonLoader}
-          </>
+          </div>
         ) : subServices.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">No services found</p>
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.467-.881-6.08-2.33M15.536 8.464a5 5 0 010 7.072M8.464 8.464a5 5 0 000 7.072" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Services Available</h3>
+            <p className="text-gray-600">Please check back later for available services.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-4 lg:grid-cols-5 gap-4">
             {subServices.map((service) => (
               <ServiceCard 
                 key={service.id}
@@ -185,20 +246,33 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
             ))}
           </div>
         )}
+
+        {/* Loading State Overlay */}
+        {routeLoading && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-6 shadow-2xl flex items-center space-x-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="text-gray-700 font-medium">Loading service...</span>
+            </div>
+          </div>
+        )}
       </section>
 
+      {/* Beauty Banner */}
       {!hideBeautyBanner && (
-        <section className="mt-8 sm:mt-12 mb-0">
+        <section className="mt-8 sm:mt-12 mb-0" aria-label="Beauty services promotion">
           <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
             <div className="rounded-xl overflow-hidden shadow-lg">
               <Image
                 src="/HomeBanner/beauty.webp"
-                alt="Beauty services promotion"
+                alt="Beauty services promotion - Professional beauty treatments at home"
                 width={1920}
                 height={400}
-                priority={true}
-                sizes="100vw"
-                className="w-full h-auto"
+                priority={false}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                className="w-full h-auto object-cover"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
               />
             </div>
           </div>
@@ -207,37 +281,3 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
     </main>
   );
 }
-
-// Extracted Service Card Component
-const ServiceCard = ({ service, onClick }) => (
-  <button
-    onClick={() => onClick(service)}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onClick(service);
-      }
-    }}
-    title={`View ${service.ServiceName} services`}
-    className="group w-full bg-white rounded-2xl p-3 sm:p-4 lg:p-6 flex flex-col items-center justify-center shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:-translate-y-1 min-h-[140px] sm:min-h-[160px] lg:min-h-[180px]"
-    tabIndex={0}
-  >
-    {/* Icon Container */}
-    <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl group-hover:from-blue-100 group-hover:to-indigo-100 transition-colors duration-300">
-      <Image
-        src={service.ServiceIcon}
-        alt={`${service.ServiceName} icon`}
-        width={96}
-        height={96}
-        className="object-contain group-hover:scale-110 transition-transform duration-300 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-        loading="lazy"
-        sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
-      />
-    </div>
-    
-    {/* Service Name */}
-    <span className="text-xs sm:text-sm lg:text-base font-medium text-center text-gray-700 leading-tight px-1 group-hover:text-blue-700 transition-colors duration-300">
-      {service.ServiceName}
-    </span>
-  </button>
-);
