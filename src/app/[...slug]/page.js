@@ -517,9 +517,12 @@
             DataService.fetchPageMaster(cityDoc.id, catDoc.id),
             DataService.fetchServices(catDoc.lead_type_id)
           ]);
-          if (pageMasterDoc?.group_category === "5" && pageMasterDoc?.status !== "0") {
-          redirect("/410");
-           }
+        if (
+            (pageMasterDoc?.group_category === "5" && pageMasterDoc?.status !== "0") ||
+            pageMasterDoc?.group_category === "6"
+          ) {
+            redirect("/410");
+          }
 
           // Generate FAQ data (only for slug length 2)
           const faqData = [];
@@ -531,7 +534,6 @@
               });
             }
           }
-
           return (
             <>
               <components.CategoryDetails 

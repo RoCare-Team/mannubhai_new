@@ -50,9 +50,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // Redirects configuration
-// Redirects configuration
 async redirects() {
   return [
     {
