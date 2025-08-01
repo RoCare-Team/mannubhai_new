@@ -282,6 +282,7 @@ const ModernServiceWrapper = memo(({
 ModernServiceWrapper.displayName = 'ModernServiceWrapper';
 
 // Enhanced Coming Soon Section with FIXED LAYOUT - NO SHIFTS
+// Fixed ModernComingSoonSection with proper image handling
 const ModernComingSoonSection = memo(({ title, cityName }) => {
   const SERVICE_IMAGES = {
     "Beauty & Personal Care": {
@@ -317,22 +318,31 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
   const [imageErrors, setImageErrors] = useState(new Set());
   const [imagesLoaded, setImagesLoaded] = useState(new Set());
 
-  const handleImageError = useCallback((serviceName) => {
+  const handleImageError = useCallback((serviceName, imagePath) => {
+    console.error(`Failed to load image for ${serviceName}: ${imagePath}`);
     setImageErrors(prev => new Set(prev).add(serviceName));
   }, []);
 
   const handleImageLoad = useCallback((serviceName) => {
+    console.log(`Successfully loaded image for: ${serviceName}`);
     setImagesLoaded(prev => new Set(prev).add(serviceName));
   }, []);
 
+  // Debug: Log the current title and services
+  useEffect(() => {
+    console.log('ModernComingSoonSection - Title:', title);
+    console.log('ModernComingSoonSection - Services found:', services.length);
+    console.log('ModernComingSoonSection - Services:', services);
+  }, [title, services]);
+
   return (
     <section 
-      className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-[400px]" // Fixed minimum height
+      className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-[400px]"
       aria-label={`${title} coming soon services`}
     >
       <div className="relative max-w-7xl mx-auto">
-        {/* Header Section - FIXED HEIGHT */}
-        <div className="text-center mb-8 sm:mb-12 h-32"> {/* Fixed header height */}
+        {/* Header Section */}
+        <div className="text-center mb-8 sm:mb-12 h-32">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             {title}
           </h2>
@@ -354,78 +364,85 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
           </p>
         </div>
 
-        {/* Services Grid - FIXED CARD DIMENSIONS */}
-        <div 
-          className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-6xl mx-auto"
-          role="list"
-          aria-label={`${title} services list`}
-        >
-          {services.map(([serviceName, imagePath], index) => (
-            <div
-              key={serviceName}
-              role="listitem"
-              className="group relative bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-              style={{ 
-                animationDelay: `${index * 50}ms`,
-              }}
-            >
-              {/* Service Card Content - FIXED HEIGHT */}
-              <div className="p-2 sm:p-4 text-center h-full flex flex-col h-[140px] sm:h-[180px]"> {/* Fixed exact heights */}
-                {/* Service Image Container - FIXED SIZE */}
-                <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mx-auto mb-2 sm:mb-3 flex-shrink-0">
-                  {/* Placeholder background - ALWAYS PRESENT */}
-                  <div className="absolute inset-0 bg-gray-100 rounded-lg sm:rounded-xl" aria-hidden="true"></div>
-                  
-                  {!imageErrors.has(serviceName) ? (
-                    <Image
-                      src={imagePath}
-                      alt={`${serviceName} service icon`}
-                      fill
-                      className={`object-contain p-1 sm:p-2 group-hover:scale-110 transition-transform duration-300 ${
-                        imagesLoaded.has(serviceName) ? 'opacity-100' : 'opacity-0'
-                      }`}
-                      sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
-                      priority={index < 4}
-                      quality={75}
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                      onError={() => handleImageError(serviceName)}
-                      onLoad={() => handleImageLoad(serviceName)}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+        {/* Services Grid */}
+        {services.length > 0 ? (
+          <div 
+            className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-6xl mx-auto"
+            role="list"
+            aria-label={`${title} services list`}
+          >
+            {services.map(([serviceName, imagePath], index) => (
+              <div
+                key={serviceName}
+                role="listitem"
+                className="group relative bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                style={{ 
+                  animationDelay: `${index * 50}ms`,
+                }}
+              >
+                {/* Service Card Content */}
+                <div className="p-2 sm:p-4 text-center h-full flex flex-col h-[140px] sm:h-[180px]">
+                  {/* Service Image Container */}
+                  <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mx-auto mb-2 sm:mb-3 flex-shrink-0">
+                    {/* Placeholder background */}
+                    <div className="absolute inset-0 bg-gray-100 rounded-lg sm:rounded-xl" aria-hidden="true"></div>
+                    
+                    {!imageErrors.has(serviceName) ? (
+                      <Image
+                        src={imagePath}
+                        alt={`${serviceName} service icon`}
+                        fill
+                        className={`object-contain p-1 sm:p-2 group-hover:scale-110 transition-transform duration-300 ${
+                          imagesLoaded.has(serviceName) ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 80px"
+                        priority={index < 4}
+                        quality={75}
+                        onError={() => handleImageError(serviceName, imagePath)}
+                        onLoad={() => handleImageLoad(serviceName)}
+                        // Remove placeholder and blurDataURL to see if they're causing issues
+                        unoptimized={process.env.NODE_ENV === 'development'} // For development debugging
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="sr-only">Image failed to load</span>
+                      </div>
+                    )}
+                    
+                    {/* Coming Soon Badge */}
+                    <div 
+                      className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full shadow-sm w-fit h-fit"
+                      aria-label="Coming soon"
+                    >
+                      <span className="hidden sm:inline">Soon</span>
+                      <span className="sm:hidden">Soon</span>
                     </div>
-                  )}
-                  
-                  {/* Coming Soon Badge - ABSOLUTE POSITIONED */}
-                  <div 
-                    className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full shadow-sm w-fit h-fit"
-                    aria-label="Coming soon"
-                  >
-                    <span className="hidden sm:inline">Soon</span>
-                    <span className="sm:hidden">Soon</span>
+                  </div>
+
+                  {/* Service Name */}
+                  <div className="flex-1 flex items-center justify-center px-1 min-h-[2.5rem]">
+                    <h3 className="font-medium text-gray-900 leading-tight text-center group-hover:text-indigo-600 transition-colors text-xs sm:text-sm line-clamp-2">
+                      {serviceName}
+                    </h3>
                   </div>
                 </div>
 
-                {/* Service Name - FIXED HEIGHT */}
-                <div className="flex-1 flex items-center justify-center px-1 min-h-[2.5rem]"> {/* Fixed min height */}
-                  <h3 className="font-medium text-gray-900 leading-tight text-center group-hover:text-indigo-600 transition-colors text-xs sm:text-sm line-clamp-2">
-                    {serviceName}
-                  </h3>
-                </div>
+                {/* Hover border effect */}
+                <div className="absolute inset-0 border-2 border-transparent group-hover:border-indigo-100 rounded-xl sm:rounded-2xl transition-colors duration-300 pointer-events-none" aria-hidden="true" />
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No services configured for "{title}"</p>
+          </div>
+        )}
 
-              {/* Subtle hover border effect */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-indigo-100 rounded-xl sm:rounded-2xl transition-colors duration-300 pointer-events-none" aria-hidden="true" />
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom CTA - FIXED HEIGHT */}
-        <div className="text-center mt-8 sm:mt-12 h-12 flex items-center justify-center"> {/* Fixed height */}
+        {/* Bottom CTA */}
+        <div className="text-center mt-8 sm:mt-12 h-12 flex items-center justify-center">
           <div className="inline-flex items-center space-x-2 sm:space-x-3 text-gray-500" role="status" aria-live="polite">
             <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo-400 rounded-full animate-pulse" aria-hidden="true"></div>
             <span className="text-xs sm:text-sm font-medium">We'll notify you when these services are available</span>
@@ -436,7 +453,6 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
     </section>
   );
 });
-
 ModernComingSoonSection.displayName = 'ModernComingSoonSection';
 
 // Main CityDetails component with modern optimizations - LAYOUT SHIFT FIXES
