@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Image from "next/image";
+import { default as NextImage } from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -33,6 +33,14 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
   const [subServices, setSubServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
+
+  // Preload important images
+  useEffect(() => {
+    Object.values(IMAGE_MAP).forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
 
   const orderMap = useMemo(
     () =>
@@ -91,6 +99,8 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
 
   const handleSubServiceClick = useCallback(
     async (service) => {
+      if (routeLoading) return;
+      
       setRouteLoading(true);
       try {
         const category_url = await getCategoryUrlByLeadTypeId(service.id);
@@ -110,7 +120,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         setRouteLoading(false);
       }
     },
-    [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router]
+    [getCategoryUrlByLeadTypeId, onServiceClick, cityUrl, router, routeLoading]
   );
 
   useEffect(() => {
@@ -123,6 +133,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         <div
           key={`skeleton-${i}`}
           className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow animate-pulse"
+          aria-hidden="true"
         >
           <div className="aspect-square w-full max-w-[80px] bg-blue-100 mb-2 rounded-md" />
           <div className="h-3 w-14 bg-blue-100 rounded" />
@@ -134,37 +145,41 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
   return (
     <main className="relative pb-5 px-3 sm:px-6 md:px-8 lg:px-20 mt-0 sm:mt-5 sm:mb-5">
       <header className="mb-5">
-        <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
+        <h1 className="text-left text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
           Beauty Services
-        </h2>
+        </h1>
       </header>
 
       <section className="max-w-7xl mx-auto" id="beauty-care">
         {loading ? (
           <>
             <p className="text-center text-sm text-gray-500 mb-4">Loading services...</p>
-            <div className="grid grid-cols-4 gap-3 sm:gap-6">{skeletonItems}</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6" role="status" aria-live="polite">
+              {skeletonItems}
+            </div>
           </>
         ) : subServices.length === 0 ? (
           <p className="text-center text-sm text-gray-500 py-8">No beauty services found.</p>
         ) : (
-          <div className="grid grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}
                 onClick={() => handleSubServiceClick(service)}
                 className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-transform"
                 title={`View ${service.ServiceName}`}
+                aria-label={`View ${service.ServiceName}`}
+                disabled={routeLoading}
               >
                 <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
-                  <Image
+                  <NextImage
                     src={service.ServiceIcon}
                     alt={service.ServiceName}
-                    fill
+                    width={96}
+                    height={96}
                     className="object-contain"
-                    placeholder="blur"
-                    blurDataURL="/blur.png"
-                    loading="lazy"
+                    priority={service.ServiceName === "Women Salon At Home"}
+                    loading={service.ServiceName === "Women Salon At Home" ? "eager" : "lazy"}
                     sizes="(max-width: 640px) 80px, 96px"
                   />
                 </div>
@@ -181,19 +196,17 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       <section className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" id="beauty-brands">
         <BeautyBrand />
       </section>
-
       {/* Promotional Banner */}
       {!hideBrightBanner && (
         <section className="mt-0 mb-0">
           <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
             <div className="rounded-xl overflow-hidden shadow">
-              <Image
+              <NextImage
                 src="/HomeBanner/homecare.webp"
                 alt="Professional homecare services available"
                 width={1920}
                 height={400}
-                priority={true}
-                sizes="100vw"
+                priority
                 className="w-full h-auto"
               />
             </div>
