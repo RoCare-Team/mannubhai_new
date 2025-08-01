@@ -132,11 +132,11 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       Array.from({ length: DESIRED_ORDER.length }).map((_, i) => (
         <div
           key={`skeleton-${i}`}
-          className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow animate-pulse"
+          className="bg-white rounded-xl p-2 sm:p-3 flex flex-col items-center justify-center shadow animate-pulse"
           aria-hidden="true"
         >
-          <div className="aspect-square w-full max-w-[80px] bg-blue-100 mb-2 rounded-md" />
-          <div className="h-3 w-14 bg-blue-100 rounded" />
+          <div className="aspect-square w-full max-w-[60px] sm:max-w-[80px] bg-blue-100 mb-2 rounded-md" />
+          <div className="h-2 sm:h-3 w-10 sm:w-14 bg-blue-100 rounded" />
         </div>
       )),
     []
@@ -154,36 +154,38 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         {loading ? (
           <>
             <p className="text-center text-sm text-gray-500 mb-4">Loading services...</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6" role="status" aria-live="polite">
+            {/* Updated grid: 4 columns on mobile, same on larger screens */}
+            <div className="grid grid-cols-4 gap-2 sm:gap-6" role="status" aria-live="polite">
               {skeletonItems}
             </div>
           </>
         ) : subServices.length === 0 ? (
           <p className="text-center text-sm text-gray-500 py-8">No beauty services found.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
+          /* Updated grid: 4 columns on mobile, same on larger screens */
+          <div className="grid grid-cols-4 gap-2 sm:gap-6">
             {subServices.map((service) => (
               <button
                 key={service.id}
                 onClick={() => handleSubServiceClick(service)}
-                className="bg-white rounded-xl p-3 flex flex-col items-center justify-center shadow-md hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-transform"
+                className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 flex flex-col items-center justify-center shadow-md hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-transform"
                 title={`View ${service.ServiceName}`}
                 aria-label={`View ${service.ServiceName}`}
                 disabled={routeLoading}
               >
-                <div className="relative w-full aspect-square max-w-[80px] sm:max-w-[96px] bg-blue-50 rounded-lg mb-2">
+                <div className="relative w-full aspect-square max-w-[60px] sm:max-w-[80px] md:max-w-[96px] bg-blue-50 rounded-lg mb-1 sm:mb-2">
                   <NextImage
                     src={service.ServiceIcon}
                     alt={service.ServiceName}
                     width={96}
                     height={96}
-                    className="object-contain"
+                    className="object-contain p-1 sm:p-0"
                     priority={service.ServiceName === "Women Salon At Home"}
                     loading={service.ServiceName === "Women Salon At Home" ? "eager" : "lazy"}
-                    sizes="(max-width: 640px) 80px, 96px"
+                    sizes="(max-width: 640px) 60px, (max-width: 768px) 80px, 96px"
                   />
                 </div>
-                <span className="text-[10px] font-semibold text-center text-gray-700 leading-tight">
+                <span className="text-[8px] sm:text-[10px] font-semibold text-center text-gray-700 leading-tight px-1">
                   {service.ServiceName}
                 </span>
               </button>
@@ -196,6 +198,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       <section className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white" id="beauty-brands">
         <BeautyBrand />
       </section>
+      
       {/* Promotional Banner */}
       {!hideBrightBanner && (
         <section className="mt-0 mb-0">
