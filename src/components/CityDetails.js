@@ -295,10 +295,11 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
       "Hair Studio": "/BeautyHomeIcons/hair studio.webp",
     },
     "Handyman Services": {
-      "Painter": "/HandyMan/painter.webp",
-      "Plumber": "/HandyMan/plumber.webp",
-      "Carpenter": "/HandyMan/carpenter.webp",
-      "Electrician": "/HandyMan/electrician.webp"
+      "Painter": "/HandyMan/PAINTER.webp",
+      "Plumber": "/HandyMan/PLUMBER.webp",
+      "Carpenter": "/HandyMan/CARPENTER.webp",
+      "Electrician": "/HandyMan/ELECTRICIAN.webp",
+      "Masons": "/HandyMan/OTHER.webp",
     },
     "Home Care Services": {
       "Sofa Cleaning": "/HomeCareHomeIcon/SOFA-CLEANING.webp",
