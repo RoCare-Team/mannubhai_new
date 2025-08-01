@@ -378,3 +378,40 @@ html {
     }
   }
 }
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .animate-reverse {
+    animation-direction: reverse;
+  }
+}
+
+/* Prevent layout shift on images */
+img {
+  content-visibility: auto;
+}
+
+/* Ensure skeleton loaders maintain aspect ratios */
+.skeleton-loader {
+  aspect-ratio: var(--aspect-ratio, auto);
+}
+
