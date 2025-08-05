@@ -25,9 +25,7 @@ export const homePageMetadata = {
     title: "Mannubhai - Professional Home Services",
     description: "Book trusted professionals for all your home service needs",
   },
-  icons: {
-    icon: 'favicon/MB Favicon.png',
-  },
+
   manifest: '/site.webmanifest',
   verification: {
     google: 'IaTaWIzhmYLa4xubMA-U595_5CX8O-zVfP_Y69z2Wss',

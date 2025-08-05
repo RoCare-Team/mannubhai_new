@@ -31,6 +31,7 @@ const ServiceCardSkeleton = ({ isMobile = false }) => (
 
 const HeroSection = () => {
   const router = useRouter();
+   const [hasMounted, setHasMounted] = useState(false)
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,36 +72,42 @@ const HeroSection = () => {
     fetchMainServices();
   }, []);
 
-  const scrollToSection = (serviceName) => {
-    const sectionMap = {
-      'Appliances Care': 'appliances-care',
-      'Home Care': 'home-care',
-      'Beauty Care': 'beauty-care',
-      'Handyman': 'handyman',
-    };
 
-    const sectionId = sectionMap[serviceName];
-    if (sectionId) {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
-        const offsetPosition = section.offsetTop - headerHeight - 20;
+ useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+  // ✅ 2. Guard after all hooks
+  if (!hasMounted) return null;
 
-        section.classList.add('highlight-section');
-        setTimeout(() => {
-          section.classList.remove('highlight-section');
-        }, 2000);
+const scrollToSection = (serviceName) => {
+  if (!isBrowser) return;
 
-        section.setAttribute('tabindex', '-1');
-        section.focus();
-      }
-    }
+  const sectionMap = {
+    'Appliances Care': 'appliances-care',
+    'Home Care': 'home-care',
+    'Beauty Care': 'beauty-care',
+    'Handyman': 'handyman',
   };
+
+  const sectionId = sectionMap[serviceName];
+  if (sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+      const offsetPosition = section.offsetTop - headerHeight - 20;
+
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+
+      section.classList.add('highlight-section');
+      setTimeout(() => section.classList.remove('highlight-section'), 2000);
+
+      section.setAttribute('tabindex', '-1');
+      section.focus();
+    }
+  }
+};
+
 
   const handleServiceClick = (service, e) => {
     if (e) e.preventDefault();
@@ -186,7 +193,6 @@ const HeroSection = () => {
                   Home services at your doorstep
                 </h1>
               </header>
-              
               <section className="services-part mb-6 lg:mb-8">
                 <h2 className="text-xl md:text-2xl font-semibold mb-4">
                   What are you looking for?
@@ -200,7 +206,6 @@ const HeroSection = () => {
                   </div>
                 </div>
               </section>
-
               <div className="flex flex-row justify-start gap-6 md:gap-8 mb-6 mt-6">
                 <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors shadow-sm">
                   <CiStar className="text-yellow-500 text-2xl lg:text-3xl flex-shrink-0" aria-hidden="true" />
@@ -218,7 +223,6 @@ const HeroSection = () => {
                 </div>
               </div>
             </div>
-
             {/* Right Image - Fixed aspect ratio to prevent layout shift */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
               <div className="relative w-full aspect-[4/5] max-h-[550px] border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
@@ -227,8 +231,8 @@ const HeroSection = () => {
                   alt="Professional home services team working"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                  loading="lazy"
+                  fetchPriority="high"
+                  priority
                   quality={85}
                   style={{ objectPosition: "center 30%" }}
                   placeholder="blur"

@@ -2,7 +2,7 @@ export default function Head() {
   return (
     <>
       <title>Book Handyman Services For Your Home @ 7065012902 - Mannubha</title>
-
+      <meta charSet="UTF-8" />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 

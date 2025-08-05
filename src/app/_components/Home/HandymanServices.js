@@ -147,7 +147,7 @@ export default function HandymanServices({ hideBanner = false, onServiceClick, c
     ))
   ), [subServices, handleSubServiceClick]);
   return (
-    <main className="bg-gray-50 pb-10 px-4 sm:px-6 lg:px-19">
+    <main className="pb-10 px-4 sm:px-6 lg:px-19">
       <header className="mb-6 sm:mb-10 mt-0">
         <h2 className="text-left text-xl sm:text-3xl font-bold text-gray-800 ml-0 sm:ml-14">
           Handyman Services

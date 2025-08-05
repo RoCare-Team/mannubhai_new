@@ -3,7 +3,7 @@ export default function Head() {
     <>
       <title>About MannuBhai | Trusted Home Services at Your Doorstep Across India
 </title>
-
+     < meta charSet="UTF-8" />
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,10 +15,10 @@ export default function Head() {
         content="Mannu Bhai, About MannuBhai, MannuBhai services
 ,MannuBhai home services, trusted home service provider, home services at doorstep, professional handyman services, cleaning services in India, home salon services, expert home service team, reliable service platform"/>
 
-      <meta name="robots" content="noindex, nofollow" />
+      <meta name="robots" content="index, follow" />
  
       {/* canonical URL */}
-      <link rel="canonical" href="https://mannubhai-new.vercel.app/about" />
+      <link rel="canonical" href="https://www.mannubhai.com//about-us" />
     </>
   );
 }

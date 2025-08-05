@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { 
-  FaHome, 
-  FaRegSmile, 
-  FaBroom, 
-  FaTools, 
+import {
+  FaHome,
+  FaRegSmile,
+  FaBroom,
+  FaTools,
   FaCheckCircle,
   FaChevronDown,
   FaChevronUp,
@@ -162,7 +162,7 @@ function AboutMannuBhaiExpert() {
     return (
         <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50 py-8 sm:py-12 lg:py-20 w-full">
             <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -187,10 +187,17 @@ function AboutMannuBhaiExpert() {
                             viewport={{ once: true }}
                             className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md overflow-hidden border border-gray-200 w-full"
                         >
-                            <button
+                            {/* --- FIX START --- */}
+                            {/* Changed outer <button> to a <div> and added accessibility attributes */}
+                            <div
                                 onClick={() => toggleCategory(category.id)}
-                                className="w-full flex justify-between items-center p-4 sm:p-6 text-left focus:outline-none group"
+                                onKeyPress={(e) => (e.key === 'Enter' || e.key === ' ') && toggleCategory(category.id)}
+                                role="button"
+                                tabIndex="0"
+                                aria-expanded={expandedCategory === category.id}
+                                className="w-full flex justify-between items-center p-4 sm:p-6 text-left focus:outline-none focus:ring-2 focus:ring-blue-300 group cursor-pointer"
                             >
+                            {/* --- FIX END --- */}
                                 <div className="flex items-center gap-3 sm:gap-4">
                                     <div className="p-2 sm:p-3 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors">
                                         {React.cloneElement(category.icon, { className: `${category.icon.props.className} text-lg sm:text-xl` })}
@@ -200,28 +207,29 @@ function AboutMannuBhaiExpert() {
                                             {category.title}
                                         </h3>
                                         <p className="text-sm sm:text-base text-gray-500 mt-1">
-                                            {showFullDescription[category.id] 
-                                                ? category.description 
+                                            {showFullDescription[category.id]
+                                                ? category.description
                                                 : `${category.description.substring(0, 100)}...`}
                                         </p>
-                                        <button 
+                                        {/* This nested button is now valid as its parent is a div. */}
+                                        <button
                                             onClick={(e) => {
-                                                e.stopPropagation();
+                                                e.stopPropagation(); // Prevents the div's onClick from firing
                                                 toggleDescription(category.id);
                                             }}
-                                            className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium mt-1 sm:mt-2"
+                                            className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium mt-1 sm:mt-2 z-10 relative"
                                         >
                                             {showFullDescription[category.id] ? "Read Less" : "Read More"}
                                         </button>
                                     </div>
                                 </div>
                                 {expandedCategory === category.id ? (
-                                    <FaChevronUp className="text-blue-600 text-base sm:text-lg" />
+                                    <FaChevronUp className="text-blue-600 text-base sm:text-lg flex-shrink-0 ml-2" />
                                 ) : (
-                                    <FaChevronDown className="text-gray-500 text-base sm:text-lg group-hover:text-blue-600 transition-colors" />
+                                    <FaChevronDown className="text-gray-500 text-base sm:text-lg group-hover:text-blue-600 transition-colors flex-shrink-0 ml-2" />
                                 )}
-                            </button>
-                            
+                            </div>
+
                             <AnimatePresence>
                                 {expandedCategory === category.id && (
                                     <motion.div
@@ -251,7 +259,7 @@ function AboutMannuBhaiExpert() {
                     ))}
                 </div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}

@@ -59,7 +59,7 @@ const createOptimizedDynamicComponent = (
           }
         })
         .catch(error => {
-          console.warn(`Failed to preload ${componentName}:`, error);
+          // console.warn(`Failed to preload ${componentName}:`, error);
           componentPreloadCache.delete(componentName);
         });
     }
@@ -100,7 +100,7 @@ const createOptimizedDynamicComponent = (
           return mod;
         })
         .catch(error => {
-          console.error(`Error loading ${componentName}:`, error);
+          // console.error(`Error loading ${componentName}:`, error);
           return {
             default: () => (
               <div className={`flex items-center justify-center p-8 bg-red-50 rounded-xl border border-red-200 ${getLoadingHeight(componentName)}`}>
@@ -320,21 +320,16 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
   const [imagesLoaded, setImagesLoaded] = useState(new Set());
 
   const handleImageError = useCallback((serviceName, imagePath) => {
-    console.error(`Failed to load image for ${serviceName}: ${imagePath}`);
+    // console.error(`Failed to load image for ${serviceName}: ${imagePath}`);
     setImageErrors(prev => new Set(prev).add(serviceName));
   }, []);
 
   const handleImageLoad = useCallback((serviceName) => {
-    console.log(`Successfully loaded image for: ${serviceName}`);
+    // console.log(`Successfully loaded image for: ${serviceName}`);
     setImagesLoaded(prev => new Set(prev).add(serviceName));
   }, []);
 
-  // Debug: Log the current title and services
-  useEffect(() => {
-    console.log('ModernComingSoonSection - Title:', title);
-    console.log('ModernComingSoonSection - Services found:', services.length);
-    console.log('ModernComingSoonSection - Services:', services);
-  }, [title, services]);
+
 
   return (
     <section 
@@ -615,16 +610,7 @@ const ModernCityDetails = memo(({ city }) => {
             <ModernComponents.HeroSection />
           </Suspense>
         </section>
-
-        {/* Main Content */}
-        <div className="relative">
-          {/* Subtle background pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.03),transparent_50%)]" aria-hidden="true" />
-          
-          <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8"> {/* Increased space-y for consistent gaps */}
-            
-            {/* Service Sections - FIXED LAYOUT */}
-            {servicesConfig.map(({ id, component, show, title, priority, minHeight }) => (
+         {servicesConfig.map(({ id, component, show, title, priority, minHeight }) => (
               show ? (
                 <ModernServiceWrapper
                   key={id}
@@ -645,7 +631,12 @@ const ModernCityDetails = memo(({ city }) => {
                 />
               )
             ))}
-
+        {/* Main Content */}
+        <div className="relative">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.03),transparent_50%)]" aria-hidden="true" />
+          
+          <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8"> {/* Increased space-y for consistent gaps */}
             {/* App Download Section - FIXED HEIGHT */}
             <section className="relative overflow-hidden rounded-3xl min-h-[200px]" aria-label="App download section">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-5" aria-hidden="true" />
