@@ -397,7 +397,7 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
                         onError={() => handleImageError(serviceName, imagePath)}
                         onLoad={() => handleImageLoad(serviceName)}
                         // Remove placeholder and blurDataURL to see if they're causing issues
-                        unoptimized={process.env.NODE_ENV === 'development'} // For development debugging
+                        
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">

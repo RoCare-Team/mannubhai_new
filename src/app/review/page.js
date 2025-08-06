@@ -24,6 +24,9 @@ function ReviewContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cmpl_id, setCmplId] = useState('');
   
+  // App link
+  const APP_LINK = 'https://www.mannubhai.com/appUrl';
+  
   useEffect(() => {
     if (review_id) {
       const decoded = decodeString(review_id);
@@ -50,6 +53,21 @@ function ReviewContent() {
     }
   };
 
+  const redirectToApp = () => {
+    window.open(APP_LINK, '_blank');
+  };
+
+  const handleStarClick = (ratingValue) => {
+    setRating(ratingValue);
+    
+    // If rating is more than 3 stars, redirect to app
+    if (ratingValue > 3) {
+      setTimeout(() => {
+        redirectToApp();
+      }, 500); // Small delay to show the star selection
+    }
+  };
+
   const handleSubmit = async () => {
     if (!rating) {
       alert('Please Select Star To Rate Us!');
@@ -71,7 +89,13 @@ function ReviewContent() {
       if (response.ok) {
         const data = await response.json();
         alert("We appreciate your feedback. Thank you!");
-        window.location.href = data.status;
+        
+        // If rating is more than 3, redirect to app instead of the status URL
+        if (rating > 3) {
+          redirectToApp();
+        } else {
+          window.location.href = data.status;
+        }
       } else {
         throw new Error('Failed to submit feedback');
       }
@@ -117,7 +141,7 @@ function ReviewContent() {
                   type="radio" 
                   name="rating" 
                   value={ratingValue} 
-                  onClick={() => setRating(ratingValue)}
+                  onClick={() => handleStarClick(ratingValue)}
                   style={{ display: 'none' }}
                 />
                 <FaStar 
@@ -132,23 +156,32 @@ function ReviewContent() {
           })}
         </div>
         
-        <div id="msgBox">
-          <textarea 
-            name="feedbackMsg" 
-            id="feedbackMsg" 
-            placeholder="Please write your feedback..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          
-          <button 
-            className="feedbackbtn" 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-        </div>
+        {rating > 0 && rating <= 3 && (
+          <div id="msgBox">
+            <textarea 
+              name="feedbackMsg" 
+              id="feedbackMsg" 
+              placeholder="Please write your feedback..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+            
+            <button 
+              className="feedbackbtn" 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
+          </div>
+        )}
+        
+        {rating > 3 && (
+          <div className="high-rating-message">
+            <h4>Thank you for your excellent rating! 🌟</h4>
+            <p>We're redirecting you to our app store page...</p>
+          </div>
+        )}
       </div>
       
       <style jsx>{`
@@ -215,6 +248,24 @@ function ReviewContent() {
         .feedbackbtn:disabled {
           background-color: #cccccc;
           cursor: not-allowed;
+        }
+        
+        .high-rating-message {
+          margin-top: 20px;
+          padding: 20px;
+          background-color: #f0f8ff;
+          border-radius: 8px;
+          border: 2px solid #4CAF50;
+        }
+        
+        .high-rating-message h4 {
+          color: #4CAF50;
+          margin-bottom: 10px;
+        }
+        
+        .high-rating-message p {
+          color: #666;
+          margin: 0;
         }
       `}</style>
     </>
