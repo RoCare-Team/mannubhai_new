@@ -9,7 +9,11 @@ import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
 import "./swiper-custom.css";
-import ServiceBannerSlider from "./ServiceBannerSlider";
+import dynamic from 'next/dynamic';
+const ServiceBannerSlider = dynamic(() => import("./ServiceBannerSlider"), {
+  ssr: false,
+  loading: () => <div className="w-full h-48 bg-gray-100 rounded-lg animate-pulse" />,
+});
 
 const SERVICE_IMAGES = {
   "Appliances Care": "/herosection/home appliances.webp",
@@ -79,7 +83,7 @@ const HeroSection = () => {
 
   // ✅ 2. Guard after all hooks
   if (!hasMounted) return null;
-
+const isBrowser = typeof window !== "undefined";
 const scrollToSection = (serviceName) => {
   if (!isBrowser) return;
 
@@ -141,8 +145,8 @@ const scrollToSection = (serviceName) => {
         key={service.id}
         className={`flex flex-col items-center ${isMobile ? 'p-2' : 'p-3 md:p-4'} rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-all duration-200 cursor-pointer shadow-sm group hover:shadow-md`}
         onClick={(e) => handleServiceClick(service, e)}
-        title={`Navigate to ${service.name} services`}
-        role="button"
+                title={`Navigate to ${service.name} services`}
+
       >
         <div className={`relative ${isMobile ? 'w-14 h-14' : 'w-14 h-14 md:w-16 md:h-16'} mb-2 md:mb-3 transition-transform duration-200 group-hover:scale-105`}>
           <Image
@@ -165,9 +169,9 @@ const scrollToSection = (serviceName) => {
   };
 
   return (
-    <section className="relative pt-10">
+    <section className="relative">
       {/* Mobile Only - Services Section */}
-      <div className="lg:hidden w-full px-2 py-3 bg-white mt-10">
+      <div className="lg:hidden w-full px-2 py-3 bg-white">
         <div className="flex items-center justify-between">
           <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-3">
             <span>Our Services</span>

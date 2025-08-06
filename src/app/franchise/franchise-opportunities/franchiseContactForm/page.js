@@ -730,7 +730,6 @@ const resetForm = () => {
                     } bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm md:text-base`}
                   >
                     <option value="">Select Investment Range</option>
-                    <option value="Rs. 4lac - 5lac">Rs. 4lac - 5lac</option>
                     <option value="Rs. 5lac - 10lac">Rs. 5lac - 10lac</option>
                     <option value="Rs. 10lac - 20lac">Rs. 10lac - 20lac</option>
                     <option value="Rs. 20lac - 30lac">Rs. 20lac - 30lac</option>

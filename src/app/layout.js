@@ -15,7 +15,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta charSet="UTF-8" />
         <SEOAndTrackingScripts />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/MB Favicon.png" />
       </head>

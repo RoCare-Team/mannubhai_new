@@ -307,7 +307,7 @@ const AboutSection = memo(() => {
 const BusinessOpportunitySection = memo(() => {
     const benefits = useMemo(() => [
         { icon: "💰", text: "Low Investment with High ROI", color: "from-green-500 to-emerald-500" },
-        { icon: "📈", text: "Quick Break-Even (6–8 months)", color: "from-blue-500 to-cyan-500" },
+        { icon: "📈", text: "Quick Break-Even (3 months)", color: "from-blue-500 to-cyan-500" },
         { icon: "📊", text: "Monthly Profit: ₹1–2 Lakhs", color: "from-purple-500 to-pink-500" },
         { icon: "🎯", text: "360° Marketing Support", color: "from-orange-500 to-red-500" },
         { icon: "🚀", text: "Massive Growth Opportunity", color: "from-indigo-500 to-purple-500" },
