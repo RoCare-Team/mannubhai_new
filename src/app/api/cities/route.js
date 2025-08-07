@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebaseConfig"; // Make sure this path to your firebaseConfig.js is correct
+import { db } from "../../firebaseConfig";
 
 /**
  * Sanitizes Firestore data, converting Timestamps to ISO strings.
