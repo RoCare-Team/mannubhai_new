@@ -9,23 +9,17 @@ const LOGO_IMAGE = `${BASE_URL}/logo.png`;
 const CONTACT_NUMBER = "+91-7065012902";
 
 const components = {
-  LogoLoader: dynamic(() => import('@/components/LogoLoader'), {
-    loading: () => <div className="min-h-[200px] flex items-center justify-center"></div>
-  }),
-  FAQSection: dynamic(() => import('@/components/FAQSection'), {
-    loading: () => <components.LogoLoader />
-  }),
-  CityDetails: dynamic(() => import('@/components/CityDetails'), {
-    loading: () => <components.LogoLoader />
-  }),
-  CategoryDetails: dynamic(() => import('@/components/CategoryDetails'), {
-    loading: () => <components.LogoLoader />
-  }),
+  LogoLoader: dynamic(() => import('@/components/LogoLoader'), { ssr: true }),
+  FAQSection: dynamic(() => import('@/components/FAQSection'), { ssr: true, loading: () => <components.LogoLoader /> }),
+  CityDetails: dynamic(() => import('@/components/CityDetails'), { ssr: true, loading: () => <components.LogoLoader /> }),
+  CategoryDetails: dynamic(() => import('@/components/CategoryDetails'), { ssr: true, loading: () => <components.LogoLoader /> }),
   CityAccordion: dynamic(() => import('@/components/CityAccordion'), {
-    loading: () => <components.LogoLoader />
+    ssr: true, // Explicitly disable SSR for this component
+    loading: () => <div className="min-h-[200px] flex items-center justify-center">Loading nearby cities...</div>
   })
 };
 
+// --- AppCache can remain the same ---
 class AppCache {
   static instance = new Map();
   static TTL = {
@@ -47,12 +41,13 @@ class AppCache {
   }
 }
 
+// --- Helper Functions ---
 const sanitizeData = (data) => {
   if (!data) return data;
   if (Array.isArray(data)) {
     return data.map(item => sanitizeData(item));
   }
-  if (typeof data === 'object') {
+  if (typeof data === 'object' && data !== null) {
     if (data.seconds !== undefined && data.nanoseconds !== undefined && typeof data.toDate === 'function') {
       return data.toDate().toISOString();
     }
@@ -71,6 +66,7 @@ const normalizeUrlSegment = (segment) =>
 const generateCacheKey = (prefix, ...args) =>
   `${prefix}-${args.map(arg => normalizeUrlSegment(arg)).join('-')}`;
 
+// --- DataService is now cleaner without fetchCities ---
 class DataService {
   static async fetchDocument(collectionName, field, value) {
     const normalizedValue = normalizeUrlSegment(value);
@@ -141,248 +137,240 @@ class DataService {
       return [];
     }
   }
-
-  static async fetchCities() {
-    const cacheKey = 'all-cities';
-    const cached = AppCache.get(cacheKey);
-    if (cached) return cached;
-
-    const snap = await getDocs(collection(db, "city_tb"));
-    const cities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const sanitizedCities = sanitizeData(cities);
-    AppCache.set(cacheKey, sanitizedCities, AppCache.TTL.LONG);
-    return sanitizedCities;
-  }
 }
 
+// --- MetadataService remains the same ---
 class MetadataService {
-  static cache = new Map();
-
-  static getDefaultMetadata() {
-    return {
-      title: "Home Services | Mannu Bhai",
-      description: "Find trusted home service professionals near you",
-      keywords: "home services, professionals, Mannu Bhai",
-      robots: { index: true, follow: true },
-      openGraph: {
-        type: "website",
-        images: [{
-          url: DEFAULT_IMAGE,
-          width: 1200,
-          height: 630,
-          alt: "Mannu Bhai Home Services",
-        }],
-      },
-      twitter: {
-        card: "summary_large_image",
-      }
-    };
-  }
-
-  static generateFAQSchema(faqData) {
-    return {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": faqData.map(faq => ({
-        "@type": "Question",
-        "name": faq.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answer
+    static cache = new Map();
+  
+    static getDefaultMetadata() {
+      return {
+        title: "Home Services | Mannu Bhai",
+        description: "Find trusted home service professionals near you",
+        keywords: "home services, professionals, Mannu Bhai",
+        robots: { index: true, follow: true },
+        openGraph: {
+          type: "website",
+          images: [{
+            url: DEFAULT_IMAGE,
+            width: 1200,
+            height: 630,
+            alt: "Mannu Bhai Home Services",
+          }],
+        },
+        twitter: {
+          card: "summary_large_image",
         }
-      }))
-    };
-  }
-
-  static generateBreadcrumbSchema(slug, cityDoc, catDoc) {
-    return {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": BASE_URL },
-        { "@type": "ListItem", "position": 2, "name": cityDoc.city_name, "item": `${BASE_URL}/${cityDoc.city_url}` },
-        { "@type": "ListItem", "position": 3, "name": catDoc.category_name, "item": `${BASE_URL}/${slug.join('/')}` }
-      ]
-    };
-  }
-
-  static generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl) {
-    return {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": `Mannubhai ${catDoc.category_name} Service`,
-      "image": LOGO_IMAGE,
-      "url": canonicalUrl,
-      "telephone": CONTACT_NUMBER,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": cityDoc.city_name,
-        "addressRegion": cityDoc.city_name,
-        "addressCountry": "IN"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "10483"
-      }
-    };
-  }
-
-  static async generateForCity(slug, cityDoc) {
-    const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-    return {
-      title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-      description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
-      keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,
-      alternates: { canonical: canonicalUrl },
-      robots: { index: true, follow: true },
-      openGraph: {
+      };
+    }
+  
+    static generateFAQSchema(faqData) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqData.map(faq => ({
+          "@type": "Question",
+          "name": faq.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.answer
+          }
+        }))
+      };
+    }
+  
+    static generateBreadcrumbSchema(slug, cityDoc, catDoc) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": BASE_URL },
+          { "@type": "ListItem", "position": 2, "name": cityDoc.city_name, "item": `${BASE_URL}/${cityDoc.city_url}` },
+          { "@type": "ListItem", "position": 3, "name": catDoc.category_name, "item": `${BASE_URL}/${slug.join('/')}` }
+        ]
+      };
+    }
+  
+    static generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": `Mannubhai ${catDoc.category_name} Service`,
+        "image": LOGO_IMAGE,
+        "url": canonicalUrl,
+        "telephone": CONTACT_NUMBER,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": cityDoc.city_name,
+          "addressRegion": cityDoc.city_name,
+          "addressCountry": "IN"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "10483"
+        }
+      };
+    }
+  
+    static async generateForCity(slug, cityDoc) {
+      const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+      return {
         title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-        description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-        url: canonicalUrl,
-        images: [{ url: cityDoc.image || DEFAULT_IMAGE, width: 1200, height: 630, alt: `Home services in ${cityDoc.city_name}` }],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-        description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-        images: [cityDoc.image || DEFAULT_IMAGE],
-      }
-    };
-  }
-
-  static async generateForCategory(slug, catDoc, pageMasterDoc = null) {
-    const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-    const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services | Mannu Bhai`;
-    const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services across India. Call ${CONTACT_NUMBER} for assistance.`;
-    const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, services, repair, maintenance`;
-    return {
-      title: metaTitle,
-      description: metaDescription,
-      keywords: metaKeywords,
-      alternates: { canonical: canonicalUrl },
-      robots: { index: true, follow: true },
-      openGraph: {
-        title: metaTitle,
-        description: metaDescription,
-        url: canonicalUrl,
-        images: [{ url: catDoc.image || DEFAULT_IMAGE, width: 1200, height: 630, alt: `${catDoc.category_name} services` }],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: metaTitle,
-        description: metaDescription,
-        images: [catDoc.image || DEFAULT_IMAGE],
-      }
-    };
-  }
-
-  static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
-    const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-    const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services in ${cityDoc.city_name} | MannuBhai`;
-    const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
-    const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
-    const imageUrl = pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE;
-
-    let faqSchema = null;
-    if (pageMasterDoc) {
-      const faqData = [];
-      for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
-        faqData.push({ question: pageMasterDoc[`faqquestion${i}`], answer: pageMasterDoc[`faqanswer${i}`] });
-      }
-      if (faqData.length > 0) {
-        faqSchema = this.generateFAQSchema(faqData);
-      }
+        description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
+        keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,
+        alternates: { canonical: canonicalUrl },
+        robots: { index: true, follow: true },
+        openGraph: {
+          title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
+          description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
+          url: canonicalUrl,
+          images: [{ url: cityDoc.image || DEFAULT_IMAGE, width: 1200, height: 630, alt: `Home services in ${cityDoc.city_name}` }],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
+          description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
+          images: [cityDoc.image || DEFAULT_IMAGE],
+        }
+      };
     }
-
-    const breadcrumbSchema = this.generateBreadcrumbSchema(slug, cityDoc, catDoc);
-    const localBusinessSchema = this.generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl);
-    const schemas = [breadcrumbSchema, localBusinessSchema];
-    if (faqSchema) schemas.push(faqSchema);
-
-    return {
-      title: metaTitle,
-      description: metaDescription,
-      keywords: metaKeywords,
-      alternates: { canonical: canonicalUrl },
-      robots: { index: true, follow: true },
-      openGraph: {
+  
+    static async generateForCategory(slug, catDoc, pageMasterDoc = null) {
+      const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+      const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services | Mannu Bhai`;
+      const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services across India. Call ${CONTACT_NUMBER} for assistance.`;
+      const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, services, repair, maintenance`;
+      return {
         title: metaTitle,
         description: metaDescription,
-        url: canonicalUrl,
-        images: [{ url: imageUrl, width: 1200, height: 630, alt: `${catDoc.category_name} services in ${cityDoc.city_name}` }],
-      },
-      twitter: {
-        card: "summary_large_image",
+        keywords: metaKeywords,
+        alternates: { canonical: canonicalUrl },
+        robots: { index: true, follow: true },
+        openGraph: {
+          title: metaTitle,
+          description: metaDescription,
+          url: canonicalUrl,
+          images: [{ url: catDoc.image || DEFAULT_IMAGE, width: 1200, height: 630, alt: `${catDoc.category_name} services` }],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: metaTitle,
+          description: metaDescription,
+          images: [catDoc.image || DEFAULT_IMAGE],
+        }
+      };
+    }
+  
+    static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
+      const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+      const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services in ${cityDoc.city_name} | MannuBhai`;
+      const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
+      const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
+      const imageUrl = pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE;
+  
+      let faqSchema = null;
+      if (pageMasterDoc) {
+        const faqData = [];
+        for (let i = 1; pageMasterDoc[`faqquestion${i}`] && pageMasterDoc[`faqanswer${i}`]; i++) {
+          faqData.push({ question: pageMasterDoc[`faqquestion${i}`], answer: pageMasterDoc[`faqanswer${i}`] });
+        }
+        if (faqData.length > 0) {
+          faqSchema = this.generateFAQSchema(faqData);
+        }
+      }
+  
+      const breadcrumbSchema = this.generateBreadcrumbSchema(slug, cityDoc, catDoc);
+      const localBusinessSchema = this.generateLocalBusinessSchema(cityDoc, catDoc, canonicalUrl);
+      
+      const schemas = [breadcrumbSchema, localBusinessSchema];
+      if (faqSchema) schemas.push(faqSchema);
+  
+      return {
         title: metaTitle,
         description: metaDescription,
-        images: [imageUrl],
-      },
-      other: { ...(schemas.length > 0 && { schemaJson: schemas }) }
-    };
-  }
-
-  static async generate({ params }) {
-    const resolvedParams = await params;
-    const { slug = [] } = resolvedParams;
-    const cacheKey = `metadata-${slug.join('-') || 'home'}`;
-    if (process.env.NODE_ENV === 'development') {
-      this.cache.delete(cacheKey);
+        keywords: metaKeywords,
+        alternates: { canonical: canonicalUrl },
+        robots: { index: true, follow: true },
+        openGraph: {
+          title: metaTitle,
+          description: metaDescription,
+          url: canonicalUrl,
+          images: [{ url: imageUrl, width: 1200, height: 630, alt: `${catDoc.category_name} services in ${cityDoc.city_name}` }],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: metaTitle,
+          description: metaDescription,
+          images: [imageUrl],
+        },
+        other: {
+          'script:ld+json': JSON.stringify(schemas)
+        }
+      };
     }
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
-
-    if (slug.length === 0) {
-      const result = { ...this.getDefaultMetadata(), alternates: { canonical: BASE_URL } };
+  
+    static async generate({ params }) {
+      const resolvedParams = await params;
+      const { slug = [] } = resolvedParams;
+      const cacheKey = `metadata-${slug.join('-') || 'home'}`;
+      if (process.env.NODE_ENV === 'development') {
+        this.cache.delete(cacheKey);
+      }
+      if (this.cache.has(cacheKey)) {
+        return this.cache.get(cacheKey);
+      }
+  
+      if (slug.length === 0) {
+        const result = { ...this.getDefaultMetadata(), alternates: { canonical: BASE_URL } };
+        this.cache.set(cacheKey, result);
+        return result;
+      }
+  
+      if (slug.length === 1) {
+        const [segment] = slug;
+        try {
+          const [cityDoc, catDoc] = await Promise.all([
+            DataService.fetchDocument("city_tb", "city_url", segment),
+            DataService.fetchDocument("category_manage", "category_url", segment),
+          ]);
+          if (cityDoc) {
+            const result = await this.generateForCity(slug, cityDoc);
+            this.cache.set(cacheKey, result);
+            return result;
+          }
+          if (catDoc) {
+            const result = await this.generateForCategory(slug, catDoc);
+            this.cache.set(cacheKey, result);
+            return result;
+          }
+        } catch (error) {
+          console.error('Metadata generation error:', error);
+        }
+      }
+  
+      if (slug.length === 2) {
+        const [citySeg, catSeg] = slug;
+        try {
+          const [cityDoc, catDoc] = await Promise.all([
+            DataService.fetchDocument("city_tb", "city_url", citySeg),
+            DataService.fetchDocument("category_manage", "category_url", catSeg),
+          ]);
+          if (cityDoc && catDoc) {
+            const pageMasterDoc = await DataService.fetchPageMaster(cityDoc.id, catDoc.id);
+            const result = await this.generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc);
+            this.cache.set(cacheKey, result);
+            return result;
+          }
+        } catch (error) {
+          console.error('Metadata generation error:', error);
+        }
+      }
+  
+      const result = { ...this.getDefaultMetadata(), alternates: { canonical: `${BASE_URL}/${slug.join('/')}` } };
       this.cache.set(cacheKey, result);
       return result;
     }
-
-    if (slug.length === 1) {
-      const [segment] = slug;
-      try {
-        const [cityDoc, catDoc] = await Promise.all([
-          DataService.fetchDocument("city_tb", "city_url", segment),
-          DataService.fetchDocument("category_manage", "category_url", segment),
-        ]);
-        if (cityDoc) {
-          const result = await this.generateForCity(slug, cityDoc);
-          this.cache.set(cacheKey, result);
-          return result;
-        }
-        if (catDoc) {
-          const result = await this.generateForCategory(slug, catDoc);
-          this.cache.set(cacheKey, result);
-          return result;
-        }
-      } catch (error) {
-        console.error('Metadata generation error:', error);
-      }
-    }
-
-    if (slug.length === 2) {
-      const [citySeg, catSeg] = slug;
-      try {
-        const [cityDoc, catDoc] = await Promise.all([
-          DataService.fetchDocument("city_tb", "city_url", citySeg),
-          DataService.fetchDocument("category_manage", "category_url", catSeg),
-        ]);
-        if (cityDoc && catDoc) {
-          const pageMasterDoc = await DataService.fetchPageMaster(cityDoc.id, catDoc.id);
-          const result = await this.generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc);
-          this.cache.set(cacheKey, result);
-          return result;
-        }
-      } catch (error) {
-        console.error('Metadata generation error:', error);
-      }
-    }
-
-    const result = { ...this.getDefaultMetadata(), alternates: { canonical: `${BASE_URL}/${slug.join('/')}` } };
-    this.cache.set(cacheKey, result);
-    return result;
-  }
 }
 
 export async function generateMetadata({ params }) {
@@ -399,10 +387,11 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
   if (slug.length === 0) notFound();
 
   try {
-    const cities = await DataService.fetchCities();
-
+    // The redirect logic now needs to fetch cities on its own if a query param exists.
     if (cityQueryParam) {
       const normalizedQueryParam = normalizeUrlSegment(cityQueryParam);
+      const citiesSnap = await getDocs(collection(db, "city_tb"));
+      const cities = citiesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       const selectedCity = cities.find(c =>
         [normalizeUrlSegment(c.city_name), normalizeUrlSegment(c.city_url)]
           .includes(normalizedQueryParam)
@@ -423,7 +412,8 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
         return (
           <>
             <components.CityDetails city={cityDoc} />
-            <components.CityAccordion cities={cities} currentCity={cityDoc} />
+            {/* The 'cities' prop is removed. The component will fetch its own data. */}
+            <components.CityAccordion currentCity={cityDoc} />
           </>
         );
       }
@@ -492,7 +482,8 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
               />
             </div>
           )}
-          <components.CityAccordion cities={cities} currentCity={cityDoc} />
+          {/* The 'cities' prop is removed. The component will fetch its own data. */}
+          <components.CityAccordion currentCity={cityDoc} />
         </>
       );
     }
