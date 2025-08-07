@@ -455,3 +455,187 @@ img {
   aspect-ratio: var(--aspect-ratio, auto);
 }
 
+
+
+
+/* Custom scrollbar styles hero section  */
+
+/* Add these styles to your global CSS or component CSS file */
+
+/* Shimmer animation for skeleton loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Gradient animation for text */
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Prevent layout shift by reserving space */
+.aspect-preserve {
+  contain: layout style paint;
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize image rendering */
+.image-optimize {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Reduce paint operations */
+.paint-optimize {
+  contain: paint layout;
+}
+
+/* Improve scroll performance */
+.scroll-optimize {
+  contain: strict;
+}
+
+/* Critical CSS for above-the-fold content */
+.critical-path {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Highlight animation for scrolled sections */
+@keyframes highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.1);
+    transform: scale(1.01);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+.highlight-section {
+  animation: highlight 2s ease-out;
+}
+
+/* Loading state improvements */
+.loading-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton loading base styles */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimize for different screen sizes */
+@media (max-width: 640px) {
+  .mobile-optimize {
+    contain: layout style;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-optimize {
+    contain: layout style paint;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer,
+  .animate-gradient-x,
+  .animate-pulse {
+    animation: none;
+  }
+  
+  .transition-transform,
+  .transition-all {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background: white;
+    border: 2px solid black;
+  }
+}
+
+/* Focus improvements for accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Performance optimizations */
+.perf-optimize {
+  transform: translateZ(0);
+  will-change: auto;
+  contain: layout style paint;
+}
+
+/* Lazy loading fade in */
+.lazy-fade-in {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.lazy-fade-in.loaded {
+  opacity: 1;
+}

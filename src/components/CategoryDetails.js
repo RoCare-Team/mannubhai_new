@@ -1,16 +1,24 @@
 'use client';
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
 
-// Dynamic imports for better code splitting
-const LoginPopup = dynamic(() => import('./login'));
-const Cart = dynamic(() => import('./cart/CartLogic'));
-const AwardCertifications = dynamic(() => import('./AwardCertifications'));
+// Dynamic imports with loading components for better code splitting
+const LoginPopup = dynamic(() => import('./login'), {
+  loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="w-8 h-8 border-t-2 border-blue-500 rounded-full animate-spin"></div></div>
+});
 
-// Icons - consider importing only what you need
+const Cart = dynamic(() => import('./cart/CartLogic'), {
+  loading: () => <CartSkeleton />
+});
+
+const AwardCertifications = dynamic(() => import('./AwardCertifications'), {
+  loading: () => <div className="h-32 bg-gray-100 rounded-lg animate-pulse"></div>
+});
+
+// Icons - only import what we need
 import { 
   FiShoppingCart, FiX, FiCheck, FiClock, 
   FiShield, FiTruck, FiUserCheck, 
@@ -24,6 +32,75 @@ const SERVICE_PRIORITY = {
   uninstallation: 4, amc: 5, foamjet: 6, gasfilling: 7
 };
 
+// Skeleton Components
+const ServiceCardSkeleton = () => (
+  <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 animate-pulse">
+    <div className="flex flex-row justify-between gap-4">
+      <div className="flex-1">
+        <div className="h-5 bg-gray-200 rounded mb-2 w-3/4"></div>
+        <div className="space-y-2">
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+          <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+          <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+        </div>
+      </div>
+      <div className="w-28 flex-shrink-0 flex flex-col items-center space-y-2">
+        <div className="w-24 h-24 bg-gray-200 rounded-md"></div>
+        <div className="w-full h-8 bg-gray-200 rounded-lg"></div>
+        <div className="h-5 bg-gray-200 rounded w-12"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const ServiceGroupSkeleton = () => (
+  <section className="space-y-6 mb-8">
+    <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+    <div className="grid grid-cols-1 gap-4">
+      {Array(3).fill(0).map((_, i) => (
+        <ServiceCardSkeleton key={i} />
+      ))}
+    </div>
+  </section>
+);
+
+const SidebarSkeleton = () => (
+  <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+      <div className="flex-1">
+        <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    </div>
+    <div className="grid grid-cols-3 gap-3">
+      {Array(6).fill(0).map((_, i) => (
+        <div key={i} className="flex flex-col items-center p-5 border border-gray-200 rounded-lg">
+          <div className="w-12 h-12 bg-gray-200 rounded-lg mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-16"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const CartSkeleton = () => (
+  <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 animate-pulse">
+    <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
+    <div className="space-y-4">
+      {Array(3).fill(0).map((_, i) => (
+        <div key={i} className="flex justify-between items-center p-3 border border-gray-200 rounded">
+          <div className="h-4 bg-gray-200 rounded w-24"></div>
+          <div className="h-4 bg-gray-200 rounded w-12"></div>
+        </div>
+      ))}
+    </div>
+    <div className="mt-4 pt-4 border-t">
+      <div className="h-10 bg-gray-200 rounded w-full"></div>
+    </div>
+  </div>
+);
+
 // Utility functions
 const normalizeString = (str) => str?.toLowerCase().trim().replace(/\s+/g, '-') || '';
 const extractFirstWords = (str) => {
@@ -31,14 +108,15 @@ const extractFirstWords = (str) => {
   return match ? match[0] : "other";
 };
 
-  export default function CategoryDetails  ({
+export default function CategoryDetails({
   meta_title,
   meta_description,
   meta_keywords,
   category,
-  city = {}
+  city = {},
+  isLoading = false
 }) {
-  // State
+  // State with initial loading states
   const [selectedService, setSelectedService] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
@@ -46,14 +124,16 @@ const extractFirstWords = (str) => {
   const [pendingCartAction, setPendingCartAction] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [servicesReady, setServicesReady] = useState(!isLoading);
 
   // Refs
   const contentRef = useRef(null);
   const groupRefs = useRef({});
 
-  // Memoized data transformations
+  // Memoized data transformations with loading fallback
   const serviceGroups = useMemo(() => {
-    if (!category?.services) return {};
+    if (isLoading || !category?.services) return {};
 
     const groups = {};
     const displayNameMap = new Map();
@@ -94,27 +174,39 @@ const extractFirstWords = (str) => {
     });
 
     return groups;
-  }, [category]);
+  }, [category, isLoading]);
 
   const orderedServiceNames = useMemo(() => 
     Object.keys(serviceGroups).sort((a, b) => {
-      const pA = serviceGroups[a].priority || 99;
-      const pB = serviceGroups[b].priority || 99;
-      return pA !== pB ? pA - pB : serviceGroups[a].displayName.localeCompare(serviceGroups[b].displayName);
+      const pA = serviceGroups[a]?.priority || 99;
+      const pB = serviceGroups[b]?.priority || 99;
+      return pA !== pB ? pA - pB : (serviceGroups[a]?.displayName || '').localeCompare(serviceGroups[b]?.displayName || '');
     }), 
     [serviceGroups]
   );
 
   const uniqueServiceGroups = useMemo(() => {
+    if (isLoading) return [];
     const seen = new Set();
     return Object.values(serviceGroups)
-      .filter(group => !seen.has(group.displayName) && seen.add(group.displayName))
+      .filter(group => group && !seen.has(group.displayName) && seen.add(group.displayName))
       .sort((a, b) => a.priority - b.priority || a.displayName.localeCompare(b.displayName));
-  }, [serviceGroups]);
+  }, [serviceGroups, isLoading]);
 
   // Effects
   useEffect(() => {
-    if (!contentRef.current || !category?.category_content) return;
+    if (isLoading) return;
+    
+    // Simulate content ready after data loads
+    const timer = setTimeout(() => {
+      setServicesReady(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading, category]);
+
+  useEffect(() => {
+    if (!contentRef.current || !category?.category_content || isLoading) return;
 
     const checkHeight = () => {
       const element = contentRef.current;
@@ -131,24 +223,26 @@ const extractFirstWords = (str) => {
 
     const timer = setTimeout(checkHeight, 100);
     return () => clearTimeout(timer);
-  }, [category?.category_content, isExpanded]);
+  }, [category?.category_content, isExpanded, isLoading]);
 
-  // Handlers
+  // Handlers with optimization
   const scrollToServiceGroup = useCallback((displayName) => {
+    if (isLoading) return;
+    
     setSelectedService(displayName);
     const matchingGroup = Object.entries(serviceGroups)
       .find(([_, group]) => group.displayName === displayName);
 
     if (matchingGroup) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const element = groupRefs.current[matchingGroup[0]];
         if (element) {
           const y = element.getBoundingClientRect().top + window.scrollY - 116;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
-      }, 100);
+      });
     }
-  }, [serviceGroups]);
+  }, [serviceGroups, isLoading]);
 
   const handleLoginSuccess = useCallback(() => {
     setShowLoginPopup(false);
@@ -199,6 +293,7 @@ const extractFirstWords = (str) => {
       console.error("Cart update failed:", error);
     }
   }, []);
+
   const isServiceInCart = useCallback((serviceId) => {
     try {
       const cartData = localStorage.getItem("checkoutState");
@@ -225,6 +320,59 @@ const extractFirstWords = (str) => {
     }
   }, []);
 
+  // Loading state
+  if (isLoading || !servicesReady) {
+    return (
+      <>
+        <Head>
+          <title>{meta_title || 'Loading Services...'}</title>
+          <meta name="description" content={meta_description || ""} />
+          <meta name="keywords" content={meta_keywords || ""} />
+        </Head>
+        <div className="mx-auto px-4 sm:px-6 py-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Skeleton */}
+            <aside className="w-full md:w-[34%] lg:sticky lg:top-4 lg:h-fit">
+              <SidebarSkeleton />
+            </aside>
+            
+            {/* Main Content Skeleton */}
+            <main className="w-full flex flex-col lg:flex-row gap-8">
+              <div className="w-full md:w-[52%]">
+                {/* Banner Skeleton */}
+                <div className="hidden sm:block h-[300px] bg-gray-200 rounded-xl mb-8 animate-pulse"></div>
+                
+                {/* Service Groups Skeleton */}
+                {Array(3).fill(0).map((_, i) => (
+                  <ServiceGroupSkeleton key={i} />
+                ))}
+              </div>
+              
+              {/* Cart Sidebar Skeleton */}
+              <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
+                <CartSkeleton />
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6 animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
+                  <div className="space-y-4">
+                    {Array(3).fill(0).map((_, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
+                          <div className="h-3 bg-gray-200 rounded w-32"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </aside>
+            </main>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (!category?.services) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -235,6 +383,7 @@ const extractFirstWords = (str) => {
       </div>
     );
   }
+
   return (
     <>
       <Head>
@@ -242,6 +391,7 @@ const extractFirstWords = (str) => {
         <meta name="description" content={meta_description || ""} />
         <meta name="keywords" content={meta_keywords || ""} />
       </Head>
+      
       <div className="mx-auto px-4 sm:px-6 py-8">
         <div className="w-full flex flex-col lg:flex-row gap-8">
           {/* Filter Sidebar */}
@@ -272,15 +422,15 @@ const extractFirstWords = (str) => {
                     }`}
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
-                   <Image
-                      src={group.image || "/placeholder-service.png"}
-                      alt={group.displayName}
-                      fetchPriority="high"
-                      width={64}
-                      height={64}
-                      className="object-cover w-16 h-16"
-                    />
-
+                      <Image
+                        src={group.image || "/placeholder-service.png"}
+                        alt={group.displayName}
+                        width={48}
+                        height={48}
+                        className="object-cover w-12 h-12"
+                        loading="lazy"
+                        onLoad={() => setImageLoading(false)}
+                      />
                     </div>
                     <span className="font-bold text-[8px] sm:text-[10px] text-center">
                       {group.displayName}
@@ -290,16 +440,19 @@ const extractFirstWords = (str) => {
               </div>
             </div>
           </aside>
+
           {/* Main Content */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
-              <div className="hidden sm:block relative rounded-xl overflow-hidden w-full aspect-[16/9] mb-8">
+              {/* Banner with fixed dimensions */}
+              <div className="hidden sm:block relative rounded-xl overflow-hidden w-full h-[300px] mb-8">
                 <Image
                   src={category.banner?.trim() || DEFAULT_BANNER}
                   alt={`${category.category_name} banner`}
                   fill
                   className="object-cover"
                   priority
+                  sizes="(max-width: 768px) 100vw, 52vw"
                   onError={(e) => { e.currentTarget.src = DEFAULT_BANNER }}
                 />
               </div>
@@ -354,6 +507,8 @@ const extractFirstWords = (str) => {
                                     alt={service.service_name}
                                     fill
                                     className="object-cover"
+                                    loading="lazy"
+                                    sizes="96px"
                                   />
                                 </div>
 
@@ -363,7 +518,7 @@ const extractFirstWords = (str) => {
                                     operation: "add",
                                     currentQuantity: quantity
                                   })}
-                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 ${
+                                  className={`w-full text-xs px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors ${
                                     isAdded
                                       ? "bg-green-100 text-green-800 cursor-not-allowed"
                                       : "bg-blue-600 text-white hover:bg-blue-700"
@@ -398,9 +553,15 @@ const extractFirstWords = (str) => {
                 );
               })}
             </div>
+
             {/* Cart Sidebar */}
             <aside className="w-full lg:w-[420px] lg:sticky lg:top-4 lg:self-start">
-              <Cart cartLoaded={cartLoaded} cartLoadedToggle={() => setCartLoaded(prev => !prev)} />
+              <Suspense fallback={<CartSkeleton />}>
+                <Cart 
+                  cartLoaded={cartLoaded} 
+                  cartLoadedToggle={() => setCartLoaded(prev => !prev)} 
+                />
+              </Suspense>
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 p-6">
                 <div className="bg-blue-50 rounded-xl p-6 mb-6">
@@ -430,7 +591,7 @@ const extractFirstWords = (str) => {
                   <div className="space-y-4">
                     {[
                       "Choose Your Service",
-                      "Expert Consultation",
+                      "Expert Consultation", 
                       "Schedule Appointment",
                       "Professional Service",
                       "Quality Check",
@@ -449,9 +610,15 @@ const extractFirstWords = (str) => {
             </aside>
           </main>
         </div>
+
+        {/* Awards Section */}
         <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-          <AwardCertifications />
+          <Suspense fallback={<div className="h-32 bg-gray-100 rounded-lg animate-pulse"></div>}>
+            <AwardCertifications />
+          </Suspense>
         </section>
+
+        {/* Content Section */}
         {category.category_content && (
           <section className="mt-12 bg-white rounded-xl shadow-sm p-8 border border-gray-100">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -468,7 +635,7 @@ const extractFirstWords = (str) => {
               {showReadMore && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  className="mt-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors"
                 >
                   {isExpanded ? "Show Less" : "Read More"}
                   {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
@@ -478,6 +645,7 @@ const extractFirstWords = (str) => {
           </section>
         )}
       </div>
+
       {/* Mobile Cart Panel */}
       <AnimatePresence>
         {isCartOpen && (
@@ -502,31 +670,40 @@ const extractFirstWords = (str) => {
                   </h2>
                   <button
                     onClick={() => setIsCartOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     <FiX className="h-6 w-6" />
                   </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                  <Cart cartLoaded={cartLoaded} cartLoadedToggle={() => setCartLoaded(prev => !prev)} />
+                  <Suspense fallback={<CartSkeleton />}>
+                    <Cart 
+                      cartLoaded={cartLoaded} 
+                      cartLoadedToggle={() => setCartLoaded(prev => !prev)} 
+                    />
+                  </Suspense>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Login Popup */}
       <AnimatePresence>
         {showLoginPopup && (
-          <LoginPopup
-            show={showLoginPopup}
-            onClose={() => setShowLoginPopup(false)}
-            onLoginSuccess={handleLoginSuccess}
-          />
+          <Suspense fallback={null}>
+            <LoginPopup
+              show={showLoginPopup}
+              onClose={() => setShowLoginPopup(false)}
+              onLoginSuccess={handleLoginSuccess}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
     </>
   );
 };
+
 export const fetchCache = 'force-cache';

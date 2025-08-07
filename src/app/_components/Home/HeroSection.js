@@ -1,23 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { CiStar } from "react-icons/ci";
 import { PiUsersThree } from "react-icons/pi";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebaseConfig";
 import Image from "next/image";
+import dynamic from 'next/dynamic';
 import "swiper/css";
 import "swiper/css/navigation";
 import "./swiper-custom.css";
-import dynamic from 'next/dynamic';
 
+// Aggressive lazy loading with higher loading priority
 const ServiceBannerSlider = dynamic(() => import("./ServiceBannerSlider"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-48 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl animate-pulse" />
-  ),
+  loading: () => <ServiceBannerSkeleton />,
 });
 
+// Constants
 const SERVICE_IMAGES = {
   "Appliances Care": "/herosection/home appliances.webp",
   "Home Care": "/herosection/sofa-bathroom-and-kitchen-cleaning.webp",
@@ -27,27 +27,28 @@ const SERVICE_IMAGES = {
 
 const DEFAULT_SERVICE_IMAGE = "/default-images/deafult.jpeg";
 const MAIN_BANNER = "/MainBanner/HomeBanner.webp";
+const BOTTOM_BANNER = "/HomeBanner/appliance.webp";
 
-// Optimized skeleton components with proper aspect ratios
+// Minimal skeleton components for faster rendering
+const MinimalSkeleton = ({ className }) => (
+  <div className={`bg-gray-100 animate-pulse ${className}`}></div>
+);
+
 const ServiceCardSkeleton = ({ isMobile = false }) => (
   <div className={`
-    relative overflow-hidden
-    ${isMobile ? 'p-3' : 'p-4 md:p-5'} 
-    bg-gradient-to-br from-white/80 to-gray-50/80 
-    rounded-2xl shadow-lg animate-pulse
-    flex flex-col items-center
-    ${isMobile ? 'h-[120px]' : 'h-[180px]'}
+    ${isMobile ? 'p-3 h-[120px]' : 'p-4 md:p-5 h-[180px]'} 
+    bg-gray-100 animate-pulse rounded-2xl flex flex-col items-center justify-center
   `}>
     <div className={`
       ${isMobile ? 'w-12 h-12' : 'w-14 h-14 md:w-16 md:h-16'} 
-      bg-gray-200 rounded-xl mb-3 mt-2
+      bg-gray-200 rounded-xl mb-3
     `}></div>
     <div className="bg-gray-200 rounded-lg h-4 w-3/4"></div>
   </div>
 );
 
 const StatsCardSkeleton = () => (
-  <div className="flex items-center gap-4 p-5 md:p-6 bg-gray-100 rounded-2xl shadow-lg animate-pulse">
+  <div className="flex items-center gap-4 p-5 md:p-6 bg-gray-100 animate-pulse rounded-2xl">
     <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
     <div className="space-y-2">
       <div className="bg-gray-200 rounded-lg h-6 w-20"></div>
@@ -57,57 +58,170 @@ const StatsCardSkeleton = () => (
 );
 
 const HeroImageSkeleton = () => (
-  <div className="relative w-full aspect-[4/5] max-h-[600px] bg-gray-200 rounded-3xl overflow-hidden animate-pulse"></div>
+  <div className="relative w-full aspect-[4/5] max-h-[600px] bg-gray-100 animate-pulse rounded-3xl"></div>
 );
 
+const ServiceBannerSkeleton = () => (
+  <div className="w-full h-48 bg-gray-100 animate-pulse rounded-2xl"></div>
+);
+
+// Optimized service card with reduced complexity
+const ServiceCard = ({ service, isMobile, onClick }) => (
+  <button
+    className={`
+      relative group
+      ${isMobile ? 'p-3 h-[120px]' : 'p-4 md:p-5 h-[180px]'} 
+      bg-white hover:bg-blue-50
+      rounded-2xl shadow-md hover:shadow-lg 
+      transition-shadow duration-200
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      flex flex-col items-center
+    `}
+    onClick={onClick}
+    title={`Navigate to ${service.name} services`}
+    aria-label={`View ${service.name} services`}
+  >
+    <div className={`
+      relative
+      ${isMobile ? 'w-12 h-12' : 'w-14 h-14 md:w-16 md:h-16'} 
+      mb-3 mt-2
+    `}>
+      <Image
+        src={service.imageUrl}
+        alt={`${service.name} service icon`}
+        fill
+        sizes={isMobile ? "48px" : "(max-width: 768px) 56px, 64px"}
+        className="object-contain"
+        loading={isMobile ? "lazy" : "eager"}
+        quality={75}
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw=="
+      />
+    </div>
+    <span className="font-medium text-center block text-gray-800 text-sm">
+      {service.name}
+    </span>
+  </button>
+);
+
+// Simplified stats card
+const StatsCard = ({ icon: Icon, value, label, bgColor, textColor, iconColor }) => (
+  <div className={`flex items-center gap-4 p-5 md:p-6 ${bgColor} rounded-2xl shadow-md`}>
+    <Icon className={`${iconColor} text-3xl lg:text-4xl`} />
+    <div>
+      <h3 className={`text-xl lg:text-2xl font-bold ${textColor}`}>{value}</h3>
+      <p className="text-sm text-gray-600">{label}</p>
+    </div>
+  </div>
+);
+
+// Bottom banner component - Load immediately since it's LCP
+const BottomBanner = () => {
+  return (
+    <div className="w-full px-2 lg:px-12 mt-6 lg:mt-12 mb-0 relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="relative w-full aspect-[91/20] bg-gray-100 rounded-3xl overflow-hidden">
+          <Image
+            src={BOTTOM_BANNER}
+            alt="Professional home appliance services banner"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1820px"
+            className="object-cover"
+            priority={true}
+            fetchPriority="high"
+            quality={85}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABQUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw=="
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const HeroSection = () => {
-  const router = useRouter();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchMainServices = async () => {
-      try {
-        const servicesCollection = collection(db, "main_category");
-        const snapshot = await getDocs(servicesCollection);
-        const order = [
-          "Appliances Care",
-          "Home Care",
-          "Beauty Care",
-          "Handyman",
-        ];
-        const servicesData = snapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            const name = data.name || "Service";
-            return {
-              id: doc.id,
-              ...data,
-              name,
-              pkgIconName: name,
-              imageUrl: SERVICE_IMAGES[name] || DEFAULT_SERVICE_IMAGE,
-            };
-          })
-          .sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+  // Memoized service order
+  const serviceOrder = useMemo(() => [
+    "Appliances Care",
+    "Home Care", 
+    "Beauty Care",
+    "Handyman",
+  ], []);
 
-        setServices(servicesData);
-      } catch (err) {
-        console.error("Error fetching services:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+  // Optimized fetch function
+  const fetchMainServices = useCallback(async () => {
+    try {
+      const servicesCollection = collection(db, "main_category");
+      const snapshot = await getDocs(servicesCollection);
+      
+      const servicesData = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          const name = data.name || "Service";
+          return {
+            id: doc.id,
+            ...data,
+            name,
+            imageUrl: SERVICE_IMAGES[name] || DEFAULT_SERVICE_IMAGE,
+          };
+        })
+        .sort((a, b) => serviceOrder.indexOf(a.name) - serviceOrder.indexOf(b.name));
+
+      setServices(servicesData);
+    } catch (err) {
+      console.error("Error fetching services:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [serviceOrder]);
+
+  useEffect(() => {
+    // Defer non-critical data fetching
+    const timer = setTimeout(() => {
+      fetchMainServices();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [fetchMainServices]);
+
+  // Optimized image preloading with requestIdleCallback
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const preloadCriticalImages = () => {
+      // Only preload the hero banner immediately
+      const heroImg = new window.Image();
+      heroImg.src = MAIN_BANNER;
     };
-    fetchMainServices();
+
+    // Use requestIdleCallback for non-blocking preload
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        preloadCriticalImages();
+        // Preload service images during idle time
+        Object.values(SERVICE_IMAGES).forEach(src => {
+          const img = new window.Image();
+          img.src = src;
+        });
+      });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(preloadCriticalImages, 100);
+    }
   }, []);
 
-  const scrollToSection = (serviceName) => {
+  // Simplified scroll function
+  const scrollToSection = useCallback((serviceName) => {
     if (typeof window === "undefined") return;
 
     const sectionMap = {
       'Appliances Care': 'appliances-care',
-      'Home Care': 'home-care',
+      'Home Care': 'home-care', 
       'Beauty Care': 'beauty-care',
       'Handyman': 'handyman',
     };
@@ -116,24 +230,17 @@ const HeroSection = () => {
     if (sectionId) {
       const section = document.getElementById(sectionId);
       if (section) {
-        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
-        const offsetPosition = section.offsetTop - headerHeight - 20;
-
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-        section.classList.add('highlight-section');
-        setTimeout(() => section.classList.remove('highlight-section'), 2000);
-        section.setAttribute('tabindex', '-1');
-        section.focus();
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
-  };
+  }, []);
 
-  const handleServiceClick = (service, e) => {
-    if (e) e.preventDefault();
+  const handleServiceClick = useCallback((service) => {
     scrollToSection(service.name);
-  };
+  }, [scrollToSection]);
 
-  const renderServiceCards = (isMobile = true) => {
+  // Optimized render function
+  const renderServiceCards = useCallback((isMobile = true) => {
     if (loading) {
       return Array.from({ length: 4 }, (_, index) => (
         <ServiceCardSkeleton key={`skeleton-${index}`} isMobile={isMobile} />
@@ -145,91 +252,69 @@ const HeroSection = () => {
         <div 
           key={`error-${index}`} 
           className={`
-            relative group
             ${isMobile ? 'p-3 h-[120px]' : 'p-4 md:p-5 h-[180px]'} 
-            bg-gradient-to-br from-gray-100/80 to-gray-200/80 
-            rounded-2xl shadow-md flex flex-col items-center justify-center
+            bg-gray-100 rounded-2xl flex flex-col items-center justify-center
           `}
         >
-          <div className={`
-            ${isMobile ? 'w-12 h-12' : 'w-14 h-14 md:w-16 md:h-16'} 
-            bg-gray-200 rounded-xl mb-3 flex items-center justify-center
-          `}>
-            <span className="text-gray-400 text-xs font-medium">N/A</span>
-          </div>
-          <span className="text-gray-400 font-medium text-center block text-sm">
-            Service
-          </span>
+          <span className="text-gray-400 text-sm">Service</span>
         </div>
       ));
     }
 
     return services.map((service) => (
-      <button
+      <ServiceCard
         key={service.id}
-        className={`
-          relative overflow-hidden
-          ${isMobile ? 'p-3 h-[120px]' : 'p-4 md:p-5 h-[180px]'} 
-          bg-gradient-to-br from-white/90 to-gray-50/90 
-          rounded-2xl shadow-lg hover:shadow-xl 
-          transition-all duration-300 ease-out
-          hover:scale-[1.02] hover:-translate-y-1
-          focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2
-          flex flex-col items-center
-        `}
-        onClick={(e) => handleServiceClick(service, e)}
-        title={`Navigate to ${service.name} services`}
-      >
-        <div className={`
-          relative
-          ${isMobile ? 'w-12 h-12' : 'w-14 h-14 md:w-16 md:h-16'} 
-          mb-3 mt-2
-        `}>
-          <Image
-            src={service.imageUrl}
-            alt={`${service.name} service icon`}
-            fill
-            sizes={isMobile ? "48px" : "(max-width: 768px) 56px, 64px"}
-            className="object-contain"
-            loading="eager"
-            quality={90}
-            priority={!isMobile} // Only prioritize desktop images
-          />
-        </div>
-        <span className="font-semibold text-center block leading-tight text-gray-800 text-sm">
-          {service.name}
-        </span>
-      </button>
+        service={service}
+        isMobile={isMobile}
+        onClick={() => handleServiceClick(service)}
+      />
     ));
-  };
+  }, [loading, error, services, handleServiceClick]);
+
+  // Simplified stats data
+  const statsData = useMemo(() => [
+    {
+      icon: CiStar,
+      value: "4.5",
+      label: "Service Rating",
+      bgColor: "bg-yellow-50",
+      textColor: "text-yellow-600",
+      iconColor: "text-yellow-500"
+    },
+    {
+      icon: PiUsersThree,
+      value: "30 Lacs+",
+      label: "Customer Globally", 
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-600",
+      iconColor: "text-blue-500"
+    }
+  ], []);
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative">
       {/* Mobile Services Section */}
-      <div className="lg:hidden w-full px-2 py-3 bg-white relative z-10">
-        <div className="flex items-center justify-between">
-          <h2 className="block sm:hidden text-lg font-semibold mb-4 text-left flex justify-start gap-2 mt-3">
-            <span>Our Services</span>
-            <span role="img" aria-label="mechanic">👨‍🔧</span>
-          </h2>
-        </div>
+      <div className="lg:hidden w-full px-2 py-3 bg-white relative">
+        <h2 className="block sm:hidden text-lg font-semibold mb-4 text-gray-800">
+          Our Services 👨‍🔧
+        </h2>
         <div className="min-h-[120px]">
-          <div className="grid grid-cols-4 gap-1 border border-gray-200 rounded-lg shadow-sm">
+          <div className="grid grid-cols-4 gap-1 bg-gray-50 rounded-lg p-2">
             {renderServiceCards(true)}
           </div>
         </div>
       </div>
 
       {/* Desktop View */}
-      <div className="hidden lg:block hero-section w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0 relative z-10">
-        <div className="hero-section-container max-w-7xl mx-auto mt-8">
+      <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0 relative">
+        <div className="max-w-7xl mx-auto mt-8">
           <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12 xl:gap-16">
             
             {/* Left Content */}
             <div className="w-full lg:flex-1 lg:max-w-2xl">
               <header className="mb-8 md:mb-12">
                 <h1 className="text-5xl md:text-6xl font-black leading-tight mb-4">
-                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Home services
                   </span>
                   <br />
@@ -243,7 +328,7 @@ const HeroSection = () => {
                   What are you looking for?
                 </h2>
                 
-                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/5">
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                   <div className="min-h-[200px]">
                     <div className="grid grid-cols-4 gap-4 md:gap-6">
                       {renderServiceCards(false)}
@@ -253,30 +338,16 @@ const HeroSection = () => {
               </section>
 
               {/* Stats Cards */}
-              <div className="flex flex-row justify-start gap-6 md:gap-8 mb-8">
+              <div className="flex gap-6 md:gap-8 mb-8">
                 {loading ? (
                   <>
                     <StatsCardSkeleton />
                     <StatsCardSkeleton />
                   </>
                 ) : (
-                  <>
-                    <div className="flex items-center gap-4 p-5 md:p-6 bg-yellow-50 rounded-2xl shadow-lg">
-                      <CiStar className="text-yellow-500 text-3xl lg:text-4xl" />
-                      <div>
-                        <h3 className="text-xl lg:text-2xl font-black text-yellow-600">4.5</h3>
-                        <p className="text-sm font-medium text-gray-600">Service Rating</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 p-5 md:p-6 bg-blue-50 rounded-2xl shadow-lg">
-                      <PiUsersThree className="text-blue-500 text-3xl lg:text-4xl" />
-                      <div>
-                        <h3 className="text-xl lg:text-2xl font-black text-blue-600">30 Lacs+</h3>
-                        <p className="text-sm font-medium text-gray-600">Customer Globally</p>
-                      </div>
-                    </div>
-                  </>
+                  statsData.map((stat, index) => (
+                    <StatsCard key={index} {...stat} />
+                  ))
                 )}
               </div>
             </div>
@@ -286,15 +357,17 @@ const HeroSection = () => {
               {loading ? (
                 <HeroImageSkeleton />
               ) : (
-                <div className="relative w-full aspect-[4/5] max-h-[600px] bg-white rounded-3xl overflow-hidden shadow-2xl shadow-black/10">
+                <div className="relative w-full aspect-[4/5] max-h-[600px] bg-gray-100 rounded-3xl overflow-hidden">
                   <Image
                     src={MAIN_BANNER}
                     alt="Professional home services team working"
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority
-                    quality={95}
-                    className="object-cover object-center"
+                    quality={85}
+                    className="object-cover"
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw==" 
                   />
                 </div>
               )}
@@ -303,33 +376,17 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Swiper Section */}
-      <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-8 relative z-10">
+      {/* Swiper Section - Lazy loaded */}
+      <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-8 relative">
         <div className="max-w-7xl mx-auto">
-          <ServiceBannerSlider />
+          <Suspense fallback={<ServiceBannerSkeleton />}>
+            <ServiceBannerSlider />
+          </Suspense>
         </div>
       </div>
 
-      {/* Bottom Banner */}
-      <div className="w-full px-2 lg:px-12 mt-6 lg:mt-12 mb-0 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {loading ? (
-            <div className="w-full aspect-[91/20] bg-gray-200 rounded-3xl animate-pulse"></div>
-          ) : (
-            <div className="relative w-full aspect-[91/20] bg-white rounded-3xl shadow-2xl shadow-black/5 overflow-hidden">
-              <Image
-                src="/HomeBanner/appliance.webp"
-                alt="Professional home appliance services banner"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1820px"
-                className="object-cover"
-                priority
-                quality={95}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Bottom Banner - Load immediately as it's the LCP element */}
+      <BottomBanner />
     </section>
   );
 };

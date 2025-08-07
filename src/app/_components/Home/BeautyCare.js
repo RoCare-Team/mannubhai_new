@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import BeautyBrand from "./BeautyBrand";
+import Image from 'next/image'; // ✅ Correct!
 
 // Constants
 const DEFAULT_IMAGE = "default-images/deafult.jpeg";
@@ -348,41 +349,46 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       </section>
 
       {/* Brands */}
-      <section className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white mt-12 sm:mt-16 lg:mt-20" id="beauty-brands">
+      <section className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white  sm:mt-16 lg:mt-20" id="beauty-brands">
         <BeautyBrand />
       </section>
       
       {/* Modern Promotional Banner */}
       {!hideBrightBanner && (
         <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Homecare services promotion">
-          <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-            <div className="
-              group relative overflow-hidden
-              bg-gradient-to-br from-white/10 to-gray-100/10 
-              backdrop-blur-sm border border-white/20 
-              rounded-3xl shadow-2xl shadow-black/5
-              hover:shadow-3xl hover:shadow-black/10
-              transition-all duration-700
-              hover:scale-[1.01]
-            ">
-              <NextImage
-                src="/HomeBanner/homecare.webp"
-                alt="Professional homecare services available"
-                width={1920}
-                height={400}
-                priority={true}
-                fetchPriority="high"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                placeholder="blur"
+  <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+    <div
+      className="
+        group relative overflow-hidden
+        bg-gradient-to-br from-white/10 to-gray-100/10 
+        backdrop-blur-sm border border-white/20 
+        rounded-3xl shadow-2xl shadow-black/5
+        hover:shadow-3xl hover:shadow-black/10
+        transition-all duration-700
+        hover:scale-[1.01]
+      "
+    >
+      {/* ✅ Responsive image using aspect ratio + fill */}
+      <div className="relative w-full aspect-[1920/400]">
+        <Image
+          src="/HomeBanner/homecare.webp"
+          alt="Professional homecare services available"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+         placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
-              />
-              
-              {/* Subtle overlay for better visual hierarchy */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            </div>
-          </div>
-        </section>
+        />
+      </div>
+
+      {/* ✅ Overlay effect (unchanged) */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    </div>
+  </div>
+</section>
+
       )}
 
    
