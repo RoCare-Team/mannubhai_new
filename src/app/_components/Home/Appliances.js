@@ -77,34 +77,41 @@ const ServiceCard = memo(({ service, onClick, index }) => (
       {/* Content container */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center">
         {/* Image Container - Enhanced with modern effects */}
-        <div className="flex-1 w-full flex items-center justify-center relative">
-          <div className="
-            relative 
-            lg:group-hover:scale-110 
-            transition-transform duration-500 ease-out
-          ">
-            {/* Subtle background glow for image - desktop only */}
-            <div className="absolute -inset-2 bg-gradient-to-br from-blue-400/0 to-purple-400/0 lg:group-hover:from-blue-400/10 lg:group-hover:to-purple-400/10 rounded-xl blur-sm opacity-0 lg:group-hover:opacity-100 transition-all duration-300"></div>
-            
-            <Image
-              src={service.ServiceIcon}
-              alt={`${service.ServiceName} service`}
-              width={100}
-              height={100}
-              className="
-                relative z-10 object-contain 
-                w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24
-                filter drop-shadow-sm lg:group-hover:drop-shadow-lg
-                transition-all duration-500
-              "
-                priority={true}
-                fetchPriority="high"
-              sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 96px"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
-            />
-          </div>
-        </div>
+       <div className="flex-1 w-full flex items-center justify-center relative">
+  <div
+    className="
+      relative 
+      lg:group-hover:scale-110 
+      transition-transform duration-500 ease-out
+      w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24
+    "
+  >
+    {/* Subtle background glow for image - desktop only */}
+    <div
+      className="absolute -inset-2 bg-gradient-to-br from-blue-400/0 to-purple-400/0 
+      lg:group-hover:from-blue-400/10 lg:group-hover:to-purple-400/10 
+      rounded-xl blur-sm opacity-0 lg:group-hover:opacity-100 
+      transition-all duration-300"
+    ></div>
+
+    <Image
+      src={service.ServiceIcon}
+      alt={`${service.ServiceName} service`}
+      fill
+      className="
+        relative z-10 object-contain 
+        filter drop-shadow-sm lg:group-hover:drop-shadow-lg
+        transition-all duration-500
+      "
+      priority={true}
+      fetchPriority="high"
+      sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 96px"
+      placeholder="blur"
+      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+    />
+  </div>
+</div>
+
         
         {/* Service Name - Enhanced typography */}
         <div className="h-8 sm:h-10 lg:h-12 flex items-center justify-center px-1">
@@ -352,35 +359,39 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
 
       {/* Modern Beauty Banner */}
       {!hideBeautyBanner && (
-        <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Beauty services promotion">
-          <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-            <div className="
-              group relative overflow-hidden
-              bg-gradient-to-br from-white/10 to-gray-100/10 
-              backdrop-blur-sm border border-white/20 
-              rounded-3xl shadow-2xl shadow-black/5
-              hover:shadow-3xl hover:shadow-black/10
-              transition-all duration-700
-              hover:scale-[1.01]
-            ">
-              <Image
-                src="/HomeBanner/beauty.webp"
-                alt="Beauty services promotion - Professional beauty treatments at home"
-                width={1920}
-                height={400}
-               priority={true}
-                fetchPriority="high"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgAHAAAAAAAAAAAAAAAAAQIAAxEhkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli21llHDjORrFUjNEWuNfFmNhEfcE05/V2d0NQ3DyY3AgegqKSNgbIUhZq5Q/QBdaDRZNLLrFYD7E/NuBbBVPj7K8b7QSZSGTl2M+yRN7e9A0KUQn8MnI05/vvIj+i9E/qGrwLiuCfDl+7Ej/RmDJGfb/vQoG9WJCaWAmjkUcE5lJk9sVsG3IQBfCLi4M/X9G5QIoNe9ZJPSFYOjmOHHhkY7FGz92B8v1OhJjJYfbBBwG2tFrZTgr45VhKc9HqyTZe2MPEBGa5VzgGsH3GAp6MfXKx2sBWJImfUe3l6OJhXYNSCUoS/x6b/VpNO1iLqxvyPtYY6DzCcTd27e+uVF9QSu1mAp/J1kvgUzYSQ0mgWJlw6Z2TrQkVTjYwQXBLJP8JFhDFJlz5CZEHEFvK1SXGT11zHgZEFEINF2H1GGnGUQiXhNwU8I2G1KMw8YOXGvNuQ8NQjKFyY2J3eIa/yQN6FGxsLx5ZIj+JT5GnJ8YCiEUQTq7T1mjDpQyFCIhYxdMTJMHf7/8BvQ=="
-              />
-              
-              {/* Subtle overlay for better visual hierarchy */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            </div>
-          </div>
-        </section>
+       <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Beauty services promotion">
+  <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+    <div
+      className="
+        group relative overflow-hidden
+        bg-gradient-to-br from-white/10 to-gray-100/10 
+        backdrop-blur-sm border border-white/20 
+        rounded-3xl shadow-2xl shadow-black/5
+        hover:shadow-3xl hover:shadow-black/10
+        transition-all duration-700
+        hover:scale-[1.01]
+      "
+    >
+      {/* ✅ Updated banner image with aspect ratio + fill */}
+      <div className="relative w-full aspect-[1920/400]">
+        <Image
+          src="/HomeBanner/beauty.webp"
+          alt="Beauty services promotion - Professional beauty treatments at home"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+        />
+      </div>
+
+      {/* Subtle overlay for better visual hierarchy */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    </div>
+  </div>
+</section>
       )}
 
     </main>
