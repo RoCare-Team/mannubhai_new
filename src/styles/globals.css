@@ -179,7 +179,47 @@ html {
   top: 34px; */
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.footer-heading {
+  @apply text-lg font-semibold tracking-wide bg-gradient-to-r from-[#e7516c] to-[#21679c] bg-clip-text text-transparent;
+}
+
+
+ @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+
+ @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
+
+          @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
 
 .emptyCartStyle {
   border: 1px solid rgb(197, 180, 245);

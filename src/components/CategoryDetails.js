@@ -272,13 +272,15 @@ const extractFirstWords = (str) => {
                     }`}
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
-                      <Image
-                        src={group.image || "/placeholder-service.png"}
-                        alt={group.displayName}
-                        width={32}
-                        height={32}
-                        className="object-cover w-14 h-14"
-                      />
+                   <Image
+                      src={group.image || "/placeholder-service.png"}
+                      alt={group.displayName}
+                      fetchPriority="high"
+                      width={64}
+                      height={64}
+                      className="object-cover w-16 h-16"
+                    />
+
                     </div>
                     <span className="font-bold text-[8px] sm:text-[10px] text-center">
                       {group.displayName}
