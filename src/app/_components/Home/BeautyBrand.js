@@ -29,32 +29,32 @@ const BeautyBrand = () => {
         </div>
 
         {/* Brands grid with gradient hover effect */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-6 px-2 sm:px-0">
           {beautyBrands.map((brand, index) => (
             <div
               key={index}
-              className="group relative bg-white dark:bg-gray-800 rounded-xl p-4 flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-2 overflow-hidden shadow-sm dark:shadow-none"
+              className="group relative bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-4 flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-2 overflow-hidden shadow-sm dark:shadow-none"
             >
-              {/* Gradient background on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900/20 dark:via-gray-800/50 dark:to-pink-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+              {/* Gradient background on hover - only on desktop */}
+              <div className="hidden sm:block absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900/20 dark:via-gray-800/50 dark:to-pink-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
               
-              {/* White border that becomes gradient on hover */}
-              <div className="absolute inset-0 rounded-xl border-2 border-white dark:border-gray-700 group-hover:border-transparent transition-all duration-300 z-10 pointer-events-none"></div>
+              {/* White border that becomes gradient on hover - only on desktop */}
+              <div className="hidden sm:block absolute inset-0 rounded-xl border-2 border-white dark:border-gray-700 group-hover:border-transparent transition-all duration-300 z-10 pointer-events-none"></div>
               
-              {/* Gradient border effect (revealed on hover) */}
-              <div className="absolute inset-0 rounded-xl p-[2px] bg-gradient-to-br from-purple-300 to-pink-300 dark:from-purple-500 dark:to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
+              {/* Gradient border effect (revealed on hover) - only on desktop */}
+              <div className="hidden sm:block absolute inset-0 rounded-xl p-[2px] bg-gradient-to-br from-purple-300 to-pink-300 dark:from-purple-500 dark:to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
                 <div className="bg-white dark:bg-gray-800 rounded-[9px] h-full w-full"></div>
               </div>
 
               {/* Content */}
-              <div className="relative h-20 sm:h-24 w-full mb-3 z-20">
+              <div className="relative h-28 sm:h-24 w-full mb-3 z-20">
                 <Image
                   src={brand.src}
                   alt={brand.name}
                   fill
                   className="object-contain object-center transition-transform duration-300 group-hover:scale-105 dark:brightness-90 dark:hover:brightness-100"
                   quality={90}
-                  sizes="(max-width: 640px) 100px, 150px"
+                  sizes="(max-width: 640px) 150px, 150px"
                   loading="eager"
                 />
               </div>
