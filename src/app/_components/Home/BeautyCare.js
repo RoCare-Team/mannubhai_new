@@ -145,9 +145,9 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
   return (
     <main className="relative pb-5 px-3 sm:px-6 md:px-8 lg:px-20 mt-0 sm:mt-5 sm:mb-5">
       <header className="mb-5">
-        <h1 className="text-left text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
+        <h2 className="text-left text-lg sm:text-3xl font-bold text-gray-800 lg:ml-10">
           Beauty Services
-        </h1>
+        </h2>
       </header>
 
       <section className="max-w-7xl mx-auto" id="beauty-care">

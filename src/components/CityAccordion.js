@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useCallback, useMemo, memo, lazy, Suspense } from "react";
-import { db } from "../app/firebaseConfig";
+import { db } from "../app/firebaseConfig"; // Make sure this path is correct
 import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -197,7 +197,8 @@ const StoreCard = memo(({ store }) => {
 });
 StoreCard.displayName = 'StoreCard';
 
-export default function CityAccordion({ cities, currentCity }) {
+// The 'cities' prop has been removed from the function signature
+export default function CityAccordion({ currentCity }) {
   const [nearbyCities, setNearbyCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -252,10 +253,9 @@ export default function CityAccordion({ cities, currentCity }) {
       });
 
       setNearbyCities(nearby);
-    } catch (error) {
-      console.error("Error fetching nearby cities:", error);
-      setNearbyCities([]); // Set empty array on error
-    } finally {
+    } catch (error){  setNearbyCities([])}
+     // Set empty array on error
+     finally {
       setLoading(false);
     }
   }, [safeCity?.id, safeCity?.parent_city, safeCity?.city_name]);
@@ -461,7 +461,7 @@ export default function CityAccordion({ cities, currentCity }) {
         ) : (
           <div className="text-center py-10 px-6 border border-gray-300 rounded-xl shadow-sm bg-gray-50 mb-16">
             <p className="text-gray-700 text-lg font-medium">
-              Showing store locations for{" "}
+              No store locations found for{" "}
               <span className="text-indigo-600 font-semibold">
                 {safeCity.parent_city && safeCity.parent_city !== safeCity.city_name
                   ? safeCity.parent_city

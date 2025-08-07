@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 
 // Hooks and Context
 import { useAuth } from "@/app/contexts/AuthContext";
-import useCartCount from "./useCartCount"; // Assuming useCartCount hook is in the same directory
+import useCartCount from "./useCartCount";
 
 // Icons
 import { MdOutlineShoppingCart, MdPhone } from "react-icons/md";
