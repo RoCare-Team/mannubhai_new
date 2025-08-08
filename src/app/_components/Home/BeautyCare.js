@@ -351,13 +351,13 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       </section>
 
       {/* Brands */}
-      <section className="w-full px-3 sm:px-6 lg:px-8 py-6 bg-white  sm:mt-16 lg:mt-20" id="beauty-brands">
+      <section className="w-full px-3 sm:px-6 lg:px-8 bg-white  sm:mt-16" id="beauty-brands">
         <BeautyBrand />
       </section>
       
       {/* Modern Promotional Banner */}
       {!hideBrightBanner && (
-        <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Homecare services promotion">
+        <section className="sm:mt-16 mb-0" aria-label="Homecare services promotion">
   <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
     <div
       className="
