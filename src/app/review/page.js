@@ -60,13 +60,15 @@ function ReviewContent() {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cmpl_id, setCmplId] = useState('');
-  const [appLink, setAppLink] = useState('https://www.mannubhai.com');
+  const [rawId, setRawId] = useState(''); // New state for raw ID without CMPL prefix
+  const [appLink, setAppLink] = useState("https://g.page/r/CXxD3amQeg2OEAE/review")
   const [toast, setToast] = useState({ show: false, message: '', type: 'error' });
   
   useEffect(() => {
     if (review_id) {
       const decoded = decodeString(review_id);
-      setCmplId(`CMPL${decoded}`);
+      setRawId(decoded); // Store the raw ID without prefix
+      setCmplId(`CMPL${decoded}`); // Still show the prefixed version in UI
     }
   }, [review_id]);
 
@@ -74,10 +76,16 @@ function ReviewContent() {
     if (!encodedString) return '';
     
     try {
+      // Replace the special characters back to base64 format
       const base64String = encodedString.replace(/-/g, '+').replace(/_/g, '/').replace(/,/g, '=');
+      
+      // Decode the base64 string
       const allstring = atob(base64String);
       
+      // Extract the part before the '#' character
       const removed_suffix_with_prefix = allstring.substring(0, allstring.indexOf('#'));
+      
+      // Extract the part after the '~' character
       const removed_prefix_decoded_string = removed_suffix_with_prefix.substring(
         removed_suffix_with_prefix.indexOf('~') + '~'.length
       );
@@ -90,6 +98,7 @@ function ReviewContent() {
   };
 
   const redirectToApp = (url) => {
+    console.log('Redirecting to:', url);
     window.open(url || appLink, '_blank');
   };
 
@@ -111,34 +120,74 @@ function ReviewContent() {
       return;
     }
     
-    if (!cmpl_id) {
-      showToast('CMPL ID missing.', 'error');
+    if (!rawId) { // Now checking rawId instead of cmpl_id
+      showToast('Service ID missing.', 'error');
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(
-        `https://waterpurifierservicecenter.in/wizard/app/review.php?reating=${rating}&cmpl_id=${cmpl_id}&comment=${encodeURIComponent(comment)}`
-      );
+      // Using rawId (without CMPL prefix) in the API call
+      const url = `https://waterpurifierservicecenter.in/wizard/app/review.php?reating=${rating}&cmpl_id=${encodeURIComponent(rawId)}&comment=${encodeURIComponent(comment)}`;
+      console.log('Request URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
       
       if (response.ok) {
         const data = await response.json();
+        console.log('API Response:', data);
         
-        if (rating > 3) {
-          showToast('Thank you for your excellent rating! Redirecting...', 'success');
-          setTimeout(() => redirectToApp(data.status), 1500);
+        // Check if we have a redirect URL in the response
+        if (data.status) {
+          const redirectUrl = data.status;
+          
+          if (rating > 3) {
+            showToast('Thank you for your excellent rating! Redirecting to Google Reviews...', 'success');
+          } else {
+            showToast('Thank you for your feedback!', 'success');
+          }
+          
+          // Redirect after toast is shown
+          setTimeout(() => {
+            redirectToApp(redirectUrl);
+          }, 2500);
+          
+        } else if (data.error) {
+          showToast(data.message || 'An error occurred while submitting your review', 'error');
         } else {
+          // Fallback if no status but no error
           showToast('Thank you for your feedback!', 'success');
-          setTimeout(() => redirectToApp(data.status), 1500);
+          setTimeout(() => {
+            redirectToApp(rating > 3 ? 'https://g.page/r/CXxD3amQeg2OEAE/review' : 'https://www.mannubhai.com');
+          }, 2500);
         }
+        
       } else {
-        throw new Error('Failed to submit feedback');
+        console.error('Response not OK:', response.status, response.statusText);
+        
+        // Try to get error details
+        try {
+          const errorText = await response.text();
+          console.error('Error response body:', errorText);
+        } catch (e) {
+          console.error('Could not read error response:', e);
+        }
+        
+        showToast('Failed to submit feedback. Please try again.', 'error');
       }
+      
     } catch (error) {
-      console.error('Submission error:', error);
-      showToast('Failed to submit feedback. Please try again.', 'error');
+      console.error('Network or parsing error:', error);
+      showToast('Network error. Please check your connection and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -215,13 +264,13 @@ function ReviewContent() {
           >
             {/* CMPL ID Display */}
             <div className="mb-8">
-              <label className="block text-sm  text-center font-medium text-gray-700 mb-2">
-                Compliant ID
+              <label className="block text-sm text-center font-medium text-gray-700 mb-2">
+                Service ID
               </label>
-              <div className="relative flex items-center justify-center">
+              <div className="relative">
                 <input 
                   name="feedbackMsg" 
-                  className="w-50 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-center text-lg font-semibold text-gray-800 focus:outline-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg font-mono text-center text-lg font-semibold text-gray-800 focus:outline-none"
                   id="cmpl_id" 
                   value={cmpl_id} 
                   readOnly 
@@ -292,7 +341,7 @@ function ReviewContent() {
                   className="mb-6"
                 >
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                  We value your feedback – let us know how we can improve our services
+                    Help us improve - share your thoughts:
                   </label>
                   <textarea 
                     name="feedbackMsg" 
@@ -360,7 +409,7 @@ function ReviewContent() {
                         Submitting...
                       </div>
                     ) : (
-                      rating > 3 ? 'Submit & Continue' : 'Submit Feedback'
+                      rating > 3 ? 'Submit & Continue to Review' : 'Submit Feedback'
                     )}
                   </motion.button>
                 </motion.div>
