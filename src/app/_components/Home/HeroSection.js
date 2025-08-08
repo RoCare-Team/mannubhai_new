@@ -7,11 +7,13 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebaseConfig";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 import "./swiper-custom.css";
 
-// Aggressive lazy loading with higher loading priority
 const ServiceBannerSlider = dynamic(() => import("./ServiceBannerSlider"), {
   ssr: false,
   loading: () => <ServiceBannerSkeleton />,
@@ -28,6 +30,7 @@ const SERVICE_IMAGES = {
 const DEFAULT_SERVICE_IMAGE = "/default-images/deafult.jpeg";
 const MAIN_BANNER = "/MainBanner/HomeBanner.webp";
 const BOTTOM_BANNER = "/HomeBanner/appliance.webp";
+const RAKHI_BANNER = "/BeautyHomeIcons/rakhi_banner.webp";
 
 // Minimal skeleton components for faster rendering
 const MinimalSkeleton = ({ className }) => (
@@ -64,8 +67,45 @@ const HeroImageSkeleton = () => (
 const ServiceBannerSkeleton = () => (
   <div className="w-full h-48 bg-gray-100 animate-pulse rounded-2xl"></div>
 );
+const RakhiBannerSkeleton = () => (
+  <div className="w-full h-32 md:h-40 lg:h-48 bg-gray-100 animate-pulse rounded-2xl mb-6"></div>
+);
 
-// Optimized service card with reduced complexity
+// Rakhi Banner Component
+const RakhiBanner = () => {
+  const router = useRouter();
+
+  const handleBannerClick = () => {
+    router.push('/rakhi_packages');
+  };
+
+  return (
+    <div className="w-full mb-6">
+      <button
+        onClick={handleBannerClick}
+        className="w-full group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-pink-300"
+        aria-label="Click to view Rakhi special packages and offers"
+      >
+        <div className="relative w-full aspect-[3/1] min-h-[120px] md:min-h-[160px] bg-gradient-to-r from-pink-100 to-orange-100">
+          <Image
+            src={RAKHI_BANNER}
+            alt="Rakhi special offer - Up to 30% OFF on home services"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+            className="object-cover object-center"
+            quality={90}
+            priority
+          />
+          
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+      </button>
+    </div>
+  );
+};
+
+// Optimized service card
 const ServiceCard = ({ service, isMobile, onClick }) => (
   <button
     className={`
@@ -115,26 +155,37 @@ const StatsCard = ({ icon: Icon, value, label, bgColor, textColor, iconColor }) 
   </div>
 );
 
-// Bottom banner component - Load immediately since it's LCP
+// Bottom banner component with click functionality
 const BottomBanner = () => {
+  const router = useRouter();
+
+  const handleAppBannerClick = () => {
+    router.push('/appliance');
+  };
+
   return (
-    <div className="w-full px-2 lg:px-12 mt-6 lg:mt-12 mb-0 relative z-10">
-      <div className="max-w-7xl mx-auto">
-        <div className="relative w-full aspect-[91/20] bg-gray-100 rounded-3xl overflow-hidden">
-          <Image
-            src={BOTTOM_BANNER}
-            alt="Professional home appliance services banner"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1820px"
-            className="object-cover"
-            priority={true}
-            fetchPriority="high"
-            quality={85}
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABQUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw=="
-          />
+    <div className="hidden md:block w-full px-2 lg:px-12 mt-6 lg:mt-12 mb-0 relative z-10">
+      <button
+        onClick={handleAppBannerClick}
+        className="w-full group relative overflow-hidden rounded-3xl focus:outline-none"
+        aria-label="View appliance services"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="relative w-full aspect-[91/20] bg-gray-100 rounded-3xl overflow-hidden">
+            <Image
+              src={BOTTOM_BANNER}
+              alt="Professional home appliance services banner"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1820px"
+              className="object-cover"
+              priority
+              quality={85}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABQUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw=="
+            />
+          </div>
         </div>
-      </div>
+      </button>
     </div>
   );
 };
@@ -143,6 +194,7 @@ const HeroSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   // Memoized service order
   const serviceOrder = useMemo(() => [
@@ -181,57 +233,41 @@ const HeroSection = () => {
   }, [serviceOrder]);
 
   useEffect(() => {
-    // Defer non-critical data fetching
     const timer = setTimeout(() => {
       fetchMainServices();
     }, 100);
-
     return () => clearTimeout(timer);
   }, [fetchMainServices]);
 
-  // Optimized image preloading with requestIdleCallback
+  // Image preloading
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const preloadCriticalImages = () => {
-      // Only preload the hero banner immediately
-      const heroImg = new window.Image();
-      heroImg.src = MAIN_BANNER;
+    const preloadImages = () => {
+      [MAIN_BANNER, BOTTOM_BANNER, RAKHI_BANNER, ...Object.values(SERVICE_IMAGES)].forEach(src => {
+        const img = new window.Image();
+        img.src = src;
+      });
     };
 
-    // Use requestIdleCallback for non-blocking preload
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(() => {
-        preloadCriticalImages();
-        // Preload service images during idle time
-        Object.values(SERVICE_IMAGES).forEach(src => {
-          const img = new window.Image();
-          img.src = src;
-        });
-      });
+      window.requestIdleCallback(preloadImages);
     } else {
-      // Fallback for browsers without requestIdleCallback
-      setTimeout(preloadCriticalImages, 100);
+      setTimeout(preloadImages, 100);
     }
   }, []);
 
-  // Simplified scroll function
   const scrollToSection = useCallback((serviceName) => {
-    if (typeof window === "undefined") return;
-
     const sectionMap = {
       'Appliances Care': 'appliances-care',
       'Home Care': 'home-care', 
       'Beauty Care': 'beauty-care',
       'Handyman': 'handyman',
     };
-
     const sectionId = sectionMap[serviceName];
     if (sectionId) {
       const section = document.getElementById(sectionId);
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, []);
 
@@ -239,7 +275,6 @@ const HeroSection = () => {
     scrollToSection(service.name);
   }, [scrollToSection]);
 
-  // Optimized render function
   const renderServiceCards = useCallback((isMobile = true) => {
     if (loading) {
       return Array.from({ length: 4 }, (_, index) => (
@@ -271,7 +306,7 @@ const HeroSection = () => {
     ));
   }, [loading, error, services, handleServiceClick]);
 
-  // Simplified stats data
+  // Stats data
   const statsData = useMemo(() => [
     {
       icon: CiStar,
@@ -291,19 +326,36 @@ const HeroSection = () => {
     }
   ], []);
 
+  // Mobile services slider
+  const renderMobileServicesSlider = () => (
+    <div className="lg:hidden w-full px-2 py-3 bg-white relative">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">
+        Our Services 👨‍🔧
+      </h2>
+      <Swiper
+        slidesPerView={4}
+        spaceBetween={8}
+        pagination={{ clickable: true }}
+        modules={[Pagination]}
+        className="services-swiper"
+      >
+        {services.map((service) => (
+          <SwiperSlide key={service.id}>
+            <ServiceCard
+              service={service}
+              isMobile={true}
+              onClick={() => handleServiceClick(service)}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+
   return (
     <section className="relative">
-      {/* Mobile Services Section */}
-      <div className="lg:hidden w-full px-2 py-3 bg-white relative">
-        <h2 className="block sm:hidden text-lg font-semibold mb-4 text-gray-800">
-          Our Services 👨‍🔧
-        </h2>
-        <div className="min-h-[120px]">
-          <div className="grid grid-cols-4 gap-1 bg-gray-50 rounded-lg p-2">
-            {renderServiceCards(true)}
-          </div>
-        </div>
-      </div>
+      {/* Mobile Services Slider */}
+      {renderMobileServicesSlider()}
 
       {/* Desktop View */}
       <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-0 relative">
@@ -376,16 +428,20 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Swiper Section - Lazy loaded */}
-      <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-8 relative">
+      {/* Rakhi Banner */}
+      <div className="w-full px-4 sm:px-6 lg:px-12 mt-6 relative">
+        <div className="max-w-7xl mx-auto">
+          {loading ? <RakhiBannerSkeleton /> : <RakhiBanner />}
+        </div>
+      </div>
+  <div className="hidden lg:block w-full px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 mt-8 relative">
         <div className="max-w-7xl mx-auto">
           <Suspense fallback={<ServiceBannerSkeleton />}>
             <ServiceBannerSlider />
           </Suspense>
         </div>
       </div>
-
-      {/* Bottom Banner - Load immediately as it's the LCP element */}
+      {/* Bottom Banner */}
       <BottomBanner />
     </section>
   );

@@ -13,6 +13,7 @@ import Image from 'next/image'; // ✅ Correct!
 // Constants
 const DEFAULT_IMAGE = "default-images/deafult.jpeg";
 const IMAGE_MAP = {
+  "Rakhi Packages": "/BeautyHomeIcons/Rakhi-packages.webp",
   "Women Salon At Home": "/BeautyHomeIcons/women salon at home.webp",
   "Makeup": "/BeautyHomeIcons/makeup.webp",
   "Spa For Women": "/BeautyHomeIcons/spa for women.webp",
@@ -23,6 +24,7 @@ const IMAGE_MAP = {
 };
 
 const DESIRED_ORDER = [
+  "Rakhi Packages",
   "Women Salon At Home",
   "Makeup",
   "Spa For Women",
