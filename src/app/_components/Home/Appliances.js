@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-
+import Link from 'next/link'; // Add this line
 // Constants
 const DEFAULT_IMAGE = "/default-images/deafult.jpeg";
 const IMAGE_MAP = {
@@ -358,41 +358,45 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
       </section>
 
       {/* Modern Beauty Banner */}
-      {!hideBeautyBanner && (
-       <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Beauty services promotion">
-  <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
-    <div
-      className="
-        group relative overflow-hidden
-        bg-gradient-to-br from-white/10 to-gray-100/10 
-        backdrop-blur-sm border border-white/20 
-        rounded-3xl shadow-2xl shadow-black/5
-        hover:shadow-3xl hover:shadow-black/10
-        transition-all duration-700
-        hover:scale-[1.01]
-      "
-    >
-      {/* ✅ Updated banner image with aspect ratio + fill */}
-      <div className="relative w-full aspect-[1920/400]">
-        <Image
-          src="/HomeBanner/beauty.webp"
-          alt="Beauty services promotion - Professional beauty treatments at home"
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
-        />
-      </div>
-
-      {/* Subtle overlay for better visual hierarchy */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    {!hideBeautyBanner && (
+      <section className="mt-12 sm:mt-16 lg:mt-20 mb-0" aria-label="Beauty services promotion">
+        <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+          <Link href="/beauty" className="block">
+  <div
+    className="
+      group relative overflow-hidden
+      bg-gradient-to-br from-white/10 to-gray-100/10 
+      backdrop-blur-sm border border-white/20 
+      rounded-3xl shadow-2xl shadow-black/5
+      hover:shadow-3xl hover:shadow-black/10
+      transition-all duration-700
+      hover:scale-[1.01]
+      cursor-pointer
+    "
+  >
+    {/* Banner image */}
+    <div className="relative w-full aspect-[1920/400]">
+      <Image
+        src="/HomeBanner/beauty.webp"
+        alt="Beauty services promotion - Professional beauty treatments at home"
+        fill
+        className="object-cover transition-transform duration-700 group-hover:scale-105"
+        priority
+        fetchPriority="high"
+        sizes="100vw"
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+      />
     </div>
+
+    {/* Subtle overlay */}
+    <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
   </div>
-</section>
-      )}
+</Link>
+
+        </div>
+      </section>
+)}
 
     </main>
   );

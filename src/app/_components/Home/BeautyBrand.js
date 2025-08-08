@@ -27,7 +27,6 @@ const BeautyBrand = () => {
             Trusted by professionals worldwide
           </p>
         </div>
-
         {/* Brands grid with gradient hover effect */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-6 px-2 sm:px-0">
           {beautyBrands.map((brand, index) => (
