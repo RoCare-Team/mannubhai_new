@@ -31,7 +31,7 @@ const SERVICE_IMAGES = {
 const DEFAULT_SERVICE_IMAGE = "/default-images/deafult.jpeg";
 const MAIN_BANNER = "/MainBanner/HomeBanner.webp";
 const BOTTOM_BANNER = "/HomeBanner/appliance.webp";
-const RAKHI_BANNER = "/BeautyHomeIcons/rakhi_banner.webp";
+
 
 // Optimized skeleton components
 const MinimalSkeleton = memo(({ className }) => (
@@ -80,55 +80,7 @@ const RakhiBannerSkeleton = memo(() => (
 RakhiBannerSkeleton.displayName = 'RakhiBannerSkeleton';
 
 // Enhanced components with better hover effects
-const RakhiBanner = memo(() => {
-  const router = useRouter();
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  const handleBannerClick = useCallback(() => {
-    router.push('/rakhi_packages');
-  }, [router]);
-
-  const handleImageLoad = useCallback(() => {
-    setIsLoaded(true);
-  }, []);
-
-  return (
-    <div className="w-full mb-6">
-      <button
-        onClick={handleBannerClick}
-        className="w-full group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-pink-300 active:scale-[0.98]"
-        aria-label="Click to view Rakhi special packages and offers"
-      >
-        <div className="relative w-full aspect-[3/1] min-h-[120px] md:min-h-[160px] bg-gradient-to-r from-pink-100 to-orange-100 overflow-hidden">
-          <Image
-            src={RAKHI_BANNER}
-            alt="Rakhi special offer - Up to 30% OFF on home services"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
-            className={`object-cover object-center transition-all duration-700 ${
-              isLoaded 
-                ? 'opacity-100 scale-100' 
-                : 'opacity-0 scale-105'
-            } group-hover:scale-110`}
-            quality={90}
-            priority
-            onLoad={handleImageLoad}
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABQUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw=="
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-600/20 via-transparent to-orange-600/20 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-ping animation-delay-100"></div>
-            <div className="absolute top-3/4 right-1/3 w-1.5 h-1.5 bg-pink-300 rounded-full animate-ping animation-delay-300"></div>
-            <div className="absolute top-1/2 right-1/4 w-2.5 h-2.5 bg-orange-300 rounded-full animate-ping animation-delay-500"></div>
-          </div>
-          <div className="absolute inset-0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-        </div>
-      </button>
-    </div>
-  );
-});
-RakhiBanner.displayName = 'RakhiBanner';
 
 const ServiceCard = memo(({ service, isMobile, onClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -298,7 +250,7 @@ const HeroSection = () => {
     if (typeof window === 'undefined') return;
 
     const preloadImages = () => {
-      const imageUrls = [MAIN_BANNER, BOTTOM_BANNER, RAKHI_BANNER, ...Object.values(SERVICE_IMAGES)];
+      const imageUrls = [MAIN_BANNER, BOTTOM_BANNER, ...Object.values(SERVICE_IMAGES)];
       
       imageUrls.forEach(src => {
         const link = document.createElement('link');
@@ -492,12 +444,6 @@ const HeroSection = () => {
               )}
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="w-full px-4 sm:px-6 lg:px-12 mt-6 relative animate-fade-in">
-        <div className="max-w-7xl mx-auto">
-          {loading ? <RakhiBannerSkeleton /> : <RakhiBanner />}
         </div>
       </div>
 

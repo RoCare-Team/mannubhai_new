@@ -1,19 +1,33 @@
 "use client";
+
 import React from "react";
 import Image from "next/image";
+
+// Import Swiper React components
+import { Swiper, SwiperSlide } from "swiper/react";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import "swiper/css/autoplay";
+
+// import required modules
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
 
 const beautyBrands = [
   { name: "O3+", src: "/Beauty Brand Logo/O3.webp" },
   { name: "L'Oréal", src: "/Beauty Brand Logo/loreal.webp" },
   { name: "Lotus", src: "/Beauty Brand Logo/lotus.webp" },
-  { name: "Raaga", src: "/Beauty Brand Logo/raaga.webp" }
+  { name: "Raaga", src: "/Beauty Brand Logo/raaga.webp" },
+  // Add more brands for a better slider experience
 ];
 
 const BeautyBrand = () => {
   return (
-    <section className="w-full transition-colors duration-300">
+    <section className="w-full transition-colors duration-300 py-8 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Modern heading with subtle gradient */}
+        {/* Modern heading - unchanged */}
         <div className="text-center mb-12 mt-8">
           <span className="text-xs sm:text-sm font-medium text-purple-500 mb-3 block tracking-widest uppercase">
             Professional Quality
@@ -27,40 +41,107 @@ const BeautyBrand = () => {
             Trusted by professionals worldwide
           </p>
         </div>
-        {/* Brands grid with gradient hover effect */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-6 px-2 sm:px-0">
+
+        {/* Swiper Slider Implementation */}
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation]}
+          loop={true}
+          autoplay={{
+            delay: 2500,
+            disableOnInteraction: false,
+          }}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          navigation={true}
+          spaceBetween={24} // Corresponds to gap-6
+          breakpoints={{
+            // when window width is >= 320px
+            320: {
+              slidesPerView: 2,
+              spaceBetween: 16,
+            },
+            // when window width is >= 640px
+            640: {
+              slidesPerView: 3,
+            },
+            // when window width is >= 1024px
+            1024: {
+              slidesPerView: 4,
+            },
+          }}
+          className="mySwiper" // Custom class for styling
+        >
           {beautyBrands.map((brand, index) => (
-            <div
-              key={index}
-              className="group relative bg-white rounded-xl p-4 sm:p-4 flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-2 overflow-hidden shadow-sm"
-            >
-              {/* Gradient background on hover - only on desktop */}
-              <div className="hidden sm:block absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-              
-              {/* White border that becomes gradient on hover - only on desktop */}
-              <div className="hidden sm:block absolute inset-0 rounded-xl border-2 border-white group-hover:border-transparent transition-all duration-300 z-10 pointer-events-none"></div>
-              
-              {/* Gradient border effect (revealed on hover) - only on desktop */}
-              <div className="hidden sm:block absolute inset-0 rounded-xl p-[2px] bg-gradient-to-br from-purple-300 to-pink-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
-                <div className="bg-white rounded-[9px] h-full w-full"></div>
+            <SwiperSlide key={index} className="group pb-12">
+              {/* The card styling from your original code is preserved here */}
+              <div className="relative bg-white rounded-xl p-4 flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-2 overflow-hidden shadow-sm h-full">
+                {/* Gradient background on hover - desktop */}
+                <div className="hidden sm:block absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                
+                {/* Gradient border effect (revealed on hover) - desktop */}
+                <div className="hidden sm:block absolute -inset-px rounded-xl p-[2px] bg-gradient-to-br from-purple-300 to-pink-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="bg-white rounded-[9px] h-full w-full"></div>
+                </div>
+
+                {/* Content */}
+                <div className="relative h-28 sm:h-24 w-full z-10">
+                  <Image
+                    src={brand.src}
+                    alt={`${brand.name} logo`}
+                    fill
+                    className="object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                    quality={85}
+                    // CORE WEB VITALS OPTIMIZATION:
+                    // 1. Eagerly load the first few images that are visible on page load.
+                    // 2. Lazily load the rest.
+                    // 3. Give priority to the first few images to improve LCP.
+                    loading={index < 4 ? "eager" : "lazy"}
+                    priority={index < 4}
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 20vw"
+                  />
+                </div>
               </div>
-              
-              {/* Content */}
-              <div className="relative h-28 sm:h-24 w-full mb-3 z-20">
-                <Image
-                  src={brand.src}
-                  alt={brand.name}
-                  fill
-                  className="object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                  quality={90}
-                  sizes="(max-width: 640px) 150px, 150px"
-                  loading="eager"
-                />
-              </div>
-            </div>
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
       </div>
+
+      {/* GLOBAL STYLES for Swiper Navigation and Pagination */}
+      {/* This is a clean way to apply custom styles without a separate CSS file */}
+      <style jsx global>{`
+        .mySwiper .swiper-button-next,
+        .mySwiper .swiper-button-prev {
+          color: #8b5cf6; /* purple-500 */
+          background-color: white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          transition: background-color 0.3s, color 0.3s;
+        }
+        .mySwiper .swiper-button-next:hover,
+        .mySwiper .swiper-button-prev:hover {
+          background-color: #8b5cf6;
+          color: white;
+        }
+        .mySwiper .swiper-button-next::after,
+        .mySwiper .swiper-button-prev::after {
+          font-size: 16px;
+          font-weight: bold;
+        }
+        .mySwiper .swiper-pagination-bullet {
+          background-color: #d8b4fe; /* purple-300 */
+          width: 10px;
+          height: 10px;
+          transition: background-color 0.3s, transform 0.3s;
+        }
+        .mySwiper .swiper-pagination-bullet-active {
+          background-color: #a855f7; /* purple-600 */
+          transform: scale(1.2);
+        }
+      `}</style>
     </section>
   );
 };
