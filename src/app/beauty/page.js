@@ -20,7 +20,6 @@ import Footer from "@/components/Footer";
 
 // Constants moved outside component to prevent recreation on every render
 const SUBSERVICE_IMAGES = {
-  "Rakhi Packages": "/BeautyHomeIcons/Rakhi-packages.webp",
   "Women Salon At Home": "/BeautyCare/women salon at home.png",
   "Makeup": "/BeautyCare/makeup.png",
   "Spa For Women": "/BeautyCare/spa for women.png",
