@@ -9,11 +9,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
 import "swiper/css/autoplay";
 
 // import required modules
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 
 const beautyBrands = [
   { name: "O3+", src: "/Beauty Brand Logo/O3.webp" },
@@ -44,7 +43,7 @@ const BeautyBrand = () => {
 
         {/* Swiper Slider Implementation */}
         <Swiper
-          modules={[Autoplay, Pagination, Navigation]}
+          modules={[Autoplay, Pagination]}
           loop={true}
           autoplay={{
             delay: 2500,
@@ -54,19 +53,18 @@ const BeautyBrand = () => {
             clickable: true,
             dynamicBullets: true,
           }}
-          navigation={true}
           spaceBetween={24} // Corresponds to gap-6
           breakpoints={{
-            // when window width is >= 320px
+            // when window width is >= 320px (mobile - 1 slide)
             320: {
-              slidesPerView: 2,
+              slidesPerView: 1,
               spaceBetween: 16,
             },
-            // when window width is >= 640px
+            // when window width is >= 640px (tablet - 3 slides)
             640: {
               slidesPerView: 3,
             },
-            // when window width is >= 1024px
+            // when window width is >= 1024px (desktop - 4 slides)
             1024: {
               slidesPerView: 4,
             },
@@ -99,7 +97,7 @@ const BeautyBrand = () => {
                     // 3. Give priority to the first few images to improve LCP.
                     loading={index < 4 ? "eager" : "lazy"}
                     priority={index < 4}
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 20vw"
+                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 30vw, 20vw"
                   />
                 </div>
               </div>
@@ -108,29 +106,9 @@ const BeautyBrand = () => {
         </Swiper>
       </div>
 
-      {/* GLOBAL STYLES for Swiper Navigation and Pagination */}
+      {/* GLOBAL STYLES for Swiper Pagination (removed navigation styles) */}
       {/* This is a clean way to apply custom styles without a separate CSS file */}
       <style jsx global>{`
-        .mySwiper .swiper-button-next,
-        .mySwiper .swiper-button-prev {
-          color: #8b5cf6; /* purple-500 */
-          background-color: white;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          transition: background-color 0.3s, color 0.3s;
-        }
-        .mySwiper .swiper-button-next:hover,
-        .mySwiper .swiper-button-prev:hover {
-          background-color: #8b5cf6;
-          color: white;
-        }
-        .mySwiper .swiper-button-next::after,
-        .mySwiper .swiper-button-prev::after {
-          font-size: 16px;
-          font-weight: bold;
-        }
         .mySwiper .swiper-pagination-bullet {
           background-color: #d8b4fe; /* purple-300 */
           width: 10px;
