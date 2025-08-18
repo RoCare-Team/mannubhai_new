@@ -197,7 +197,7 @@ const MannuBhaiServices = () => {
                 onClick={() => setActiveTab(key)}
                 className={`group px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
                   activeTab === key
-                    ? `bg-gradient-to-r ${service.gradient} text-white shadow-lg shadow-${service.color}-500/25`
+                    ? `bg-gradient-to-r ${service.gradient} text-white shadow-lg`
                     : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
                 }`}
               >
@@ -273,7 +273,7 @@ const MannuBhaiServices = () => {
           <div className="text-center">
             <button
               onClick={() => setShowForm(true)}
-              className={`group bg-gradient-to-r ${services[activeTab].gradient} hover:shadow-lg hover:shadow-${services[activeTab].color}-500/25 text-white px-12 py-4 rounded-xl font-bold text-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center gap-3 mx-auto`}
+              className={`group bg-gradient-to-r ${services[activeTab].gradient} hover:shadow-lg text-white px-12 py-4 rounded-xl font-bold text-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center gap-3 mx-auto`}
             >
               Apply for {services[activeTab].title}
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
