@@ -5,7 +5,6 @@ import Head from "next/head";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
 
-// Dynamic imports with loading components for better code splitting
 const LoginPopup = dynamic(() => import('./login'), {
   loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="w-8 h-8 border-t-2 border-blue-500 rounded-full animate-spin"></div></div>
 });
@@ -158,18 +157,28 @@ export default function CategoryDetails({
       const groupKey = firstWords.toLowerCase().replace(/\s+/g, '_');
       const priority = SERVICE_PRIORITY[groupKey.split('_')[0]] || 99;
 
-      if (!groups[groupKey]) {
-        groups[groupKey] = {
-          displayName: firstWords,
-          services: [],
-          priority,
-          image: service.image_icon?.startsWith("http") 
+
+if (!groups[groupKey]) {
+  const imageUrl = service.image_icon?.startsWith("http")
+  groups[groupKey] = {
+    displayName: firstWords,
+    services: [],
+    priority,
+    image: (
+      <Image
+        src={imageUrl}
+        alt={firstWords}
+        width={64}
+        height={64}
+        loading="lazy"
+      />
+    ),
+    image: service.image_icon?.startsWith("http") 
             ? service.image_icon 
             : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`,
           id: `service-group-${groupKey}`
-        };
-      }
-
+  };
+}
       groups[groupKey].services.push(service);
     });
 

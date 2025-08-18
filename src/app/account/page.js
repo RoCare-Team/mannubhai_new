@@ -282,10 +282,17 @@ const AccountDetails = () => {
                   setConfirmAction("logout");
                   setConfirmOpen(true);
                 }}
+<<<<<<< Updated upstream
                 className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm"
               >
                 <MdLogout className="w-4 h-4" />
                 <span className="font-medium">Logout</span>
+=======
+                className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50"
+              >
+                <MdLogout className="w-4 h-4" />
+                <span className="font-medium" style={{pointerEvents:'none'}}>Logout</span>
+>>>>>>> Stashed changes
               </button>
             </div>
             <div className="relative z-10">

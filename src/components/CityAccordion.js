@@ -1,18 +1,19 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, useCallback, useMemo, memo, lazy, Suspense } from "react";
-import { db } from "../app/firebaseConfig"; // Make sure this path is correct
+import { db } from "../app/firebaseConfig";
 import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
+import StoreLocator from "./StoreLocator";
 
-// Lazy load FooterLinks to reduce initial bundle size
+// Lazy load FooterLinks
 const FooterLinks = dynamic(() => import("@/app/_components/Home/FooterLinks"), {
   loading: () => <div className="h-20 bg-gray-50 animate-pulse rounded"></div>,
   ssr: false
 });
 
-// Memoized icons with reduced complexity
+// Memoized LocationIcon
 const LocationIcon = memo(() => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -21,225 +22,79 @@ const LocationIcon = memo(() => (
     viewBox="0 0 24 24"
     stroke="currentColor"
     aria-hidden="true"
-    role="img"
   >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-    />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 ));
 LocationIcon.displayName = 'LocationIcon';
 
+// LoadingSpinner component
 const LoadingSpinner = memo(() => (
-  <div className="text-center py-10" role="status" aria-label="Loading">
-    <h2 className="text-3xl font-bold mb-6">Loading...</h2>
-    <div className="flex justify-center">
-      <div 
-        className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"
-        aria-hidden="true"
-      ></div>
-    </div>
-    <span className="sr-only">Loading content...</span>
+  <div className="text-center py-10">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
   </div>
 ));
 LoadingSpinner.displayName = 'LoadingSpinner';
 
-// Lazy load map component to improve initial performance
-const LazyMapEmbed = lazy(() => Promise.resolve({
-  default: memo(({ src, title }) => (
-    <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-lg shadow mt-2">
-      <iframe
-        src={src}
-        width="100%"
-        height="100%"
-        style={{
-          border: 0,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-        }}
-        allowFullScreen=""
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        title={title}
-        className="rounded-lg"
-      ></iframe>
-    </div>
-  ))
-}));
-
+// CityCard component
 const CityCard = memo(({ city, currentCategory }) => {
-  const slug = useMemo(() => {
-    if (city.slug) return city.slug;
-    
-    return city.city_name
-      .toLowerCase()
-      .replace(/,/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }, [city.slug, city.city_name]);
+  const slug = useMemo(() => 
+    city.slug || city.city_name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    [city]
+  );
 
-  const href = useMemo(() => {
-    return currentCategory ? `/${slug}/${currentCategory}` : `/${slug}`;
-  }, [slug, currentCategory]);
+  const href = useMemo(() => 
+    currentCategory ? `/${slug}/${currentCategory}` : `/${slug}`,
+    [slug, currentCategory]
+  );
 
   return (
     <Link
       href={href}
-      className="group relative block overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      className="group block rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition p-5"
       prefetch={false}
-      aria-label={`View services in ${city.city_name}`}
     >
-      <div className="p-5">
-        <div className="flex items-center">
-          <LocationIcon />
-          <span className="text-gray-800 font-medium group-hover:text-indigo-600 transition-colors">
-            {city.city_name}
-          </span>
-        </div>
+      <div className="flex items-center">
+        <LocationIcon />
+        <span className="text-gray-800 font-medium group-hover:text-indigo-600">
+          {city.city_name}
+        </span>
       </div>
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        aria-hidden="true"
-      ></div>
     </Link>
   );
 });
 CityCard.displayName = 'CityCard';
 
-const StoreCard = memo(({ store }) => {
-  const [showMap, setShowMap] = useState(false);
-  
-  const handleShowMap = useCallback(() => {
-    setShowMap(true);
-  }, []);
-
-  return (
-    <div className="border border-gray-200 p-6 rounded-xl shadow-sm bg-white hover:shadow-lg transition flex flex-col">
-      <h3 className="text-xl font-semibold text-indigo-700 mb-3">
-        {store.branch || "Franchise Store"}
-      </h3>
-
-      <p className="text-gray-700 mb-2">
-        <strong>Address:</strong> {store.address}
-      </p>
-
-      {store.time && (
-        <p className="text-gray-700 mb-2">
-          <strong>Timings:</strong> {store.time}
-        </p>
-      )}
-
-      {store.map_link ? (
-        <a
-          href={store.map_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block mt-2 mb-4 px-4 py-2 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-700 transition self-start focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          aria-label={`Open ${store.branch || 'store'} location in Google Maps`}
-        >
-          Open in Google Maps
-        </a>
-      ) : (
-        <p className="text-sm text-gray-500 mt-2">
-          No Google Maps link available.
-        </p>
-      )}
-
-      {store.map ? (
-        <>
-          {!showMap ? (
-            <button
-              onClick={handleShowMap}
-              className="mt-2 p-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              aria-label={`Load map for ${store.branch || 'store'}`}
-            >
-              <div className="text-center">
-                <div className="text-indigo-600 text-lg mb-2">📍</div>
-                <p className="text-sm text-gray-600">Click to load map</p>
-              </div>
-            </button>
-          ) : (
-            <Suspense 
-              fallback={
-                <div className="relative pb-[56.25%] h-0 overflow-hidden rounded-lg shadow mt-2 bg-gray-100 animate-pulse">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-gray-500">Loading map...</p>
-                  </div>
-                </div>
-              }
-            >
-              <LazyMapEmbed 
-                src={store.map} 
-                title={`Map for ${store.branch || "store"}`} 
-              />
-            </Suspense>
-          )}
-        </>
-      ) : (
-        <p className="text-sm text-gray-500 mt-2">
-          No embedded map available.
-        </p>
-      )}
-    </div>
-  );
-});
-StoreCard.displayName = 'StoreCard';
-
-// The 'cities' prop has been removed from the function signature
 export default function CityAccordion({ currentCity }) {
   const [nearbyCities, setNearbyCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
-  const [stores, setStores] = useState([]);
-  const [loadingStores, setLoadingStores] = useState(true);
-  const [showAllStores, setShowAllStores] = useState(false);
-  
   const pathname = usePathname();
 
-  // Memoize safeCity to prevent unnecessary re-renders
-  const safeCity = useMemo(() => {
-    return currentCity || { 
-      city_name: "Unknown City", 
-      id: "", 
-      parent_city: "" 
-    };
-  }, [currentCity]);
+  const safeCity = useMemo(() => 
+    currentCity || { city_name: "Unknown City", id: "", parent_city: "" },
+    [currentCity]
+  );
 
-  // Memoize current category extraction
-  const currentCategory = useMemo(() => {
-    if (!pathname) return '';
-    const parts = pathname.split('/');
-    return parts.length >= 3 ? parts[2] : '';
-  }, [pathname]);
+  const currentCategory = useMemo(() => 
+    pathname?.split('/')[2] || '',
+    [pathname]
+  );
 
-  // Optimized fetch functions with error handling and caching
   const fetchNearbyCities = useCallback(async () => {
     if (!safeCity?.id && !safeCity?.parent_city) return;
 
     try {
       setLoading(true);
-
       const citiesRef = collection(db, "city_tb");
       const parentToMatch = safeCity.parent_city || safeCity.city_name;
 
-      // Add limit to reduce initial load
       const q = query(
         citiesRef,
         where("parent_city", "==", parentToMatch),
         orderBy("city_name", "asc"),
-        limit(20) // Limit initial results
+        limit(20)
       );
 
       const querySnapshot = await getDocs(q);
@@ -253,99 +108,29 @@ export default function CityAccordion({ currentCity }) {
       });
 
       setNearbyCities(nearby);
-    } catch (error){  setNearbyCities([])}
-     // Set empty array on error
-     finally {
+    } catch (error) {
+      setNearbyCities([]);
+    } finally {
       setLoading(false);
     }
-  }, [safeCity?.id, safeCity?.parent_city, safeCity?.city_name]);
+  }, [safeCity]);
 
-  const fetchStores = useCallback(async () => {
-    if (!safeCity?.id && !safeCity?.parent_city) return;
-
-    try {
-      setLoadingStores(true);
-      let targetCityId = safeCity.id;
-
-      // Optimize store lookup logic
-      if (safeCity.parent_city && safeCity.parent_city !== safeCity.city_name) {
-        const citiesRef = collection(db, "city_tb");
-        const q = query(
-          citiesRef, 
-          where("city_name", "==", safeCity.parent_city),
-          limit(1) // Only need one result
-        );
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          targetCityId = querySnapshot.docs[0].id;
-        }
-      }
-
-      if (!targetCityId) {
-        setStores([]);
-        return;
-      }
-
-      // Fetch stores with limit
-      const storesRef = collection(db, "franchise_loaction");
-      const storesQuery = query(
-        storesRef, 
-        where("city_id", "==", targetCityId),
-        limit(10) // Limit results
-      );
-      const storesSnapshot = await getDocs(storesQuery);
-
-      const fetchedStores = storesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setStores(fetchedStores);
-    } catch (error) {
-      console.error("Error fetching stores:", error);
-      setStores([]); // Set empty array on error
-    } finally {
-      setLoadingStores(false);
-    }
-  }, [safeCity?.id, safeCity?.parent_city, safeCity?.city_name]);
-
-  // Debounced effects to prevent excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchNearbyCities();
     }, 100);
-
     return () => clearTimeout(timer);
   }, [fetchNearbyCities]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchStores();
-    }, 150);
+  const citiesToShow = useMemo(() => 
+    showAll ? nearbyCities : nearbyCities.slice(0, 8),
+    [nearbyCities, showAll]
+  );
 
-    return () => clearTimeout(timer);
-  }, [fetchStores]);
-
-  // Memoize display arrays
-  const citiesToShow = useMemo(() => {
-    const initialDisplayCount = 8;
-    return showAll ? nearbyCities : nearbyCities.slice(0, initialDisplayCount);
-  }, [nearbyCities, showAll]);
-
-  const storesToShow = useMemo(() => {
-    const initialStoresDisplayCount = 3;
-    return showAllStores ? stores : stores.slice(0, initialStoresDisplayCount);
-  }, [stores, showAllStores]);
-
-  // Memoized toggle handlers
-  const toggleShowAll = useCallback(() => {
-    setShowAll(prev => !prev);
-  }, []);
-
-  const toggleShowAllStores = useCallback(() => {
-    setShowAllStores(prev => !prev);
-  }, []);
+  const toggleShowAll = useCallback(() => 
+    setShowAll(prev => !prev),
+    []
+  );
 
   return (
     <div className="mt-16 w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
@@ -360,23 +145,17 @@ export default function CityAccordion({ currentCity }) {
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              color: "transparent",
-              fontSize: "2.5rem",
             }}
           >
             Nearby Service Areas
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full" aria-hidden="true"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full"></div>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
             We also provide premium home services in these nearby areas
           </p>
         </div>
 
         <div className="relative mb-16">
-          {/* Background decorations - reduced complexity */}
-          <div className="absolute -top-6 -left-6 w-24 h-24 bg-purple-100 rounded-full opacity-30 blur-xl" aria-hidden="true"></div>
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-100 rounded-full opacity-30 blur-xl" aria-hidden="true"></div>
-
           {loading ? (
             <LoadingSpinner />
           ) : nearbyCities.length > 0 ? (
@@ -395,10 +174,7 @@ export default function CityAccordion({ currentCity }) {
                 <div className="text-center mt-6">
                   <button
                     onClick={toggleShowAll}
-                    className="inline-block px-6 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    type="button"
-                    aria-expanded={showAll}
-                    aria-controls="city-grid"
+                    className="inline-block px-6 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition duration-300"
                   >
                     {showAll ? "Show Less" : "Show More"}
                   </button>
@@ -418,59 +194,8 @@ export default function CityAccordion({ currentCity }) {
         </div>
       </section>
 
-      {/* Store Locator Section */}
-      <section aria-labelledby="store-locations-title">
-        <div className="text-center mb-10">
-          <h2 
-            id="store-locations-title"
-            className="text-3xl md:text-4xl font-bold mb-4 text-indigo-700" 
-            style={{ fontSize: "2.5rem" }}
-          >
-            Nearby Store Locations
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full" aria-hidden="true"></div>
-          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-            Find our nearby franchise stores in your city
-          </p>
-        </div>
-
-        {loadingStores ? (
-          <LoadingSpinner />
-        ) : stores.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {storesToShow.map((store) => (
-                <StoreCard key={store.id} store={store} />
-              ))}
-            </div>
-
-            {stores.length > 3 && (
-              <div className="text-center mt-6 mb-16">
-                <button
-                  onClick={toggleShowAllStores}
-                  className="inline-block px-6 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  type="button"
-                  aria-expanded={showAllStores}
-                  aria-controls="stores-grid"
-                >
-                  {showAllStores ? "Show Less" : "Show More"}
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-10 px-6 border border-gray-300 rounded-xl shadow-sm bg-gray-50 mb-16">
-            <p className="text-gray-700 text-lg font-medium">
-              No store locations found for{" "}
-              <span className="text-indigo-600 font-semibold">
-                {safeCity.parent_city && safeCity.parent_city !== safeCity.city_name
-                  ? safeCity.parent_city
-                  : safeCity.city_name}
-              </span>
-            </p>
-          </div>
-        )}
-      </section>
+      {/* Store Locator Section - Now using the separate component */}
+      <StoreLocator currentCity={safeCity} />
 
       <Suspense fallback={<div className="h-20 bg-gray-50 animate-pulse rounded"></div>}>
         <FooterLinks />
