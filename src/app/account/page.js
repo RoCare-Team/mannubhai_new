@@ -277,23 +277,29 @@ const AccountDetails = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-3xl"></div>
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
               <div className="sm:hidden absolute top-5 right-5">
-              <button
-                onClick={() => {
-                  setConfirmAction("logout");
-                  setConfirmOpen(true);
-                }}
-<<<<<<< Updated upstream
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm"
-              >
-                <MdLogout className="w-4 h-4" />
-                <span className="font-medium">Logout</span>
-=======
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50"
-              >
-                <MdLogout className="w-4 h-4" />
-                <span className="font-medium" style={{pointerEvents:'none'}}>Logout</span>
->>>>>>> Stashed changes
-              </button>
+              // <button
+              //   onClick={() => {
+              //     setConfirmAction("logout");
+              //     setConfirmOpen(true);
+              //   }}
+              //   className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm">
+              //   <MdLogout className="w-4 h-4" />
+              //   <span className="font-medium">Logout</span>
+              //   className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50">
+              //   <MdLogout className="w-4 h-4" />
+              //   <span className="font-medium" style={{pointerEvents:'none'}}>Logout</span>
+
+              // </button>
+            <button
+  onClick={() => {
+    setConfirmAction("logout");
+    setConfirmOpen(true);
+  }}
+  className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50"
+>
+  <MdLogout className="w-4 h-4" />
+  <span className="font-medium">Logout</span>
+</button>
             </div>
             <div className="relative z-10">
               {/* Profile Picture Section */}
