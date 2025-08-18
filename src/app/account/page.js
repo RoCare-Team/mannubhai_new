@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { 
-  MdPerson, 
-  MdEmail, 
-  MdPhone, 
-  MdEdit, 
-  MdSave, 
-  MdClose, 
-  MdSecurity, 
+import {
+  MdPerson,
+  MdEmail,
+  MdPhone,
+  MdEdit,
+  MdSave,
+  MdClose,
+  MdSecurity,
   MdCheck,
   MdCameraAlt,
   MdDelete,
@@ -37,7 +37,7 @@ const AccountDetails = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success"); // 'success', 'error', 'info', 'warning'
-  
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -49,27 +49,27 @@ const AccountDetails = () => {
           mobile: localStorage.getItem("userPhone") || "",
           profileImage: localStorage.getItem("userProfileImage") || "",
         };
-        
+
         const customerId = localStorage.getItem("customer_id");
         if (!customerId) {
           router.push("/");
           showAlert("Please login to access your account", "info");
           return;
         }
-        
+
         const urlParams = new URLSearchParams(window.location.search);
         const otpVerified = urlParams.get('otp_verified');
-        
+
         if (otpVerified === 'true') {
           showAlert("Mobile number verified successfully", "success");
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         setUser(localData);
-        setFormData({ 
-          name: localData.name, 
-          email: localData.email, 
-          profileImage: localData.profileImage 
+        setFormData({
+          name: localData.name,
+          email: localData.email,
+          profileImage: localData.profileImage
         });
         setImagePreview(localData.profileImage);
       } catch (error) {
@@ -189,10 +189,10 @@ const AccountDetails = () => {
         localStorage.setItem("userName", payload.name);
         localStorage.setItem("userEmail", payload.email);
         localStorage.setItem("userProfileImage", payload.profileImage);
-        
-        setUser({ 
-          ...user, 
-          name: payload.name, 
+
+        setUser({
+          ...user,
+          name: payload.name,
           email: payload.email,
           profileImage: payload.profileImage
         });
@@ -210,10 +210,10 @@ const AccountDetails = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData({ 
-      name: user.name, 
-      email: user.email, 
-      profileImage: user.profileImage 
+    setFormData({
+      name: user.name,
+      email: user.email,
+      profileImage: user.profileImage
     });
     setImagePreview(user.profileImage);
     setErrors({ name: "", email: "", image: "" });
@@ -259,47 +259,34 @@ const AccountDetails = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4 sm:mt-10">
         <div className="max-w-2xl mx-auto">
           {/* Header Section */}
-         <div className="text-center mb-6 sm:mb-8 relative">
+          <div className="text-center mb-6 sm:mb-8 relative">
             <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-3 sm:mb-4 shadow-lg">
               <MdPerson className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mt-10 sm:mt-0">
               Account Details
             </h1>
-          <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage your personal information</p>
-  
+            <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">Manage your personal information</p>
+
             {/* Mobile-only Logout Button */}
-          
+
           </div>
 
           {/* Main Card */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-3xl"></div>
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
-              <div className="sm:hidden absolute top-5 right-5">
-              // <button
-              //   onClick={() => {
-              //     setConfirmAction("logout");
-              //     setConfirmOpen(true);
-              //   }}
-              //   className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm">
-              //   <MdLogout className="w-4 h-4" />
-              //   <span className="font-medium">Logout</span>
-              //   className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50">
-              //   <MdLogout className="w-4 h-4" />
-              //   <span className="font-medium" style={{pointerEvents:'none'}}>Logout</span>
-
-              // </button>
-            <button
-  onClick={() => {
-    setConfirmAction("logout");
-    setConfirmOpen(true);
-  }}
-  className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50"
->
-  <MdLogout className="w-4 h-4" />
-  <span className="font-medium">Logout</span>
-</button>
+            <div className="sm:hidden absolute top-5 right-5">
+              <button
+                onClick={() => {
+                  setConfirmAction("logout");
+                  setConfirmOpen(true);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors duration-200 text-sm relative z-50"
+              >
+                <MdLogout className="w-4 h-4" />
+                <span className="font-medium">Logout</span>
+              </button>
             </div>
             <div className="relative z-10">
               {/* Profile Picture Section */}
@@ -321,7 +308,7 @@ const AccountDetails = () => {
                         </span>
                       </div>
                     )}
-                    
+
                     {isEditing && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <MdCameraAlt className="w-6 h-6 text-white" />
@@ -416,13 +403,12 @@ const AccountDetails = () => {
                       value={formData.name}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${
-                        errors.name 
-                          ? "border-red-300 bg-red-50/50" 
-                          : isEditing 
-                          ? "border-blue-300 hover:border-blue-400" 
-                          : "border-slate-200"
-                      } ${!isEditing ? "cursor-not-allowed opacity-60" : ""}`}
+                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${errors.name
+                          ? "border-red-300 bg-red-50/50"
+                          : isEditing
+                            ? "border-blue-300 hover:border-blue-400"
+                            : "border-slate-200"
+                        } ${!isEditing ? "cursor-not-allowed opacity-60" : ""}`}
                       placeholder="Enter your full name"
                     />
                     {errors.name && (
@@ -447,13 +433,12 @@ const AccountDetails = () => {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${
-                        errors.email 
-                          ? "border-red-300 bg-red-50/50" 
-                          : isEditing 
-                          ? "border-blue-300 hover:border-blue-400" 
-                          : "border-slate-200"
-                      } ${!isEditing ? "cursor-not-allowed opacity-60" : ""}`}
+                      className={`w-full px-4 py-4 bg-white/80 border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${errors.email
+                          ? "border-red-300 bg-red-50/50"
+                          : isEditing
+                            ? "border-blue-300 hover:border-blue-400"
+                            : "border-slate-200"
+                        } ${!isEditing ? "cursor-not-allowed opacity-60" : ""}`}
                       placeholder="Enter your email address"
                     />
                     {errors.email && (
@@ -536,7 +521,7 @@ const AccountDetails = () => {
                   {confirmAction === "update" ? "Confirm Update" : "Confirm Logout"}
                 </h3>
                 <p className="text-slate-600 mb-8 leading-relaxed">
-                  {confirmAction === "update" 
+                  {confirmAction === "update"
                     ? "Are you sure you want to update your profile details? This action will save your changes permanently."
                     : "Are you sure you want to logout? You'll need to login again to access your account."}
                 </p>
@@ -556,11 +541,10 @@ const AccountDetails = () => {
                         handleLogout();
                       }
                     }}
-                    className={`flex-1 bg-gradient-to-r ${
-                      confirmAction === "update" 
-                        ? "from-blue-500 to-purple-600" 
+                    className={`flex-1 bg-gradient-to-r ${confirmAction === "update"
+                        ? "from-blue-500 to-purple-600"
                         : "from-red-500 to-orange-600"
-                    } text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200`}
+                      } text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200`}
                   >
                     {confirmAction === "update" ? "Yes, Update" : "Yes, Logout"}
                   </button>
@@ -573,14 +557,14 @@ const AccountDetails = () => {
         {/* Alert Notification */}
         {alertOpen && (
           <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md`}>
-            <div 
+            <div
               className={`flex items-center justify-between p-4 rounded-2xl shadow-lg border ${alertColors[alertType]} transition-all duration-300 animate-in`}
             >
               <div className="flex items-center gap-3">
                 {alertIcons[alertType]}
                 <span className="font-medium">{alertMessage}</span>
               </div>
-              <button 
+              <button
                 onClick={() => setAlertOpen(false)}
                 className="p-1 rounded-full hover:bg-black/10 transition-colors"
               >
