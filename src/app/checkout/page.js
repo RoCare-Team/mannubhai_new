@@ -138,12 +138,20 @@ const AlertBox = ({ message, type, onClose }) => {
     const timeSlot = localStorage.getItem("bookingTimeSlot");
     const addressId = localStorage.getItem("address_id");
 
+    console.log("refreshBookingData called");
+    console.log("address:", address);
+    console.log("timeSlot:", timeSlot);
+    console.log("addressId:", addressId);
+
+    const isBookingCompleted = address && timeSlot && addressId;
+    console.log("isBookingCompleted:", isBookingCompleted);
+
     setBookingData({
       address,
       timeSlot: timeSlot ? JSON.parse(timeSlot) : null,
       addressId,
     });
-    setBookingCompleted(address && timeSlot && addressId);
+    setBookingCompleted(isBookingCompleted);
   }, []);
 
   // Cart operations

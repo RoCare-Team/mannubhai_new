@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true, // Consider removing this in production for better image optimization
+    unoptimized: false, // Consider removing this in production for better image optimization
     remotePatterns: [
       {
         protocol: 'https',
@@ -51,6 +51,16 @@ const nextConfig = {
         ],
       },
     ];
+  },
+experimental: {
+    legacyBrowsers: false, 
+      browserslist: [
+    ">0.5%",
+    "last 2 versions",
+    "not dead",
+    "not IE 11",
+    "not op_mini all",
+  ]
   },
 
   // Permanent Redirects

@@ -114,4 +114,12 @@
 <sitemap>
 <loc>https://www.mannubhai.com/sitemap/mensalonsitemap.xml</loc>
 </sitemap> 
+
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/allcitysitemap.xml</loc>
+</sitemap> 
+
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/alllocalitysitemap.xml</loc>
+</sitemap> 
 </sitemapindex>
