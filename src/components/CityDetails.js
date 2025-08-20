@@ -205,7 +205,7 @@ ModernServiceWrapper.displayName = 'ModernServiceWrapper';
 
 
 // --- NEW: Modern "Coming Soon" Section ---
-const ModernComingSoonSection = memo(({ title, cityName }) => {
+const ModernComingSoonSection = memo(({ title, cityName, id }) => {
   const SERVICE_IMAGES = useMemo(() => ({
     "Beauty & Personal Care": {
       "Women Salon At Home": "/BeautyHomeIcons/women salon at home.webp",
@@ -245,7 +245,7 @@ const ModernComingSoonSection = memo(({ title, cityName }) => {
   }, []);
 
   return (
-    <section className="relative py-16 px-4 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 min-h-[500px] overflow-hidden">
+    <section className="relative py-16 px-4 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 min-h-[500px] overflow-hidden" id={id}>
       {/* Modern background elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-purple-100/50" />
       <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-indigo-100 to-transparent rounded-full blur-3xl opacity-70" />
@@ -515,6 +515,7 @@ const ModernCityDetails = memo(({ city }) => {
           ) : (
             <ModernComingSoonSection
               key={id}
+              id={id}
               title={title}
               cityName={city.city_name}
             />
