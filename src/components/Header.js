@@ -26,8 +26,8 @@ const MobileMenu = dynamic(() => import("./MobileMenu"));
 
 // Navigation items for the main desktop header and mobile slide-out menu
 const desktopNavigationItems = [
-  { name: "Appliance", href: "/appliance" },
-  { name: "Beauty", href: "/beauty" },
+  { name: "Appliance", href: "/appliance-care" },
+  { name: "Beauty", href: "/beauty-care" },
   { name: "Homecare", href: "/homecare" },
   { name: "Handyman", href: "/handyman" },
   { name: "Become Franchise Partner", href: "/franchise/franchise-opportunities" },

@@ -76,11 +76,6 @@ experimental: {
         destination: '/franchise/franchise-opportunities',
         permanent: true,
       },
-      {
-        source: '/beauty-care',
-        destination: '/beauty',
-        permanent: true,
-      },
     ];
   },
 };

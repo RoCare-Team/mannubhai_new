@@ -383,6 +383,7 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
   const { slug = [] } = resolvedParams;
   const { city: cityQueryParam } = resolvedSearchParams;
   const normalizedSlug = slug.map(normalizeUrlSegment);
+  // console.log(normalizedSlug+"this is beaut")
 
   if (slug.length === 0) notFound();
 
