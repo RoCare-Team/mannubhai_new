@@ -213,28 +213,41 @@ class MetadataService {
       };
     }
   
-    static async generateForCity(slug, cityDoc) {
-      const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-      return {
-        title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-        description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for quick service.`,
-        keywords: cityDoc.meta_keywords || `home services, ${cityDoc.city_name}, professionals, Mannu Bhai`,
-        alternates: { canonical: canonicalUrl },
-        robots: { index: true, follow: true },
-        openGraph: {
-          title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-          description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-          url: canonicalUrl,
-          images: [{ url: cityDoc.image || DEFAULT_IMAGE, width: 1200, height: 630, alt: `Home services in ${cityDoc.city_name}` }],
-        },
-        twitter: {
-          card: "summary_large_image",
-          title: cityDoc.meta_title || `${cityDoc.city_name} Home Services | Mannu Bhai`,
-          description: cityDoc.meta_description || `Find trusted home service professionals in ${cityDoc.city_name}`,
-          images: [cityDoc.image || DEFAULT_IMAGE],
+static async generateForCity(slug, cityDoc) {
+  const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
+  const cityName = cityDoc.city_name; // dynamic city
+
+  return {
+    title:`MannuBhai - Get Specialist Services At Doorstep in ${cityName}`,
+    description:`Get trusted home appliance, beauty care, home care, and handyman services in ${cityName} with MannuBhai’s globally trained and verified professionals at your doorstep.`,
+    keywords: `mannubhai service ${cityName.toLowerCase()}, Professional Services ${cityName.toLowerCase()}, appliance repair service at home in ${cityName}, beauty service at home in ${cityName}, home care service in ${cityName}, handyman services in ${cityName}`,
+    
+    alternates: { canonical: canonicalUrl },
+    robots: { index: true, follow: true },
+    
+    openGraph: {
+      title: cityDoc.meta_title || `MannuBhai - Get Specialist Services At Doorstep in ${cityName}`,
+      description: cityDoc.meta_description || `Get trusted home appliance, beauty care, home care, and handyman services in ${cityName} with MannuBhai’s globally trained and verified professionals at your doorstep.`,
+      url: canonicalUrl,
+      images: [
+        {
+          url: cityDoc.image || DEFAULT_IMAGE,
+          width: 1200,
+          height: 630,
+          alt: `Home services in ${cityName}`
         }
-      };
+      ],
+    },
+    
+    twitter: {
+      card: "summary_large_image",
+      title: cityDoc.meta_title || `MannuBhai - Get Specialist Services At Doorstep in ${cityName}`,
+      description: cityDoc.meta_description || `Get trusted home appliance, beauty care, home care, and handyman services in ${cityName} with MannuBhai’s globally trained and verified professionals at your doorstep.`,
+      images: [cityDoc.image || DEFAULT_IMAGE],
     }
+  };
+}
+
   
     static async generateForCategory(slug, catDoc, pageMasterDoc = null) {
       const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
@@ -264,9 +277,9 @@ class MetadataService {
   
     static async generateForCityCategory(slug, cityDoc, catDoc, pageMasterDoc = null) {
       const canonicalUrl = `${BASE_URL}/${slug.join('/')}`;
-      const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services in ${cityDoc.city_name} | MannuBhai`;
-      const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services in ${cityDoc.city_name}. Call ${CONTACT_NUMBER} for assistance.`;
-      const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, ${cityDoc.city_name}, services, repair, maintenance`;
+      const metaTitle = pageMasterDoc?.meta_title || catDoc.meta_title || `${catDoc.category_name} Services in ${cityDoc.cityName} | MannuBhai`;
+      const metaDescription = pageMasterDoc?.meta_description || catDoc.meta_description || `Professional ${catDoc.category_name} services in ${cityDoc.cityName}. Call ${CONTACT_NUMBER} for assistance.`;
+      const metaKeywords = pageMasterDoc?.meta_keywords || catDoc.meta_keywords || `${catDoc.category_name}, ${cityDoc.cityName}, services, repair, maintenance`;
       const imageUrl = pageMasterDoc?.image || catDoc.image || cityDoc.image || DEFAULT_IMAGE;
   
       let faqSchema = null;
