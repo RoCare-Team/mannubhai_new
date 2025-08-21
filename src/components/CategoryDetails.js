@@ -496,9 +496,9 @@ if (!groups[groupKey]) {
                           >
                             <div className="flex flex-row justify-between gap-4">
                               <div className="flex-1">
-                                <h3 className="text-base md:text-lg font-medium text-gray-800 mb-2">
+                                {/* <h3 className="text-base md:text-lg font-medium text-gray-800 mb-2">
                                   {service.service_name}
-                                </h3>
+                                </h3> */}
                                 <div
                                   className="text-gray-600 text-sm mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-1"
                                   dangerouslySetInnerHTML={{
