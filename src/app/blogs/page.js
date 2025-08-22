@@ -1,8 +1,6 @@
 import BlogImage from '@/components/BlogImage';
 import { getActiveBlogs } from '../lib/fetchBlogs';
 import Link from 'next/link';
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 export default async function BlogList() {
 
   const blogs = await getActiveBlogs();

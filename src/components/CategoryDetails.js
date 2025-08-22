@@ -102,9 +102,13 @@ const CartSkeleton = () => (
 
 // Utility functions
 const normalizeString = (str) => str?.toLowerCase().trim().replace(/\s+/g, '-') || '';
-const extractFirstWords = (str) => {
-  const match = str.replace(/^\d+\s*/, "").trim().match(/^([\w'-]+(?:\s+[\w'-]+)*)/i);
-  return match ? match[0] : "other";
+
+// Function to extract the first word from a service name
+const extractFirstWord = (str) => {
+  if (!str) return "other";
+  // Remove numbers and leading/trailing whitespace, then get the first word
+  const firstWord = str.replace(/^\d+\s*/, "").trim().split(' ')[0];
+  return firstWord ? firstWord : "other";
 };
 
 export default function CategoryDetails({
@@ -139,46 +143,43 @@ export default function CategoryDetails({
 
     category.services.forEach((service) => {
       let cleanedName = service.service_name;
-      let firstWords = extractFirstWords(cleanedName);
+      let firstWord = extractFirstWord(cleanedName);
 
-      // Special case handling
-      if (cleanedName.toLowerCase().startsWith("installation")) {
-        firstWords = "Installation";
-      } else if (cleanedName.toLowerCase().startsWith("un-installation")) {
-        firstWords = "Un-installation";
+      // Special case handling to ensure consistent grouping for common terms
+      // This logic is designed to handle multi-word common phrases like "Foam Jet"
+      let groupKey;
+      let displayName;
+      if (cleanedName.toLowerCase().includes("un-installation")) {
+        groupKey = "un-installation";
+        displayName = "Un-installation";
       } else if (cleanedName.toLowerCase().includes("amc")) {
-        firstWords = "AMC";
-      } else if (cleanedName.toLowerCase().startsWith("gas filling")) {
-        firstWords = "Gas Filling";
-      } else if (cleanedName.toLowerCase().startsWith("foam jet")) {
-        firstWords = "Foam Jet";
+        groupKey = "amc";
+        displayName = "AMC";
+      } else if (cleanedName.toLowerCase().includes("gas filling")) {
+        groupKey = "gas_filling";
+        displayName = "Gas Filling";
+      } else if (cleanedName.toLowerCase().includes("foam jet")) {
+        groupKey = "foam_jet";
+        displayName = "Foam Jet";
+      } else {
+        // Default grouping based on the first word
+        groupKey = normalizeString(firstWord);
+        displayName = firstWord;
       }
 
-      const groupKey = firstWords.toLowerCase().replace(/\s+/g, '_');
       const priority = SERVICE_PRIORITY[groupKey.split('_')[0]] || 99;
 
-
-if (!groups[groupKey]) {
-  const imageUrl = service.image_icon?.startsWith("http")
-  groups[groupKey] = {
-    displayName: firstWords,
-    services: [],
-    priority,
-    image: (
-      <Image
-        src={imageUrl}
-        alt={firstWords}
-        width={64}
-        height={64}
-        loading="lazy"
-      />
-    ),
-    image: service.image_icon?.startsWith("http") 
-            ? service.image_icon 
-            : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`,
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          displayName: displayName,
+          services: [],
+          priority,
+          image: service.image_icon?.startsWith("http") 
+                  ? service.image_icon 
+                  : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`,
           id: `service-group-${groupKey}`
-  };
-}
+        };
+      }
       groups[groupKey].services.push(service);
     });
 
@@ -239,6 +240,7 @@ if (!groups[groupKey]) {
     if (isLoading) return;
     
     setSelectedService(displayName);
+    // Find the group key from the display name to get the correct ref
     const matchingGroup = Object.entries(serviceGroups)
       .find(([_, group]) => group.displayName === displayName);
 
@@ -261,7 +263,7 @@ if (!groups[groupKey]) {
         setPendingCartAction(null);
       }, 300);
     }
-  }, [pendingCartAction]);
+  }, [pendingCartAction, handleCartAction]);
 
   const handleCartAction = useCallback(async ({ serviceId, operation, currentQuantity = 0 }) => {
     const customerId = localStorage.getItem("customer_id");
@@ -496,9 +498,9 @@ if (!groups[groupKey]) {
                           >
                             <div className="flex flex-row justify-between gap-4">
                               <div className="flex-1">
-                                {/* <h3 className="text-base md:text-lg font-medium text-gray-800 mb-2">
+                                <h3 className="text-base md:text-lg font-medium text-gray-800 mb-2">
                                   {service.service_name}
-                                </h3> */}
+                                </h3>
                                 <div
                                   className="text-gray-600 text-sm mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>li]:mb-1"
                                   dangerouslySetInnerHTML={{
