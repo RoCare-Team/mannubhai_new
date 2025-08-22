@@ -440,15 +440,26 @@ export default function CategoryDetails({
                     }`}
                   >
                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2">
-                      <Image
-                        src={group.image || "/placeholder-service.png"}
-                        alt={group.displayName}
-                        width={48}
-                        height={48}
-                        className="object-cover w-12 h-12"
-                        loading="lazy"
-                        onLoad={() => setImageLoading(false)}
-                      />
+                     <Image
+                      src={group.image || "/placeholder-service.png"}
+                      alt={group.displayName || 'Group image'}
+                      width={48}
+                      height={48}
+                      className="object-cover w-12 h-12"
+                      loading="lazy"
+                      quality={75}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQABAAABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli5Uxrxde3zcLF/8/9oADAMBAAIAAwAAABCiaAAD/8QAMhABAAEDAgMFBwUAAAAAAAAAAREAITEQQVEgMGGBkbHB0eHwUHGhstLxEkJicpLh/9oACAEBAAE/EM2+wg2l0CtB3n99c1zt24z8nxtfN2qVKlSpUqVKlSpUqVKlSpUqVKlSrPf9Q="
+                      sizes="48px"
+                      onLoad={() => setImageLoading(false)}
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder-service.png";
+                        setImageLoading(false);
+                      }}
+                      style={{
+                        objectFit: 'cover',
+                      }}
+                    />
                     </div>
                     <span className="font-bold text-[8px] sm:text-[10px] text-center">
                       {group.displayName}
@@ -465,14 +476,21 @@ export default function CategoryDetails({
               {/* Banner with fixed dimensions */}
               <div className="hidden sm:block relative rounded-xl overflow-hidden w-full h-[300px] mb-8">
                 <Image
-                  src={category.banner?.trim() || DEFAULT_BANNER}
-                  alt={`${category.category_name} banner`}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 52vw"
-                  onError={(e) => { e.currentTarget.src = DEFAULT_BANNER }}
-                />
+                src={category.banner?.trim() || DEFAULT_BANNER}
+                alt={`${category.category_name} banner`}
+                fill
+                className="object-cover"
+               
+                sizes="(max-width: 768px) 100vw, 52vw"
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli5Uxrxde3zcLF/8/9oADAMBAAIAAwAAABCiaAAD/8QAMhABAAEDAgMFBwUAAAAAAAAAAREAITEQQVEgMGGBkbHB0eHwUHGhstLxEkJicpLh/9oACAEBAAE/EM2+wg2l0CtB3n99c1zt24z8nxtfN2qVKlSpUqVKlSpUqVKlSpUqVKlSrPf9Q="
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = DEFAULT_BANNER }}
+                style={{
+                  objectFit: 'cover',
+                }}
+              />
               </div>
 
               {orderedServiceNames.map((serviceName) => {
@@ -518,16 +536,25 @@ export default function CategoryDetails({
 
                               <div className="w-28 flex-shrink-0 flex flex-col items-center justify-start space-y-2">
                                 <div className="relative w-24 h-24 rounded-md overflow-hidden">
-                                  <Image
-                                    src={service.image_icon?.startsWith("http") 
-                                      ? service.image_icon 
-                                      : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`}
-                                    alt={service.service_name}
-                                    fill
-                                    className="object-cover"
-                                    loading="lazy"
-                                    sizes="96px"
-                                  />
+                                 <Image
+                                src={service.image_icon?.startsWith("http")
+                                  ? service.image_icon
+                                  : `https://www.waterpurifierservicecenter.in/inet/img/service_img/${service.image_icon}`}
+                                alt={service.service_name || 'Service icon'}
+                                fill
+                                className="object-cover"
+                                loading="lazy"
+                                sizes="96px"
+                                quality={80}
+                                placeholder="blur"
+                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli5Uxrxde3zcLF/8/9oADAMBAAIAAwAAABCiaAAD/8QAMhABAAEDAgMFBwUAAAAAAAAAAREAITEQQVEgMGGBkbHB0eHwUHGhstLxEkJicpLh/9oACAEBAAE/EM2+wg2l0CtB3n99c1zt24z8nxtfN2qVKlSpUqVKlSpUqVKlSpUqVKlSrPf9Q="
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/fallback-service-icon.png'; // or a default service icon
+                                }}
+                                style={{
+                                  objectFit: 'cover',
+                                }}
+                              />
                                 </div>
 
                                 <button

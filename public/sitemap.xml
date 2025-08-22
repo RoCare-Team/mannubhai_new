@@ -126,4 +126,11 @@
 <sitemap>
 <loc>https://www.mannubhai.com/sitemap/sofasitemap.xml</loc>
 </sitemap> 
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/homecleaningsitemap.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/bathsitemap.xml</loc>
+</sitemap>
+
 </sitemapindex>
