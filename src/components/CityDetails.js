@@ -303,15 +303,21 @@ const ModernComingSoonSection = memo(({ title, cityName, id }) => {
                       <>
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <Image
-                          src={imagePath}
-                          alt={`${serviceName} service`}
-                          fill
-                          className="relative z-10 object-contain p-0.5 sm:p-1 group-hover:scale-110 transition-transform duration-300 filter group-hover:drop-shadow-lg"
-                          sizes="(max-width: 640px) 32px, (max-width: 1024px) 48px, 64px"
-                          loading={index < 8 ? "eager" : "lazy"}
-                          quality={70}
-                          onError={() => handleImageError(serviceName)}
-                        />
+  src={imagePath}
+  alt={`${serviceName} service` || 'Service icon'}
+  fill
+  className="relative z-10 object-contain p-0.5 sm:p-1 group-hover:scale-110 transition-transform duration-300 filter group-hover:drop-shadow-lg"
+  sizes="(max-width: 640px) 32px, (max-width: 1024px) 48px, 64px"
+  loading={index < 8 ? "eager" : "lazy"}
+  quality={70}
+  placeholder="blur"
+  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli5Uxrxde3zcLF/8/9oADAMBAAIAAwAAABCiaAAD/8QAMhABAAEDAgMFBwUAAAAAAAAAAREAITEQQVEgMGGBkbHB0eHwUHGhstLxEkJicpLh/9oACAEBAAE/EM2+wg2l0CtB3n99c1zt24z8nxtfN2qVKlSpUqVKlSpUqVKlSpUqVKlSrPf9Q="
+  priority={index < 4}
+  onError={() => handleImageError(serviceName)}
+  style={{
+    objectFit: 'contain',
+  }}
+/>
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl border border-gray-200">
