@@ -5,6 +5,7 @@ import Head from "next/head";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
 
+// Dynamically imported components
 const LoginPopup = dynamic(() => import('./login'), {
   loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="w-8 h-8 border-t-2 border-blue-500 rounded-full animate-spin"></div></div>
 });
@@ -134,6 +135,85 @@ export default function CategoryDetails({
   const contentRef = useRef(null);
   const groupRefs = useRef({});
 
+  // Memoized cart functions
+  const isServiceInCart = useCallback((serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return false;
+      
+      const parsedData = JSON.parse(cartData);
+      return Array.isArray(parsedData) && 
+        parsedData.some(item => item?.cart_dtls?.some(dtl => dtl.service_id === serviceId));
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const getCartQuantity = useCallback((serviceId) => {
+    try {
+      const cartData = localStorage.getItem("checkoutState");
+      if (!cartData) return 0;
+      
+      const cartItems = JSON.parse(cartData);
+      return cartItems.reduce((total, item) => 
+        total + (item?.cart_dtls?.find(dtl => dtl.service_id === serviceId)?.quantity || 0), 0);
+    } catch {
+      return 0;
+    }
+  }, []);
+
+  // Cart action handler - defined early to avoid reference issues
+  const handleCartAction = useCallback(async ({ serviceId, operation, currentQuantity = 0 }) => {
+    const customerId = localStorage.getItem("customer_id");
+    if (!customerId) {
+      setPendingCartAction({ serviceId, operation, currentQuantity });
+      setShowLoginPopup(true);
+      return;
+    }
+
+    try {
+      const payload = {
+        service_id: serviceId,
+        type: operation === "remove" ? "delete" : operation,
+        cid: customerId,
+        quantity: operation === "add" ? currentQuantity + 1 
+               : operation === "decrement" ? currentQuantity - 1 : 0,
+        source: 'mannubhai'
+      };
+
+      const res = await fetch(
+        "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.AllCartDetails) {
+          localStorage.setItem("checkoutState", JSON.stringify(data.AllCartDetails));
+          localStorage.setItem("cart_total_price", data.total_main || 0);
+          setCartLoaded(prev => !prev);
+        }
+      }
+    } catch (error) {
+      console.error("Cart update failed:", error);
+    }
+  }, []);
+
+  // Login success handler
+  const handleLoginSuccess = useCallback(() => {
+    setShowLoginPopup(false);
+    if (pendingCartAction) {
+      setTimeout(() => {
+        handleCartAction(pendingCartAction);
+        setPendingCartAction(null);
+      }, 300);
+    }
+  }, [pendingCartAction, handleCartAction]);
+
   // Memoized data transformations with loading fallback
   const serviceGroups = useMemo(() => {
     if (isLoading || !category?.services) return {};
@@ -254,82 +334,6 @@ export default function CategoryDetails({
       });
     }
   }, [serviceGroups, isLoading]);
-
-  const handleLoginSuccess = useCallback(() => {
-    setShowLoginPopup(false);
-    if (pendingCartAction) {
-      setTimeout(() => {
-        handleCartAction(pendingCartAction);
-        setPendingCartAction(null);
-      }, 300);
-    }
-  }, [pendingCartAction, handleCartAction]);
-
-  const handleCartAction = useCallback(async ({ serviceId, operation, currentQuantity = 0 }) => {
-    const customerId = localStorage.getItem("customer_id");
-    if (!customerId) {
-      setPendingCartAction({ serviceId, operation, currentQuantity });
-      setShowLoginPopup(true);
-      return;
-    }
-
-    try {
-      const payload = {
-        service_id: serviceId,
-        type: operation === "remove" ? "delete" : operation,
-        cid: customerId,
-        quantity: operation === "add" ? currentQuantity + 1 
-               : operation === "decrement" ? currentQuantity - 1 : 0,
-        source: 'mannubhai'
-      };
-
-      const res = await fetch(
-        "https://waterpurifierservicecenter.in/customer/ro_customer/add_to_cart.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.AllCartDetails) {
-          localStorage.setItem("checkoutState", JSON.stringify(data.AllCartDetails));
-          localStorage.setItem("cart_total_price", data.total_main || 0);
-          setCartLoaded(prev => !prev);
-        }
-      }
-    } catch (error) {
-      console.error("Cart update failed:", error);
-    }
-  }, []);
-
-  const isServiceInCart = useCallback((serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return false;
-      
-      const parsedData = JSON.parse(cartData);
-      return Array.isArray(parsedData) && 
-        parsedData.some(item => item?.cart_dtls?.some(dtl => dtl.service_id === serviceId));
-    } catch {
-      return false;
-    }
-  }, []);
-
-  const getCartQuantity = useCallback((serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return 0;
-      
-      const cartItems = JSON.parse(cartData);
-      return cartItems.reduce((total, item) => 
-        total + (item?.cart_dtls?.find(dtl => dtl.service_id === serviceId)?.quantity || 0), 0);
-    } catch {
-      return 0;
-    }
-  }, []);
 
   // Loading state
   if (isLoading || !servicesReady) {
