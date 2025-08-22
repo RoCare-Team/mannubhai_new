@@ -1,22 +1,13 @@
-'use client';
-import { useState, useRef, useEffect, useMemo, useCallback, Suspense } from "react";
+"use client";
+import { useState, useRef, useEffect, useMemo, useCallback, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
-import dynamic from 'next/dynamic';
 
-// Dynamically imported components
-const LoginPopup = dynamic(() => import('./login'), {
-  loading: () => <div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="w-8 h-8 border-t-2 border-blue-500 rounded-full animate-spin"></div></div>
-});
-
-const Cart = dynamic(() => import('./cart/CartLogic'), {
-  loading: () => <CartSkeleton />
-});
-
-const AwardCertifications = dynamic(() => import('./AwardCertifications'), {
-  loading: () => <div className="h-32 bg-gray-100 rounded-lg animate-pulse"></div>
-});
+// Lazy load all components with proper loading states
+const LoginPopup = lazy(() => import('./login'));
+const Cart = lazy(() => import('./cart/CartLogic'));
+const AwardCertifications = lazy(() => import('./AwardCertifications'));
 
 // Icons - only import what we need
 import { 
@@ -112,6 +103,46 @@ const extractFirstWord = (str) => {
   return firstWord ? firstWord : "other";
 };
 
+// Debounce function to limit how often a function can fire
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// Memoized cart functions outside component to prevent re-renders
+const isServiceInCart = (serviceId) => {
+  try {
+    const cartData = localStorage.getItem("checkoutState");
+    if (!cartData) return false;
+    
+    const parsedData = JSON.parse(cartData);
+    return Array.isArray(parsedData) && 
+      parsedData.some(item => item?.cart_dtls?.some(dtl => dtl.service_id === serviceId));
+  } catch {
+    return false;
+  }
+};
+
+const getCartQuantity = (serviceId) => {
+  try {
+    const cartData = localStorage.getItem("checkoutState");
+    if (!cartData) return 0;
+    
+    const cartItems = JSON.parse(cartData);
+    return cartItems.reduce((total, item) => 
+      total + (item?.cart_dtls?.find(dtl => dtl.service_id === serviceId)?.quantity || 0), 0);
+  } catch {
+    return 0;
+  }
+};
+
 export default function CategoryDetails({
   meta_title,
   meta_description,
@@ -134,33 +165,6 @@ export default function CategoryDetails({
   // Refs
   const contentRef = useRef(null);
   const groupRefs = useRef({});
-
-  // Memoized cart functions
-  const isServiceInCart = useCallback((serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return false;
-      
-      const parsedData = JSON.parse(cartData);
-      return Array.isArray(parsedData) && 
-        parsedData.some(item => item?.cart_dtls?.some(dtl => dtl.service_id === serviceId));
-    } catch {
-      return false;
-    }
-  }, []);
-
-  const getCartQuantity = useCallback((serviceId) => {
-    try {
-      const cartData = localStorage.getItem("checkoutState");
-      if (!cartData) return 0;
-      
-      const cartItems = JSON.parse(cartData);
-      return cartItems.reduce((total, item) => 
-        total + (item?.cart_dtls?.find(dtl => dtl.service_id === serviceId)?.quantity || 0), 0);
-    } catch {
-      return 0;
-    }
-  }, []);
 
   // Cart action handler - defined early to avoid reference issues
   const handleCartAction = useCallback(async ({ serviceId, operation, currentQuantity = 0 }) => {
@@ -226,7 +230,6 @@ export default function CategoryDetails({
       let firstWord = extractFirstWord(cleanedName);
 
       // Special case handling to ensure consistent grouping for common terms
-      // This logic is designed to handle multi-word common phrases like "Foam Jet"
       let groupKey;
       let displayName;
       if (cleanedName.toLowerCase().includes("un-installation")) {
@@ -316,7 +319,7 @@ export default function CategoryDetails({
   }, [category?.category_content, isExpanded, isLoading]);
 
   // Handlers with optimization
-  const scrollToServiceGroup = useCallback((displayName) => {
+  const scrollToServiceGroup = useCallback(debounce((displayName) => {
     if (isLoading) return;
     
     setSelectedService(displayName);
@@ -333,7 +336,7 @@ export default function CategoryDetails({
         }
       });
     }
-  }, [serviceGroups, isLoading]);
+  }, 100), [serviceGroups, isLoading]);
 
   // Loading state
   if (isLoading || !servicesReady) {
