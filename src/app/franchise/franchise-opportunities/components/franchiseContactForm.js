@@ -402,27 +402,6 @@ const resetForm = () => {
     <section className="py-8 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats Banner */}
-        <div className="bg-indigo-700 text-white rounded-lg p-6 mb-8 md:mb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">50+</p>
-              <p className="text-sm md:text-base">Service Outlets</p>
-            </div>
-            <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">10,000</p>
-              <p className="text-sm md:text-base">Verified Experts</p>
-            </div>
-            <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">50+</p>
-              <p className="text-sm md:text-base">Live Services</p>
-            </div>
-            <div className="p-4">
-              <p className="text-2xl md:text-3xl font-bold">30 Lac+</p>
-              <p className="text-sm md:text-base">Customers Served</p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Contact Info */}
           <div className="order-2 lg:order-1">
@@ -768,6 +747,7 @@ const resetForm = () => {
             )}
           </div>
         </div>
+      
       </div>
     </section>
   );

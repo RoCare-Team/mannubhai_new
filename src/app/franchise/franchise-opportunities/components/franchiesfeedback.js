@@ -216,7 +216,6 @@ export default function FranchiseFeedback() {
             />
           ))}
         </div>
-
         {/* Call to Action */}
         <div className="text-center mt-8 sm:mt-12">
           <p className="text-sm sm:text-base text-gray-600 mb-6 px-4">

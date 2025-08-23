@@ -4,7 +4,7 @@ import AboutMannuBhai from '@/components/about';
 import ClientReviews from './ClientReviews';
 import BrandsWeRepair from '@/components/BrandsWeRepair';
 import Services from './Services';
-import FooterLinks from './FooterLinks';
+import WaterPurifierLocations from './WaterPurifierLocations';
 
 export default function SecondaryGroup() {
   return (
@@ -15,7 +15,7 @@ export default function SecondaryGroup() {
       <ClientReviews />
       <BrandsWeRepair />
       <Services />
-      <FooterLinks />
+     <WaterPurifierLocations />
     </>
   );
 }
