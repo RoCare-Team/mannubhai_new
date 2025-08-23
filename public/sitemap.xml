@@ -133,4 +133,13 @@
 <loc>https://www.mannubhai.com/sitemap/bathsitemap.xml</loc>
 </sitemap>
 
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/kitchensitemap.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/pestsitemap.xml</loc>
+</sitemap>
+<sitemap>
+<loc>https://www.mannubhai.com/sitemap/tanksitemap.xml</loc>
+</sitemap>
 </sitemapindex>

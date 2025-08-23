@@ -75,7 +75,7 @@ const WaterPurifierLocations = () => {
   const selectedLocation = locations.find(loc => loc.name === selectedCity);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 mb-0">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -83,7 +83,6 @@ const WaterPurifierLocations = () => {
             Quick Links
           </h1>
         </div>
-
         {/* Quick Links Section */}
         <div className="mb-8">
           <div className="bg-white rounded-lg border border-gray-200">
@@ -130,7 +129,7 @@ const WaterPurifierLocations = () => {
         {/* Selected City Display */}
         {selectedLocation && (
           <div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -158,9 +157,6 @@ const WaterPurifierLocations = () => {
             </div>
           </div>
         )}
-
-        {/* Default Message */}
-       
       </div>
     </div>
   );
