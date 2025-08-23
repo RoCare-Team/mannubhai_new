@@ -56,4 +56,98 @@ export const homePageMetadata = {
       "availableLanguage": ["English", "Hindi"]
     }
   },
+
+  // Additional Schema Scripts for Home Page
+  schemas: {
+    breadcrumb: {
+      "@context": "https://schema.org/", 
+      "@type": "BreadcrumbList", 
+      "itemListElement": [{
+        "@type": "ListItem", 
+        "position": 1, 
+        "name": "home",
+        "item": "https://www.mannubhai.com/"  
+      },{
+        "@type": "ListItem", 
+        "position": 2, 
+        "name": "City",
+        "item": "https://www.mannubhai.com/delhi/water-purifier-service"  
+      },{
+        "@type": "ListItem", 
+        "position": 3, 
+        "name": "Services",
+        "item": "https://www.mannubhai.com/water-purifier-service"  
+      },{
+        "@type": "ListItem", 
+        "position": 4, 
+        "name": "City+Service",
+        "item": "https://www.mannubhai.com/delhi/water-purifier-service"  
+      }]
+    },
+
+    organization: {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Mannu Bhai Service Expert",
+      "alternateName": "Mannu Bhai",
+      "url": "https://www.mannubhai.com/",
+      "logo": "https://www.mannubhai.com/_next/image?url=%2Flogo.png&w=256&q=75",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "07065012902",
+        "contactType": "customer service",
+        "contactOption": "TollFree",
+        "areaServed": "IN",
+        "availableLanguage": ["en","Hindi"]
+      },
+      "sameAs": [
+        "https://www.facebook.com/mannubhaiserviceexperts",
+        "https://www.instagram.com/mannubhaiserviceexperts",
+        "https://www.youtube.com/@mannubhaiserviceexpert",
+        "https://in.linkedin.com/company/mannubhaiserviceexpert",
+        "https://www.mannubhai.com/"
+      ]
+    },
+
+    localBusiness: {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Mannu Bhai Service Expert",
+      "image": "https://www.mannubhai.com/_next/image?url=%2Flogo.png&w=256&q=75",
+      "@id": "https://www.mannubhai.com/#localbusiness",
+      "url": "https://www.mannubhai.com/",
+      "telephone": "07065012902",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Unit No 831 8th Floor, Head Office, JMD MEGAPOLIS, Sector 48, Gurugram, Haryana 122018",
+        "addressLocality": "Gurgaon",
+        "postalCode": "122018",
+        "addressCountry": "IN"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "00:00",
+        "closes": "23:59"
+      }
+    }
+  }
+};
+
+// Helper function to generate JSON-LD script tags
+export const generateSchemaScripts = () => {
+  const schemas = homePageMetadata.schemas;
+  
+  return Object.keys(schemas).map(key => ({
+    type: 'application/ld+json',
+    children: JSON.stringify(schemas[key], null, 2)
+  }));
 };

@@ -4,11 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 
-// Lazy load all components with proper loading states
 const LoginPopup = lazy(() => import('./login'));
 const Cart = lazy(() => import('./cart/CartLogic'));
 const AwardCertifications = lazy(() => import('./AwardCertifications'));
-
 // Icons - only import what we need
 import { 
   FiShoppingCart, FiX, FiCheck, FiClock, 
@@ -22,7 +20,6 @@ const SERVICE_PRIORITY = {
   service: 1, repair: 2, install: 3, 
   uninstallation: 4, amc: 5, foamjet: 6, gasfilling: 7
 };
-
 // Skeleton Components
 const ServiceCardSkeleton = () => (
   <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 animate-pulse">
@@ -469,7 +466,6 @@ export default function CategoryDetails({
               </div>
             </div>
           </aside>
-
           {/* Main Content */}
           <main className="w-full flex flex-col lg:flex-row gap-8">
             <div className="w-full md:w-[52%]">
