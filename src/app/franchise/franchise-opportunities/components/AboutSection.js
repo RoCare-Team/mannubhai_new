@@ -32,7 +32,7 @@ const AboutSection = memo(() => {
 
   const stats = useMemo(() => [
     { value: "2.5M+", label: "Orders Completed", color: "from-green-400 to-emerald-400" },
-    { value: "30M+", label: "Happy Customers", color: "from-blue-400 to-cyan-400" },
+    { value: "3M+", label: "Happy Customers", color: "from-blue-400 to-cyan-400" },
     { value: "3000+", label: "Verified Partners", color: "from-purple-400 to-pink-400" },
     { value: "PAN India", label: "Service Coverage", color: "from-yellow-400 to-orange-400" },
   ], []);

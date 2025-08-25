@@ -49,7 +49,7 @@ export default function FranchiseeDetails() {
             <div className="flex flex-col items-center text-center">
               <FaUserTie className="text-5xl text-gray-700 mb-2" />
               <p className="text-lg font-semibold text-gray-800">Total Investment</p>
-              <p className="text-pink-600 text-lg">15 Lacs</p>
+              <p className="text-pink-600 text-lg">10  to 15 Lacs</p>
             </div>
           </div>
         </div>

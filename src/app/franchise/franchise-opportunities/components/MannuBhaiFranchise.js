@@ -38,7 +38,7 @@ const MannuBhaiFranchise = () => {
   ];
 
   const highlights = [
-    { label: "Investment", value: "₹1–5 Lakhs", color: "text-green-600", icon: DollarSign },
+    { label: "Investment", value: "₹10–15 Lakhs", color: "text-green-600", icon: DollarSign },
     { label: "Break-Even", value: "3–8 Months", color: "text-blue-600", icon: Calendar },
     { label: "Monthly Profit", value: "₹1–2 Lakhs", color: "text-purple-600", icon: TrendingUp },
     { label: "Annual ROI", value: "90–95%", color: "text-orange-600", icon: BarChart3 }
@@ -147,7 +147,7 @@ const MannuBhaiFranchise = () => {
           <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-2xl text-white text-center">
               <Users className="w-8 h-8 mb-4 mx-auto" />
-              <div className="text-3xl font-bold">30M+</div>
+              <div className="text-3xl font-bold">3M+</div>
               <div className="text-blue-100">Happy Customers</div>
             </div>
             <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-2xl text-white text-center">
@@ -317,7 +317,7 @@ const MannuBhaiFranchise = () => {
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900 mb-4">Then MannuBhai is your solution!</p>
-                <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl">
+                <button  onClick={() => document.getElementById('franchise-form')?.scrollIntoView({ behavior: 'smooth' })} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl">
                   Get Started Today
                 </button>
               </div>
