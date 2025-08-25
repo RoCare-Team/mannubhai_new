@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import BlogImage from '@/components/BlogImage';
 import { getActiveBlogs, getCategories } from '../lib/fetchBlogs';
 import Link from 'next/link';
-import { Search, Filter, Calendar, User, ChevronRight, Home } from 'lucide-react';
+import { Search, Filter, Calendar, User, ChevronRight, Home, X } from 'lucide-react';
 
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
@@ -12,6 +13,8 @@ export default function BlogList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     async function fetchData() {
@@ -23,10 +26,17 @@ export default function BlogList() {
         setBlogs(blogData || []);
         setCategories(categoryData || []);
         
+        // Set category from URL parameter
+        const categoryFromUrl = searchParams.get('category');
+        if (categoryFromUrl) {
+          setSelectedCategory(decodeURIComponent(categoryFromUrl));
+        }
+        
         // Debug logs
         console.log('Blogs loaded:', blogData?.length || 0);
         console.log('Categories loaded:', categoryData);
         console.log('Sample blog data:', blogData?.[0]);
+        console.log('URL Category:', categoryFromUrl);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -34,7 +44,30 @@ export default function BlogList() {
       }
     }
     fetchData();
-  }, []);
+  }, [searchParams]);
+
+  // Calculate category counts
+  const categoriesWithCount = useMemo(() => {
+    if (!blogs || blogs.length === 0) {
+      return categories.map(category => ({
+        ...category,
+        count: 0
+      }));
+    }
+
+    return categories.map(category => {
+      const count = blogs.filter(blog => 
+        blog.blog_cat_id === category.name || 
+        blog.category === category.name ||
+        blog.category_name === category.name
+      ).length;
+      
+      return {
+        ...category,
+        count: count
+      };
+    });
+  }, [categories, blogs]);
 
   const filteredAndSortedBlogs = useMemo(() => {
     console.log('Filtering blogs with category:', selectedCategory);
@@ -44,8 +77,11 @@ export default function BlogList() {
                            blog.blog_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            blog.blog_title?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // FIXED: Use blog_cat_id instead of category
-      const matchesCategory = selectedCategory === 'all' || blog.blog_cat_id === selectedCategory;
+      // Check if blog matches selected category
+      const matchesCategory = selectedCategory === 'all' || 
+                             blog.blog_cat_id === selectedCategory ||
+                             blog.category === selectedCategory ||
+                             blog.category_name === selectedCategory;
       
       return matchesSearch && matchesCategory;
     });
@@ -68,6 +104,23 @@ export default function BlogList() {
 
     return filtered;
   }, [blogs, searchTerm, selectedCategory, sortBy]);
+
+  const handleCategoryChange = (categoryName) => {
+    setSelectedCategory(categoryName);
+    
+    // Update URL without page reload
+    const url = new URL(window.location);
+    if (categoryName === 'all') {
+      url.searchParams.delete('category');
+    } else {
+      url.searchParams.set('category', categoryName);
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  const clearCategoryFilter = () => {
+    handleCategoryChange('all');
+  };
 
   if (loading) {
     return (
@@ -108,6 +161,12 @@ export default function BlogList() {
             </Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-gray-900 font-medium">Blogs</span>
+            {selectedCategory !== 'all' && (
+              <>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-blue-600 font-medium">{selectedCategory}</span>
+              </>
+            )}
           </nav>
         </div>
       </div>
@@ -115,9 +174,14 @@ export default function BlogList() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Blog</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            {selectedCategory !== 'all' ? `${selectedCategory} Blogs` : 'Our Blog'}
+          </h1>
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-            Discover insights, stories, and knowledge from our latest posts
+            {selectedCategory !== 'all' 
+              ? `Discover insights and stories about ${selectedCategory}` 
+              : 'Discover insights, stories, and knowledge from our latest posts'
+            }
           </p>
         </div>
       </div>
@@ -140,21 +204,18 @@ export default function BlogList() {
 
             {/* Filters */}
             <div className="flex gap-4 items-center">
-              {/* Category Filter - FIXED */}
+              {/* Category Filter */}
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-gray-400" />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => {
-                    console.log('Category selected:', e.target.value);
-                    setSelectedCategory(e.target.value);
-                  }}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
+                  <option value="all">All Categories ({blogs.length})</option>
+                  {categoriesWithCount.map(category => (
                     <option key={category.id} value={category.name}>
-                      {category.name}
+                      {category.name} ({category.count})
                     </option>
                   ))}
                 </select>
@@ -172,6 +233,35 @@ export default function BlogList() {
               </select>
             </div>
           </div>
+
+          {/* Active Filter Tags */}
+          {(selectedCategory !== 'all' || searchTerm) && (
+            <div className="mt-4 flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-gray-600">Active filters:</span>
+              {selectedCategory !== 'all' && (
+                <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  <span>Category: {selectedCategory}</span>
+                  <button
+                    onClick={clearCategoryFilter}
+                    className="ml-2 hover:text-blue-900"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              {searchTerm && (
+                <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  <span>Search: "{searchTerm}"</span>
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="ml-2 hover:text-green-900"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Results Count */}
           <div className="mt-4 text-sm text-gray-600">
@@ -199,8 +289,8 @@ export default function BlogList() {
             </p>
             {selectedCategory !== 'all' && (
               <button
-                onClick={() => setSelectedCategory('all')}
-                className="mt-4 text-blue-600 hover:text-blue-700 underline"
+                onClick={clearCategoryFilter}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Show all categories
               </button>
@@ -226,7 +316,7 @@ export default function BlogList() {
                   </div>
 
                   <div className="p-6">
-                    {/* Category Badge - FIXED */}
+                    {/* Category Badge */}
                     {blog.blog_cat_id && (
                       <div className="mb-3">
                         <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
