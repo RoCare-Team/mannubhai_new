@@ -3,14 +3,12 @@ import React from "react";
 import Link from "next/link";
 import { FaHeadphones, FaShoppingCart, FaBookOpen } from "react-icons/fa";
 import { LuChevronRight } from "react-icons/lu";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 const topics = [
   {
     icon: <FaHeadphones className="text-white" />,
     title: "Customer Care",
-    description: "24/7 Customer Service: +91 9311587744",
+    description: "24/7 Customer Service: +91 7065012902",
     link: "/help/Support",
     color: "bg-purple-500",
   },
