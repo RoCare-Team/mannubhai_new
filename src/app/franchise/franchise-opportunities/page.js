@@ -84,7 +84,7 @@ const HeroSection = memo(() => (
                         <div className="group bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
                             <div className="text-center">
                                 <div className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-2">
-                                    30M+
+                                    3M+
                                 </div>
                                 <div className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
                                     Satisfied Customers
@@ -160,7 +160,7 @@ const FAQSection = memo(({ activeFaq, toggleFaq }) => {
     const faqs = useMemo(() => [
         {
             question: "What makes MannuBhai one of the best low investment franchise opportunities in India with high returns?",
-            answer: "Because you can start with just ₹1–5 lakhs, earn ₹1–2 lakhs monthly, and enjoy up to 95% ROI."
+            answer: "Because you can start with just ₹10–15 lakhs, earn ₹1–2 lakhs monthly, and enjoy up to 95% ROI."
         },
         {
             question: "How fast can I break even?",
