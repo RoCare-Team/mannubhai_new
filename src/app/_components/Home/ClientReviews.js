@@ -34,9 +34,9 @@ const REVIEWS = [
 ];
 
 const STATS = [
-  { value: "50+", label: "Live Services", icon: Zap },
+  { value: "25+", label: "Live Services", icon: Zap },
   { value: "30 Lac+", label: "Customers Served", icon: Users },
-  { value: "10,000", label: "Verified Experts", icon: Award },
+  { value: "3000", label: "Verified Experts", icon: Award },
   { value: "50+", label: "Service Outlets", icon: MapPin },
   { value: "4.5", label: "Average Rating", icon: Star }
 ];

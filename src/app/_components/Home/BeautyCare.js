@@ -9,7 +9,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import BeautyBrand from "./BeautyBrand";
 import Image from 'next/image'; // ✅ Correct!
-
+import Link from 'next/link'; // Add this line
 // Constants
 const DEFAULT_IMAGE = "default-images/deafult.jpeg";
 const IMAGE_MAP = {
@@ -357,6 +357,8 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       {!hideBrightBanner && (
         <section className="sm:mt-16 mb-0" aria-label="Homecare services promotion">
   <div className="px-3 sm:px-6 md:px-0 max-w-7xl mx-auto">
+
+    <Link href="/homecare" className="block">
     <div
       className="
         group relative overflow-hidden
@@ -366,6 +368,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
         hover:shadow-3xl hover:shadow-black/10
         transition-all duration-700
         hover:scale-[1.01]
+        cursor-pointer
       "
     >
       {/* ✅ Responsive image using aspect ratio + fill */}
@@ -386,6 +389,7 @@ export default function BeautyCare({ hideBrightBanner = false, onServiceClick, c
       {/* ✅ Overlay effect (unchanged) */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
     </div>
+    </Link>
   </div>
 </section>
 

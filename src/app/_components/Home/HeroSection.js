@@ -13,7 +13,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "./swiper-custom.css";
-
+import Link from 'next/link'; // Add this line
 // Dynamic imports with loading states
 const ServiceBannerSlider = dynamic(() => import("./ServiceBannerSlider"), {
   ssr: false,
@@ -423,12 +423,15 @@ const HeroSection = () => {
                 )}
               </div>
             </div>
-
+           
             <div className="w-full lg:flex-1 lg:max-w-2xl animate-slide-right">
+            
               {loading ? (
                 <HeroImageSkeleton />
               ) : (
-                <div className="relative w-full aspect-[4/5] max-h-[600px] bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-105">
+
+                 <Link href="/appliance-care" className="block">
+                  <div className="relative w-full aspect-[4/5] max-h-[600px] bg-gray-100 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-105 cursor-pointer">
                   <Image
                     src={MAIN_BANNER}
                     alt="Professional home services team working"
@@ -440,9 +443,12 @@ const HeroSection = () => {
                     placeholder="blur"
                     blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rw==" 
                   />
-                </div>
+                </div> 
+               </Link>
               )}
+           
             </div>
+           
           </div>
         </div>
       </div>
