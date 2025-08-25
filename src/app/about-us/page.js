@@ -97,7 +97,7 @@ const AboutUsContent = () => {
                 </div>
                 <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-200 shadow-lg">
                   <span className="text-blue-500 text-2xl">🏆</span>
-                  <span className="text-slate-700 font-medium">30 lach Happy Customers</span>
+                  <span className="text-slate-700 font-medium">30 lack Happy Customers</span>
                 </div>
               </div>
             </div>
