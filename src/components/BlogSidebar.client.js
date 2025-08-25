@@ -4,8 +4,41 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { X, Tag } from 'lucide-react';
 
-export default function BlogSidebar({ categories, currentCategory }) {
+export default function BlogSidebar({ categories, currentCategory, posts = [] }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Calculate category counts from posts if not provided in categories
+  const getCategoryCount = (categoryName) => {
+    // First check if count is already provided in category object
+    const category = categories.find(cat => cat.name === categoryName);
+    if (category && category.count !== undefined) {
+      return category.count;
+    }
+    
+    // If no count provided, calculate from posts array
+    if (posts && posts.length > 0) {
+      return posts.filter(post => 
+        post.category === categoryName || 
+        post.categories?.includes(categoryName) ||
+        (Array.isArray(post.tags) && post.tags.includes(categoryName))
+      ).length;
+    }
+    
+    return 0;
+  };
+
+  // Calculate total posts count
+  const getTotalCount = () => {
+    if (posts && posts.length > 0) {
+      return posts.length;
+    }
+    
+    // Sum up all category counts if posts not available
+    return categories.reduce((total, cat) => {
+      const count = getCategoryCount(cat.name);
+      return total + count;
+    }, 0);
+  };
 
   return (
     <>
@@ -56,43 +89,50 @@ export default function BlogSidebar({ categories, currentCategory }) {
               >
                 <span>All Categories</span>
                 <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                  {categories.reduce((total, cat) => total + (cat.count || 0), 0)}
+                  {getTotalCount()}
                 </span>
               </Link>
               
               {/* Individual categories */}
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/blogs?category=${category.name}`}
-                  className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                    currentCategory === category.name
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span>{category.name}</span>
-                  <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                    {category.count || 0}
-                  </span>
-                </Link>
-              ))}
+              {categories.map((category) => {
+                const count = getCategoryCount(category.name);
+                return (
+                  <Link
+                    key={category.id || category.name}
+                    href={`/blogs?category=${category.name}`}
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      currentCategory === category.name
+                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>{category.name}</span>
+                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+                      {count}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
             
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {categories.slice(0, 10).map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/blogs?category=${category.name}`}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {category.name}
-                  </Link>
-                ))}
+                {categories
+                  .filter(category => getCategoryCount(category.name) > 0)
+                  .sort((a, b) => getCategoryCount(b.name) - getCategoryCount(a.name))
+                  .slice(0, 10)
+                  .map((category) => (
+                    <Link
+                      key={category.id || category.name}
+                      href={`/blogs?category=${category.name}`}
+                      className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
               </div>
             </div>
             
