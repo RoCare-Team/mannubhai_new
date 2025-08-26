@@ -1,12 +1,13 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import BlogImage from '@/components/BlogImage';
 import { getActiveBlogs, getCategories } from '../lib/fetchBlogs';
 import Link from 'next/link';
 import { Search, Filter, Calendar, User, ChevronRight, Home, X } from 'lucide-react';
 
-export default function BlogList() {
+// Create a separate component for the search params logic
+function BlogListContent() {
   const [blogs, setBlogs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -365,5 +366,26 @@ export default function BlogList() {
         )}
       </div>
     </div>
+  );
+}
+
+// Loading component for Suspense fallback
+function BlogListLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading blogs...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function BlogList() {
+  return (
+    <Suspense fallback={<BlogListLoading />}>
+      <BlogListContent />
+    </Suspense>
   );
 }
