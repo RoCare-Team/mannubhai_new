@@ -1,8 +1,14 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const AboutSection = memo(() => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Fix: Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const features = useMemo(() => [
     {
       icon: "/franchies/time.webp",
@@ -31,7 +37,7 @@ const AboutSection = memo(() => {
   ], []);
 
   const stats = useMemo(() => [
-    { value: "2.5M+", label: "Orders Completed", color: "from-green-400 to-emerald-400" },
+    { value: "2.5M+", label: "Bookings Completed", color: "from-green-400 to-emerald-400" },
     { value: "3M+", label: "Happy Customers", color: "from-blue-400 to-cyan-400" },
     { value: "3000+", label: "Verified Partners", color: "from-purple-400 to-pink-400" },
     { value: "PAN India", label: "Service Coverage", color: "from-yellow-400 to-orange-400" },

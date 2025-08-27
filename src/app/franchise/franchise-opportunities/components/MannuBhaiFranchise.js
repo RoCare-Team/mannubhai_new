@@ -40,7 +40,7 @@ const MannuBhaiFranchise = () => {
   const highlights = [
     { label: "Investment", value: "₹10–15 Lakhs", color: "text-green-600", icon: DollarSign },
     { label: "Break-Even", value: "3–8 Months", color: "text-blue-600", icon: Calendar },
-    { label: "Monthly Profit", value: "₹1–2 Lakhs", color: "text-purple-600", icon: TrendingUp },
+    { label: "Monthly Profit", value: "₹1–3 Lakhs", color: "text-purple-600", icon: TrendingUp },
     { label: "Annual ROI", value: "90–95%", color: "text-orange-600", icon: BarChart3 }
   ];
 

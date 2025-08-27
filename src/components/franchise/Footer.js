@@ -26,7 +26,7 @@ export default function FranchiseFooter() {
                 Company
               </h4>
               <ul className="text-sm space-y-3">
-                <li><Link href="/about-us" className="hover:text-[#e7516c] transition-colors duration-200 flex items-center group">
+                <li><Link href="/about-us" scroll={true} className="hover:text-[#e7516c] transition-colors duration-200 flex items-center group">
                   <span className="w-1 h-1 bg-gray-400 rounded-full mr-3 group-hover:bg-[#e7516c] transition-colors"></span>
                   About
                 </Link></li>
@@ -177,7 +177,7 @@ export default function FranchiseFooter() {
               Company
             </h4>
             <ul className="text-sm space-y-2">
-              <li><Link href="/about">About</Link></li>
+              <li><Link href="/about-us" scroll={true}>About</Link></li>
               <li><Link href="/terms-conditions">Terms & Conditions</Link></li>
               <li><Link href="/privacy-policy">Privacy Policy</Link></li>
               <li><Link href="/return-policy">Return & Refund Policy</Link></li>
