@@ -58,12 +58,10 @@ export class SchemaService {
     return schemas; 
   }
 
-  static generateSchemaScript(schemas) {
-    if (!schemas || schemas.length === 0) return null;
-    
-    // Return each schema as a separate script tag
-    return schemas.map(schema => 
-      `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`
-    ).join('\n');
-  }
+static generateSchemaScript(schemas) {
+  if (!schemas || schemas.length === 0) return null;
+  
+  return schemas.map(schema => JSON.stringify(schema, null, 2)).join('\n');
+}
+
 }
