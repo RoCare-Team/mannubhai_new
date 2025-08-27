@@ -38,6 +38,11 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
           ? [...prev.expertise, value]
           : prev.expertise.filter(item => item !== value)
       }));
+
+      // Clear expertise error when user selects/deselects
+      if (errors.expertise) {
+        setErrors(prev => ({ ...prev, expertise: '' }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
@@ -49,17 +54,21 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
   const handleMobileChange = (e) => {
     const value = e.target.value;
     
-    // Only allow numbers and + sign
-    if (!/^\+?\d*$/.test(value)) return;
+    // Only allow numbers
+    if (!/^\d*$/.test(value)) return;
     
-    // Validate length based on whether it starts with +91
-    if (value.startsWith('+91') && value.length > 13) return;
-    if (!value.startsWith('+') && value.length > 10) return;
+    // Limit to 10 digits
+    if (value.length > 10) return;
 
     setFormData(prev => ({
       ...prev,
       mobile: value
     }));
+
+    // Clear mobile error when user starts typing
+    if (errors.mobile) {
+      setErrors(prev => ({ ...prev, mobile: '' }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -94,7 +103,7 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
 
       const cleanMobile = formData.mobile.replace(/\D/g, '');
       if (!cleanMobile) newErrors.mobile = 'Mobile number is required';
-      else if (cleanMobile.length !== 10) newErrors.mobile = 'Please enter a valid 10-digit number';
+      else if (cleanMobile.length !== 10) newErrors.mobile = 'Please enter a valid 10-digit mobile number';
     }
 
     // Step 2 validation
@@ -116,11 +125,18 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (validateStep(formStep)) {
-      setFormStep(prev => prev + 1);
-      if (formRef.current) {
-        formRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+    
+    const isValid = validateStep(formStep);
+    
+    if (isValid) {
+      setFormStep(prev => Math.min(prev + 1, 3));
+      
+      // Scroll to top of form
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 100);
     }
   };
 
@@ -195,14 +211,14 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
           </div>
         </div>
 
-        <form onSubmit={formStep < 3 ? handleNext : handleSubmit}>
+        <form onSubmit={formStep === 3 ? handleSubmit : handleNext}>
           <div ref={formRef} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
             {/* Step 1: Personal Information */}
             {formStep === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-6" key="step1">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Personal Information</h3>
 
-                <div className="grid sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Full Name *
@@ -251,7 +267,7 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
                       className={`w-full px-4 py-3 border ${
                         errors.mobile ? 'border-red-500' : 'border-gray-300'
                       } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
-                      placeholder="+91 9876543210"
+                      placeholder="9876543210"
                       disabled={loading}
                     />
                     {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
@@ -277,10 +293,10 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
 
             {/* Step 2: Experience & Skills */}
             {formStep === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-6" key="step2">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Experience & Skills</h3>
 
-                <div className="grid sm:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Gender *
@@ -324,56 +340,56 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
                     </select>
                     {errors.experience && <p className="text-red-500 text-sm mt-1">{errors.experience}</p>}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Select Your Skills * (Choose all that apply)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {service.skills.map((skill, index) => (
-                      <label 
-                        key={index} 
-                        className={`group flex items-center p-4 border-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${
-                          formData.expertise.includes(skill)
-                            ? 'border-blue-500 bg-blue-50'
-                            : errors.expertise
-                              ? 'border-red-500'
-                              : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          name="expertise"
-                          value={skill}
-                          checked={formData.expertise.includes(skill)}
-                          onChange={handleInputChange}
-                          className="sr-only"
-                          disabled={loading}
-                        />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          formData.expertise.includes(skill)
-                            ? 'border-blue-500 bg-blue-500'
-                            : 'border-gray-300 group-hover:border-gray-400'
-                        }`}>
-                          {formData.expertise.includes(skill) && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="font-medium text-gray-700">{skill}</span>
-                      </label>
-                    ))}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Select Your Skills * (Choose all that apply)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {service.skills && service.skills.map((skill, index) => (
+                        <label 
+                          key={index} 
+                          className={`group flex items-center p-4 border-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-200 ${
+                            formData.expertise.includes(skill)
+                              ? 'border-blue-500 bg-blue-50'
+                              : errors.expertise
+                                ? 'border-red-500'
+                                : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            name="expertise"
+                            value={skill}
+                            checked={formData.expertise.includes(skill)}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                            disabled={loading}
+                          />
+                          <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
+                            formData.expertise.includes(skill)
+                              ? 'border-blue-500 bg-blue-500'
+                              : 'border-gray-300 group-hover:border-gray-400'
+                          }`}>
+                            {formData.expertise.includes(skill) && (
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="font-medium text-gray-700">{skill}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.expertise && <p className="text-red-500 text-sm mt-2">{errors.expertise}</p>}
                   </div>
-                  {errors.expertise && <p className="text-red-500 text-sm mt-2">{errors.expertise}</p>}
                 </div>
               </div>
             )}
 
             {/* Step 3: Address & Documents */}
             {formStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-6" key="step3">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Address & Documents</h3>
 
                 <div>
@@ -434,7 +450,7 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
             )}
           </div>
 
-          {/* Form Footer */}
+          {/* Form Footer with Navigation Buttons */}
           <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="flex justify-between">
               {formStep > 1 ? (

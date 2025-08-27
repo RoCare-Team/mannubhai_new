@@ -41,7 +41,7 @@ class AppCache {
   }
 }
 
-// Helper Functions remain the same
+// Helper Functions
 const sanitizeData = (data) => {
   if (!data) return data;
   if (Array.isArray(data)) {
@@ -65,6 +65,11 @@ const normalizeUrlSegment = (segment) =>
 
 const generateCacheKey = (prefix, ...args) =>
   `${prefix}-${args.map(arg => normalizeUrlSegment(arg)).join('-')}`;
+
+// New function to check if URL has uppercase characters
+const hasUppercaseCharacters = (slug) => {
+  return slug.some(segment => segment !== segment.toLowerCase());
+};
 
 // DataService remains the same
 class DataService {
@@ -327,9 +332,24 @@ export default async function DynamicRouteHandler({ params, searchParams }) {
   const resolvedSearchParams = await searchParams;
   const { slug = [] } = resolvedParams;
   const { city: cityQueryParam } = resolvedSearchParams;
-  const normalizedSlug = slug.map(normalizeUrlSegment);
 
   if (slug.length === 0) notFound();
+
+  // Check if URL contains uppercase characters and redirect to lowercase version
+  if (hasUppercaseCharacters(slug)) {
+    const lowercaseSlug = slug.map(segment => segment.toLowerCase());
+    const redirectUrl = `/${lowercaseSlug.join('/')}`;
+    
+    // Preserve query parameters if they exist
+    const searchParamsString = new URLSearchParams(resolvedSearchParams).toString();
+    const finalRedirectUrl = searchParamsString 
+      ? `${redirectUrl}?${searchParamsString}` 
+      : redirectUrl;
+    
+    redirect(finalRedirectUrl);
+  }
+
+  const normalizedSlug = slug.map(normalizeUrlSegment);
 
   try {
     // Redirect logic for city query param
