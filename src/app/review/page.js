@@ -112,6 +112,64 @@ function ReviewContent() {
 
   const handleStarClick = (ratingValue) => {
     setRating(ratingValue);
+    
+    // If rating is more than 3, submit directly and redirect
+    if (ratingValue > 3) {
+      handleSubmitHighRating(ratingValue);
+    }
+  };
+
+  const handleSubmitHighRating = async (ratingValue) => {
+    if (!rawId) {
+      showToast('Service ID missing.', 'error');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const url = `https://waterpurifierservicecenter.in/wizard/app/review.php?reating=${ratingValue}&cmpl_id=${encodeURIComponent(rawId)}&comment=${encodeURIComponent('')}`;
+      console.log('Request URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('API Response:', data);
+        
+        const redirectUrl = data.status || appLink;
+        
+        showToast('Thank you for your excellent rating! Redirecting to Google Reviews...', 'success');
+        
+        // Redirect after toast is shown
+        setTimeout(() => {
+          redirectToApp(redirectUrl);
+        }, 1500);
+        
+      } else {
+        console.error('Response not OK:', response.status, response.statusText);
+        // Even if API fails, still redirect to review page for high ratings
+        setTimeout(() => {
+          redirectToApp(appLink);
+        }, 1500);
+      }
+      
+    } catch (error) {
+      console.error('Network or parsing error:', error);
+      // Even if there's an error, still redirect to review page for high ratings
+      setTimeout(() => {
+        redirectToApp(appLink);
+      }, 1500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -120,7 +178,7 @@ function ReviewContent() {
       return;
     }
     
-    if (!rawId) { // Now checking rawId instead of cmpl_id
+    if (!rawId) {
       showToast('Service ID missing.', 'error');
       return;
     }
@@ -128,7 +186,6 @@ function ReviewContent() {
     setIsSubmitting(true);
     
     try {
-      // Using rawId (without CMPL prefix) in the API call
       const url = `https://waterpurifierservicecenter.in/wizard/app/review.php?reating=${rating}&cmpl_id=${encodeURIComponent(rawId)}&comment=${encodeURIComponent(comment)}`;
       console.log('Request URL:', url);
       
@@ -140,48 +197,20 @@ function ReviewContent() {
       });
       
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       
       if (response.ok) {
         const data = await response.json();
         console.log('API Response:', data);
         
-        // Check if we have a redirect URL in the response
-        if (data.status) {
-          const redirectUrl = data.status;
-          
-          if (rating > 3) {
-            showToast('Thank you for your excellent rating! Redirecting to Google Reviews...', 'success');
-          } else {
-            showToast('Thank you for your feedback!', 'success');
-          }
-          
-          // Redirect after toast is shown
-          setTimeout(() => {
-            redirectToApp(redirectUrl);
-          }, 2500);
-          
-        } else if (data.error) {
-          showToast(data.message || 'An error occurred while submitting your review', 'error');
-        } else {
-          // Fallback if no status but no error
-          showToast('Thank you for your feedback!', 'success');
-          setTimeout(() => {
-            redirectToApp(rating > 3 ? 'https://g.page/r/CXxD3amQeg2OEAE/review' : 'https://www.mannubhai.com');
-          }, 2500);
-        }
+        showToast('Thank you for your feedback!', 'success');
+        
+        // For low ratings, just show success message and stay on page or redirect to homepage
+        setTimeout(() => {
+          window.location.href = 'https://www.mannubhai.com';
+        }, 2500);
         
       } else {
         console.error('Response not OK:', response.status, response.statusText);
-        
-        // Try to get error details
-        try {
-          const errorText = await response.text();
-          console.error('Error response body:', errorText);
-        } catch (e) {
-          console.error('Could not read error response:', e);
-        }
-        
         showToast('Failed to submit feedback. Please try again.', 'error');
       }
       
@@ -195,11 +224,9 @@ function ReviewContent() {
 
   const getRatingText = () => {
     switch (rating) {
-      case 1: return "We're sorry to hear that 😞";
-      case 2: return "We can do better 🤔";
-      case 3: return "Thanks for the feedback 😊";
-      case 4: return "Great! We're glad you liked it 😄";
-      case 5: return "Awesome! You made our day! 🌟";
+      case 1: return "We're sorry to hear that";
+      case 2: return "We can do better";
+      case 3: return "Thanks for the feedback";
       default: return "";
     }
   };
@@ -300,12 +327,13 @@ function ReviewContent() {
                         value={ratingValue} 
                         onClick={() => handleStarClick(ratingValue)}
                         className="hidden"
+                        disabled={isSubmitting}
                       />
                       <FaStar 
                         className="transition-all duration-200 drop-shadow-sm hover:drop-shadow-md" 
                         color={ratingValue <= (hover || rating) ? "#fbbf24" : "#d1d5db"} 
                         size={40}
-                        onMouseEnter={() => setHover(ratingValue)}
+                        onMouseEnter={() => !isSubmitting && setHover(ratingValue)}
                         onMouseLeave={() => setHover(0)}
                       />
                     </motion.label>
@@ -313,9 +341,9 @@ function ReviewContent() {
                 })}
               </div>
 
-              {/* Rating Feedback Text */}
+              {/* Rating Feedback Text - Only for ratings 1-3 */}
               <AnimatePresence>
-                {rating > 0 && (
+                {rating > 0 && rating <= 3 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -356,36 +384,9 @@ function ReviewContent() {
               )}
             </AnimatePresence>
             
-            {/* High Rating Message */}
+            {/* Submit Button - Only for ratings 1-3 */}
             <AnimatePresence>
-              {rating > 3 && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="mb-6 text-center"
-                >
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200">
-                    <div className="flex justify-center mb-3">
-                      <div className="flex gap-2">
-                        <FaHeart className="text-red-500 text-2xl animate-pulse" />
-                        <FaThumbsUp className="text-green-500 text-2xl" />
-                      </div>
-                    </div>
-                    <h4 className="text-xl font-bold text-green-600 mb-2">
-                      Thank you for your excellent rating! 🌟
-                    </h4>
-                    <p className="text-gray-700">
-                      Your positive feedback motivates our team to keep delivering great service!
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            {/* Submit Button */}
-            <AnimatePresence>
-              {rating > 0 && (
+              {rating > 0 && rating <= 3 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -409,9 +410,26 @@ function ReviewContent() {
                         Submitting...
                       </div>
                     ) : (
-                      rating > 3 ? 'Submit & Continue to Review' : 'Submit Feedback'
+                      'Submit Feedback'
                     )}
                   </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Loading state for high ratings */}
+            <AnimatePresence>
+              {rating > 3 && isSubmitting && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center"
+                >
+                  <div className="flex items-center justify-center gap-2 text-lg text-gray-600">
+                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    Redirecting to review page...
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

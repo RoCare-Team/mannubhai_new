@@ -5,7 +5,7 @@ const BusinessOpportunitySection = memo(() => {
     const benefits = useMemo(() => [
         { icon: "💰", text: "Low Investment with High ROI", color: "from-green-500 to-emerald-500" },
         { icon: "📈", text: "Quick Break-Even (3 months)", color: "from-blue-500 to-cyan-500" },
-        { icon: "📊", text: "Monthly Profit: ₹1–2 Lakhs", color: "from-purple-500 to-pink-500" },
+        { icon: "📊", text: "Monthly Profit: ₹1–3 Lakhs", color: "from-purple-500 to-pink-500" },
         { icon: "🎯", text: "360° Marketing Support", color: "from-orange-500 to-red-500" },
         { icon: "🚀", text: "Massive Growth Opportunity", color: "from-indigo-500 to-purple-500" },
     ], []);
@@ -88,43 +88,45 @@ const BusinessOpportunitySection = memo(() => {
                 </div>
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-12 md:mb-16">
-                    {/* Image */}
-                    <div className="relative order-2 lg:order-1">
-                        <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl"></div>
-                        <div className="relative h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-3xl overflow-hidden shadow-2xl">
-                            <Image
-                                src="/franchies/industries-chart.webp"
-                                alt="Service industry growth chart"
-                                fill
-                                className="object-cover hover:scale-105 transition-transform duration-500"
-                                loading="lazy"
-                                sizes="(max-width: 1024px) 100vw, 50vw"
-                                placeholder="blur"
-                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaUMk6Tq5Q0ZqjUc4SCUc4sFtfKbRGoL3k4Sg=="
-                            />
-                        </div>
-                    </div>
-
-                    {/* Info Section */}
-                    <div className="space-y-6 md:space-y-8 order-1 lg:order-2">
-                        <article className="bg-white/80 backdrop-blur-sm p-6 md:p-8 lg:p-10 rounded-3xl shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
-                            <h3 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 md:mb-6">
-                                Why Choose Our Franchise?
-                            </h3>
-                            <ul className="space-y-3 md:space-y-4">
-                                {benefits.map((item, index) => (
-                                    <li key={item.text} className="group flex items-center text-gray-700 text-base md:text-lg">
-                                        <div className={`mr-3 md:mr-4 p-2 bg-gradient-to-r ${item.color} rounded-xl text-white font-bold group-hover:scale-110 transition-transform duration-300`}>
-                                            {item.icon}
-                                        </div>
-                                        <span className="group-hover:text-gray-900 transition-colors font-medium">{item.text}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </article>
-                    </div>
-                </div>
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-12 md:mb-16">
+    {/* Image */}
+    <div className="relative order-2 lg:order-1">
+    <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl -z-10"></div>
+    <div className="relative z-10 h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-3xl overflow-hidden shadow-2xl bg-gray-100">
+<Image
+            src="/franchies/industries-chart.webp"
+            alt="Service industry growth chart"
+            width={800}
+            height={500}
+            className="w-full h-full object-contain hover:scale-95 transition-transform duration-500"
+            loading="lazy"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
+        </div>
+    </div>
+     
+    {/* Info Section */}
+        <div className="space-y-6 md:space-y-8 order-1 lg:order-2">
+            <article className="bg-white/80 backdrop-blur-sm p-6 md:p-8 lg:p-10 rounded-3xl shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 md:mb-6">
+                    Why Choose Our Franchise?
+                </h3>
+                <ul className="space-y-3 md:space-y-4">
+                    {benefits.map((item, index) => (
+                        <li key={item.text} className="group flex items-center text-gray-700 text-base md:text-lg">
+                            <div className={`mr-3 md:mr-4 p-2 bg-gradient-to-r ${item.color} rounded-xl text-white font-bold group-hover:scale-110 transition-transform duration-300`}>
+                                {item.icon}
+                            </div>
+                            <span className="group-hover:text-gray-900 transition-colors font-medium">{item.text}</span>
+                        </li>
+                    ))}
+                </ul>
+            </article>
+        </div>
+        </div>
 
                 {/* Franchisee Benefits */}
                 <article className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 backdrop-blur-xl p-6 md:p-10 lg:p-12 rounded-3xl shadow-2xl border border-white/10 text-white relative overflow-hidden">
