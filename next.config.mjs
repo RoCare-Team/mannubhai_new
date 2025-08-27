@@ -76,6 +76,11 @@ experimental: {
         destination: '/franchise/franchise-opportunities',
         permanent: true,
       },
+      {
+        source: '/:city/franchise/franchise-opportunities',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      }
     ];
   },
 };
