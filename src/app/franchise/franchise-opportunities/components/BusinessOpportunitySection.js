@@ -73,7 +73,7 @@ const BusinessOpportunitySection = memo(() => {
                             Why Franchise with <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">MannuBhai?</span>
                         </h3>
                         <p className="text-gray-600 text-lg md:text-xl max-w-4xl mx-auto">
-                            Beginning an independent business is not easy—uncertainty, limited brand presence, marketing costs, and operational challenges usually deter entrepreneurs from going for it. But with an investment in a franchise business in the range of ₹1 lakh to ₹5 lakh investment, you obtain the reputation of the brand, tested systems, and robust support from day one.
+                            Beginning an independent business is not easy—uncertainty, limited brand presence, marketing costs, and operational challenges usually deter entrepreneurs from going for it. But with an investment in a franchise business in the range of ₹10 lakh to ₹15 lakh investment, you obtain the reputation of the brand, tested systems, and robust support from day one.
                         </p>
                     </div>
 
