@@ -449,7 +449,6 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
               </div>
             )}
           </div>
-
           {/* Form Footer with Navigation Buttons */}
           <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="flex justify-between">
