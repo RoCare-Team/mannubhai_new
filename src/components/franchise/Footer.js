@@ -70,7 +70,7 @@ export default function FranchiseFooter() {
               For Partners
             </h4>
             <ul className="text-sm space-y-3">
-              <li><Link href="#" className="hover:text-[#e7516c] transition-colors duration-200 flex items-center group">
+              <li><Link href="/join-partner" className="hover:text-[#e7516c] transition-colors duration-200 flex items-center group">
                 <span className="w-1 h-1 bg-gray-400 rounded-full mr-3 group-hover:bg-[#e7516c] transition-colors"></span>
                 Register as a Professional
               </Link></li>
