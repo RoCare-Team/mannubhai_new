@@ -201,7 +201,7 @@ export default function FranchiseFooter() {
               For Partners
             </h4>
             <ul className="text-sm space-y-2">
-              <li><Link href="#">Register as a Professional</Link></li>
+              <li><Link href="/join-partner">Register as a Professional</Link></li>
               <li><Link href="/franchise/franchise-opportunities">Become Franchise Partner</Link></li>
             </ul>
           </div>

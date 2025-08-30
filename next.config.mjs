@@ -1,89 +1,66 @@
-  /** @type {import('next').NextConfig} */
-  const nextConfig = {
-    images: {
-      unoptimized: false, // Consider removing this in production for better image optimization
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'www.waterpurifierservicecenter.in',
-          pathname: '/**',
-        },
-        {
-          protocol: 'https',
-          hostname: 'firebasestorage.googleapis.com',
-          pathname: '/**',
-        },
-      ],
-      minimumCacheTTL: 60, // Cache TTL for optimized images
-    },
+/** @type {import('next').NextConfig} */
 
-    // Security Headers
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: [
-            {
-              key: 'Strict-Transport-Security',
-              value: 'max-age=63072000; includeSubDomains; preload',
-            },
-            {
-              key: 'X-Content-Type-Options',
-              value: 'nosniff',
-            },
-            {
-              key: 'X-Frame-Options',
-              value: 'SAMEORIGIN',
-            },
-            {
-              key: 'X-XSS-Protection',
-              value: '1; mode=block',
-            },
-            {
-              key: 'Referrer-Policy',
-              value: 'strict-origin-when-cross-origin',
-            },
-            {
-              key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-            },
+import { GONE_PATHS } from './gonePaths.js';
 
-          ],
-        },
-      ];
-    },
-  experimental: { 
-      scrollRestoration: true,
-      legacyBrowsers: false, 
-        browserslist: [
-      ">0.5%",
-      "last 2 versions",
-      "not dead",
-      "not IE 11",
-      "not op_mini all",
-    ]
-    },
+const nextConfig = {
+  images: {
+    unoptimized: false,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.waterpurifierservicecenter.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        pathname: '/**',
+      },
+    ],
+    minimumCacheTTL: 60,
+  },
 
-    // Permanent Redirects
-    async redirects() {
-      return [
-        {
-          source: '/franchise-opportunities',
-          destination: '/franchise/franchise-opportunities',
-          permanent: true,
-        },
-        {
-          source: '/franchise',
-          destination: '/franchise/franchise-opportunities',
-          permanent: true,
-        },
-        {
-          source: '/:city/franchise/franchise-opportunities',
-          destination: '/franchise/franchise-opportunities',
-          permanent: true,
+  async redirects() {
+    // Create 410 redirects for gone paths
+    const goneRedirects = Array.from(GONE_PATHS)
+      .map(url => {
+        const path = url.replace('https://www.mannubhai.com', '');
+        // Ensure the path starts with '/' and is valid
+        if (!path.startsWith('/') || path.trim() === '') {
+          console.warn(`Skipping invalid path: ${path}`);
+          return null;
         }
-      ];
-    },
-  };
+        return {
+          source: path,
+          destination: '/410',
+          statusCode: 308, // Using 308 for permanent redirect
+        };
+      })
+      .filter(redirect => redirect !== null); // Remove any null entries
 
-  export default nextConfig;
+    return [
+      {
+        source: '/franchise-opportunities',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      },
+      {
+        source: '/franchise',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      },
+      {
+        source: '/:city/franchise/franchise-opportunities',
+        destination: '/franchise/franchise-opportunities',
+        permanent: true,
+      },
+      ...goneRedirects,
+    ];
+  },
+  
+  experimental: { 
+    scrollRestoration: true,
+  },
+};
+  
+export default nextConfig;
