@@ -78,7 +78,7 @@ export default function FranchiseFooter() {
                 <span className="w-1 h-1 bg-gray-400 rounded-full mr-3 group-hover:bg-gray-600 transition-colors"></span>
                 Become Franchise Partner
               </Link></li>
-            </ul>
+            </ul> 
           </div>
 
           {/* Social Links in modern card */}
@@ -201,7 +201,7 @@ export default function FranchiseFooter() {
               For Partners
             </h4>
             <ul className="text-sm space-y-2 text-gray-700">
-              <li><Link href="#" className="hover:text-gray-900 transition-colors">Register as a Professional</Link></li>
+              <li><Link href="/join-partner" className="hover:text-gray-900 transition-colors">Register as a Professional</Link></li>
               <li><Link href="/franchise/franchise-opportunities" className="hover:text-gray-900 transition-colors">Become Franchise Partner</Link></li>
             </ul>
           </div>

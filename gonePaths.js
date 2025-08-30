@@ -1,4 +1,4 @@
-export const GONE_PATHS = new Set([
+const GONE_PATHS = new Set([
   "https://www.mannubhai.com/dhenkanal-sadar/franchise/franchise-opportunities",
   "https://www.mannubhai.com/dhouj-faridabad/franchise/franchise-opportunities",
   "https://www.mannubhai.com/guwahati/desktop",
@@ -2158,3 +2158,4 @@ export const GONE_PATHS = new Set([
   "https://www.mannubhai.com/tulasi-nagar-vijayawada/franchise/franchise-opportunities",
   "]);",
 ]);
+module.exports = { GONE_PATHS };
