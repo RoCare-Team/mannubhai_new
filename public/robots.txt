@@ -1,0 +1,19 @@
+User-agent: *
+Disallow: /*/cart
+Disallow: /*/checkout
+Disallow: /*/account
+Disallow: /*/my-bookings
+Disallow: /*/410
+Disallow: /*/painting-services
+Disallow: /*/plumber
+Disallow: /*/carpenter
+Disallow: /*/electrician
+Disallow: /*/mason-service
+
+
+
+
+
+Allow: /
+
+Sitemap: https://www.mannubhai.com/sitemap.xml
