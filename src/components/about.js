@@ -21,7 +21,7 @@ const AboutMannuBhai = () => {
               ABOUT MANNU BHAI
             </h2>
             <p className="text-sm sm:text-base leading-relaxed">
-              Mannu Bhai is one of the most trusted service providers in India. We offer reliable solutions in home appliance care, home care, fitness, personal grooming, and gadget support. Our dedicated, experienced professionals ensure customer satisfaction through consistent service quality.
+              Mannu Bhai is one of the most trusted service provider in India. We offer reliable solutions in home appliance care, home care, fitness, personal grooming, and gadget support. Our dedicated, experienced professionals ensure customer satisfaction through consistent service quality.
             </p>
             <Link
               href="/about-us"
