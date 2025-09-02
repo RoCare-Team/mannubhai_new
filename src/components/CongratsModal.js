@@ -4,7 +4,8 @@ import React, { useEffect } from "react";
 import { Modal, Box, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-function CongratsModal({ setShowCongrats, open }) {
+// Fixed component with display name
+const CongratsModal = ({ setShowCongrats, open }) => {
   const handleClose = () => {
     setShowCongrats(false);
     if (typeof window !== "undefined") {
@@ -97,6 +98,9 @@ function CongratsModal({ setShowCongrats, open }) {
       </Box>
     </Modal>
   );
-}
+};
+
+// Add display name
+CongratsModal.displayName = "CongratsModal";
 
 export default CongratsModal;

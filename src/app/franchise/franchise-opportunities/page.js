@@ -39,14 +39,14 @@ const HeroSection = memo(() => (
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                         </span>
                         <span className="text-sm font-semibold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-                            India's #1 Quick Service Network
+                            India s #1 Quick Service Network
                         </span>
                     </div>
 
                     {/* Heading */}
                     <div className="space-y-4">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight">
-                            <span className="block text-white mb-2">Join India's</span>
+                            <span className="block text-white mb-2">Join India s</span>
                             <span className="block bg-gradient-to-r from-yellow-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                                 Leading Network
                             </span>
@@ -355,7 +355,7 @@ const LandingContent = () => {
                             </div>
 
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-tight">
-                                India's Fastest Growing
+                                India s Fastest Growing
                                 <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                     Local Service Provider
                                 </span>

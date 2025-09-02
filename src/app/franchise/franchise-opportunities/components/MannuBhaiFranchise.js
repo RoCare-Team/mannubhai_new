@@ -127,7 +127,7 @@ const MannuBhaiFranchise = () => {
               What Sets MannuBhai Apart?
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-              MannuBhai is not a typical franchise. It is a full business ecosystem that puts us at the top of India's most valued service franchise options.
+              MannuBhai is not a typical franchise. It is a full business ecosystem that puts us at the top of India s most valued service franchise options.
             </p>
           </div>
           
@@ -176,7 +176,7 @@ const MannuBhaiFranchise = () => {
             Support & Training – Ensuring Your Success
           </h2>
           <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-            At MannuBhai, we are convinced that our franchise partner's success is our success. That is why we provide comprehensive support at every step.
+            At MannuBhai we are convinced that our franchise partner s success is our success. That is why we provide comprehensive support at every step.
           </p>
         </div>
 
@@ -286,7 +286,7 @@ const MannuBhaiFranchise = () => {
                 Who Can Join MannuBhai Franchise?
               </h2>
               <p className="text-xl text-gray-600 mb-8">
-                You don't need prior experience to become a MannuBhai franchise partner. Whether you're a first-time entrepreneur, small investor, or business owner looking to diversify, this model is designed for you.
+                You don t need prior experience to become a MannuBhai franchise partner. Whether you re a first-time entrepreneur small investor or business owner looking to diversify  this model is designed for you.
               </p>
               
               <div className="space-y-4">
@@ -303,16 +303,16 @@ const MannuBhaiFranchise = () => {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Are you asking these questions?</h3>
               <div className="space-y-4 mb-8">
                 <div className="p-4 bg-blue-50 rounded-xl">
-                  <p className="text-blue-800 font-medium">"How to start a home service franchise in India?"</p>
+                  <p className="text-blue-800 font-medium">How to start a home service franchise in India?</p>
                 </div>
                 <div className="p-4 bg-green-50 rounded-xl">
-                  <p className="text-green-800 font-medium">"Which is the best low-cost franchise in India?"</p>
+                  <p className="text-green-800 font-medium">Which is the best low-cost franchise in India?</p>
                 </div>
                 <div className="p-4 bg-purple-50 rounded-xl">
-                  <p className="text-purple-800 font-medium">"Is there a franchise business that guarantees returns?"</p>
+                  <p className="text-purple-800 font-medium">Is there a franchise business that guarantees returns?</p>
                 </div>
                 <div className="p-4 bg-orange-50 rounded-xl">
-                  <p className="text-orange-800 font-medium">"Best franchises for small capital entrepreneurs?"</p>
+                  <p className="text-orange-800 font-medium">Best franchises for small capital entrepreneurs?</p>
                 </div>
               </div>
               <div className="text-center">

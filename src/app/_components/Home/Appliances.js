@@ -321,7 +321,7 @@ export default function Appliances({ hideBeautyBanner = false, onServiceClick, c
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">No Services Available</h3>
-            <p className="text-gray-600 text-lg max-w-md mx-auto">We're working hard to bring you the best appliance services. Please check back later.</p>
+            <p className="text-gray-600 text-lg max-w-md mx-auto">We re working hard to bring you the best appliance services. Please check back later.</p>
           </div>
         ) : (
           <div className="grid grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">

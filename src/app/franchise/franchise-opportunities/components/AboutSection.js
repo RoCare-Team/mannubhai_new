@@ -89,7 +89,7 @@ const AboutSection = memo(() => {
                 </p>
 
                 <p className="text-lg">
-                  Welcome to MannuBhai Franchise – a technology-based franchise venture that enables you to establish your own business in the most sought-after service segments such as home appliance repair, handyman services, beauty salon at home, and home care services. With MannuBhai, you don't merely invest money—you invest in a winning business model with high ROI, assured demand, and complete support.
+                  Welcome to MannuBhai Franchise – a technology-based franchise venture that enables you to establish your own business in the most sought-after service segments such as home appliance repair, handyman services, beauty salon at home, and home care services. With MannuBhai, you don&apos;t merely invest money—you invest in a winning business model with high ROI, assured demand, and complete support.
                 </p>
               </div>
               
@@ -151,7 +151,7 @@ const AboutSection = memo(() => {
                   <span className="font-semibold">Trusted by clients nationwide</span>
                 </div>
                 <p className="text-white/90 text-xl italic font-medium">
-                  "Setting new standards in convenience and efficiency"
+                  &quot;Setting new standards in convenience and efficiency&quot;
                 </p>
               </div>
             </div>

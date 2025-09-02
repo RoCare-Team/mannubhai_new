@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../app/firebaseConfig";
 import Header from "@/components/Header";
@@ -126,7 +127,7 @@ export default function ContactPage() {
                 Get in Touch
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                We're here to help you with any questions or concerns. Choose your preferred way to reach us and experience exceptional support.
+                We&apos;re here to help you with any questions or concerns. Choose your preferred way to reach us and experience exceptional support.
               </p>
             </div>
           </div>
@@ -150,7 +151,7 @@ export default function ContactPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <p className="text-green-800 font-semibold">Your enquiry has been sent successfully! We'll get back to you soon.</p>
+                      <p className="text-green-800 font-semibold">Your enquiry has been sent successfully! We&apos;ll get back to you soon.</p>
                     </div>
                   </div>
                 )}
@@ -351,7 +352,7 @@ export default function ContactPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-gray-800 mb-3 text-lg">Email Support</h3>
                     <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                  Not satisfied with chat support? Send us a detailed email and we'll respond within 24-48 hours.
+                      Not satisfied with chat support? Send us a detailed email and we&apos;ll respond within 24-48 hours.
                     </p>
                     <a
                       href="mailto:info@mannubhai.com"
@@ -378,7 +379,7 @@ export default function ContactPage() {
                     <p className="text-gray-600 text-sm leading-relaxed mb-4">
                       Get immediate assistance through our AI-powered chat support. Available 24/7 for quick resolutions.
                     </p>
-                    <a
+                    <Link
                       href="/helpCenter"
                       className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-purple-600 transition-colors duration-200"
                     >
@@ -386,7 +387,7 @@ export default function ContactPage() {
                       <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -402,7 +403,7 @@ export default function ContactPage() {
                   <div className="flex-1">
                     <h3 className="font-bold text-blue-800 mb-3 text-lg">Digital-First Support</h3>
                     <p className="text-blue-700 text-sm leading-relaxed">
-                      We've evolved to provide faster, more efficient help through digital channels. Get instant responses with full conversation history and seamless follow-ups.
+                      We&apos;ve evolved to provide faster, more efficient help through digital channels. Get instant responses with full conversation history and seamless follow-ups.
                     </p>
                   </div>
                 </div>

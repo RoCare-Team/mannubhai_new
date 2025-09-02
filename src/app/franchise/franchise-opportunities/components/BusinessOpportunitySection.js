@@ -62,7 +62,7 @@ const BusinessOpportunitySection = memo(() => {
                         <span className="block text-gray-900">Business</span>
                     </h2>
                     <p className="text-lg md:text-xl lg:text-2xl text-gray-600 font-medium">
-                        India's fastest-growing industry with high returns and low risk.
+                        India&apos;s fastest-growing industry with high returns and low risk.
                     </p>
                 </div>
 

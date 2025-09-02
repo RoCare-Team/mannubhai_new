@@ -1,4 +1,6 @@
-    const ServiceCard = ({ service, onClick }) => (
+import Image from 'next/image';
+
+const ServiceCard = ({ service, onClick }) => (
   <button
     onClick={() => onClick(service)}
     aria-label={`View ${service.ServiceName} services`}
@@ -55,3 +57,5 @@ const PromoBanner = () => (
     </div>
   </section>
 );
+
+export { ServiceCard, PromoBanner };

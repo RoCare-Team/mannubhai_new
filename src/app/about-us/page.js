@@ -87,7 +87,7 @@ const AboutUsContent = () => {
                 <div className="h-1 w-full bg-gradient-to-r from-teal-400 via-blue-400 to-purple-400 rounded-full"></div>
               </div>
               <p className="text-xl sm:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed mt-8">
-                India's <span className="text-teal-600 font-semibold">most trusted</span> professional home service company, 
+                India&apos;s <span className="text-teal-600 font-semibold">most trusted</span> professional home service company, 
                 bringing <span className="text-blue-600 font-semibold">premium quality</span> peace of mind and care to every home.
               </p>
               <div className="mt-12 flex flex-wrap justify-center gap-4">
@@ -116,7 +116,7 @@ const AboutUsContent = () => {
               <div className="grid lg:grid-cols-2 gap-10 items-center">
                 <div className="space-y-6">
                   <p className="text-slate-600 leading-relaxed text-lg">
-                    Mannu Bhai Service Expert is one of India's leading professional home service companies, working to bring peace of mind, comfort, and quality care to every home. From busy metros such as <span className="text-teal-600 font-medium">Delhi and Mumbai</span>, to developing towns across the nation, we work to make daily life easier with services founded on <span className="text-blue-600 font-medium">trust, technology, and a personal touch</span>.
+                    Mannu Bhai Service Expert is one of India&apos;s leading professional home service companies, working to bring peace of mind, comfort, and quality care to every home. From busy metros such as <span className="text-teal-600 font-medium">Delhi and Mumbai</span>, to developing towns across the nation, we work to make daily life easier with services founded on <span className="text-blue-600 font-medium">trust, technology, and a personal touch</span>.
                   </p>
                   <p className="text-slate-600 leading-relaxed text-lg">
                     We are a <span className="text-purple-600 font-medium">technology company</span>, remaking the standard of service excellence by an innovative hybrid approach that marries cutting-edge digital platforms with human know-how. Our smart systems offer <span className="text-teal-600 font-medium">precision, efficiency, and convenience</span>, with our team of experienced and background-checked experts.

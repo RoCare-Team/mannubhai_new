@@ -252,7 +252,7 @@ function BlogListContent() {
               )}
               {searchTerm && (
                 <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  <span>Search: "{searchTerm}"</span>
+                  <span>Search:{searchTerm}</span>
                   <button
                     onClick={() => setSearchTerm('')}
                     className="ml-2 hover:text-green-900"
@@ -269,7 +269,7 @@ function BlogListContent() {
             Showing {filteredAndSortedBlogs.length} of {blogs.length} blogs
             {selectedCategory !== 'all' && (
               <span className="ml-2 text-blue-600">
-                in "{selectedCategory}" category
+                in {selectedCategory}category
               </span>
             )}
           </div>

@@ -12,7 +12,6 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
 
-
 const CheckOut = () => {
   // Use auth context
   const { 
@@ -38,19 +37,20 @@ const CheckOut = () => {
     addressId: null,
   });
   const [showBookingModal, setShowBookingModal] = useState(false);
-const [alertMessage, setAlertMessage] = useState("");
-const [alertType, setAlertType] = useState("success"); // 'success' | 'error'
-const AlertBox = ({ message, type, onClose }) => {
-  if (!message) return null;
-  const bgColor = type === "error" ? "bg-red-100 text-red-700 border-red-300" : "bg-green-100 text-green-700 border-green-300";
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success"); // 'success' | 'error'
 
-  return (
-    <div className={`p-4 mb-4 border rounded-md ${bgColor} flex items-start justify-between`}>
-      <span className="text-sm">{message}</span>
-      <button onClick={onClose} className="ml-4 font-bold text-sm">×</button>
-    </div>
-  );
-};
+  const AlertBox = ({ message, type, onClose }) => {
+    if (!message) return null;
+    const bgColor = type === "error" ? "bg-red-100 text-red-700 border-red-300" : "bg-green-100 text-green-700 border-green-300";
+
+    return (
+      <div className={`p-4 mb-4 border rounded-md ${bgColor} flex items-start justify-between`}>
+        <span className="text-sm">{message}</span>
+        <button onClick={onClose} className="ml-4 font-bold text-sm">×</button>
+      </div>
+    );
+  };
 
   // Items to remove from localStorage after booking confirmation
   const itemsToRemove = [
@@ -63,7 +63,7 @@ const AlertBox = ({ message, type, onClose }) => {
   // Helper functions
   const handlePopup = () => setShowModal(true);
 
-  const getLocalStorageItem = (key, defaultValue = null) => {
+  const getLocalStorageItem = useCallback((key, defaultValue = null) => {
     if (typeof window !== "undefined") {
       try {
         const item = localStorage.getItem(key);
@@ -74,9 +74,9 @@ const AlertBox = ({ message, type, onClose }) => {
       }
     }
     return defaultValue;
-  };
+  }, []);
 
-  const setLocalStorageItem = (key, value) => {
+  const setLocalStorageItem = useCallback((key, value) => {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(key, JSON.stringify(value));
@@ -84,20 +84,20 @@ const AlertBox = ({ message, type, onClose }) => {
         console.error(`Error setting ${key} to localStorage:`, error);
       }
     }
-  };
+  }, []);
 
-  const removeLocalStorageItems = () => {
+  const removeLocalStorageItems = useCallback(() => {
     itemsToRemove.forEach(item => {
       localStorage.removeItem(item);
     });
-  };
+  }, []);
 
-  const displayCartData = () => {
+  const displayCartData = useCallback(() => {
     const cartDataArray = getLocalStorageItem("checkoutState", []);
     setCartDataArray(cartDataArray);
-  };
+  }, [getLocalStorageItem]);
 
-  const fetchRecentAddress = async (customerId) => {
+  const fetchRecentAddress = useCallback(async (customerId) => {
     try {
       const storedAddresses = getLocalStorageItem("RecentAddress", []);
       if (Array.isArray(storedAddresses) && storedAddresses.length > 0) {
@@ -131,7 +131,7 @@ const AlertBox = ({ message, type, onClose }) => {
         setRecentAddress(fallback[0]);
       }
     }
-  };
+  }, [getLocalStorageItem, setLocalStorageItem]);
 
   const refreshBookingData = useCallback(() => {
     const address = localStorage.getItem("bookingAddress");
@@ -176,11 +176,11 @@ const AlertBox = ({ message, type, onClose }) => {
         displayCartData();
       } catch (error) {
         setAlertMessage("Error updating cart");
-       setAlertType("error");
+        setAlertType("error");
       }
     } else {
-        setAlertMessage("You can't add more than 5 items");
-       setAlertType("error");
+      setAlertMessage("You can't add more than 5 items");
+      setAlertType("error");
     }
   };
 
@@ -216,11 +216,8 @@ const AlertBox = ({ message, type, onClose }) => {
         }
         displayCartData();
       } catch (error) {
- 
-
         setAlertMessage("Error updating cart");
         setAlertType("error");
-   
       }
     }
   };
@@ -277,8 +274,7 @@ const AlertBox = ({ message, type, onClose }) => {
     const source = "mannubhai website";
 
     if (!cust_id || !cust_mobile || !address_id || !cust_email || !appointment_date || !appointment_time) {
-
-      setAlertMessage("Please complete all booking details before proceeding to payment", { autoClose: 3000 });
+      setAlertMessage("Please complete all booking details before proceeding to payment");
       setAlertType("error");
       return;
     }
@@ -339,15 +335,14 @@ const AlertBox = ({ message, type, onClose }) => {
         } else {
           setAlertMessage("Team will contact you soon!");
           setAlertType("success");
-            
         }
       } else {
-            setAlertMessage("Payment processing failed");
-            setAlertType("error");
+        setAlertMessage("Payment processing failed");
+        setAlertType("error");
       }
     } catch (error) {
-     setAlertMessage("Network error. Please try again.");
-            setAlertType("error");
+      setAlertMessage("Network error. Please try again.");
+      setAlertType("error");
     }
   };
 
@@ -365,7 +360,7 @@ const AlertBox = ({ message, type, onClose }) => {
       setPhoneNumber(userInfo.phone || "");
     }
     refreshBookingData();
-  }, [isLoggedIn, userInfo, refreshBookingData]);
+  }, [isLoggedIn, userInfo, refreshBookingData, displayCartData, fetchRecentAddress]);
 
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -393,209 +388,211 @@ const AlertBox = ({ message, type, onClose }) => {
       </div>
     );
   }
+
   // Main render
   return (
     <>
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <AlertBox message={alertMessage} type={alertType} onClose={() => setAlertMessage("")} />
 
-      <div className="max-w-4xl mx-auto">
+          {isLoggedIn ? (
+            <>
+              {cartDataArray.length > 0 ? (
+                <>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-6">My Cart</h1>
+                  
+                  <div className="space-y-6">
+                    {cartDataArray?.map((service, serviceIndex) => {
+                      const calculatedTotal = service.cart_dtls.reduce((sum, item) => {
+                        const price = Number(item.total_price || item.price || 0);
+                        const quantity = Number(item.quantity || 1);
+                        return sum + price * quantity;
+                      }, 0);
+                      const categoryTotal = Number(service.total_main) || calculatedTotal;
 
-      <AlertBox message={alertMessage} type={alertType} onClose={() => setAlertMessage("")} />
+                      return (
+                        <div
+                          key={service.cart_id ?? `service-${serviceIndex}`}
+                          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                        >
+                          <div className="p-6">
+                            <h2 className="text-xl font-semibold text-indigo-700 mb-4">
+                              {service.leadtype_name}
+                            </h2>
 
-        {isLoggedIn ? (
-          <>
-            {cartDataArray.length > 0 ? (
-              <>
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">My Cart</h1>
-                
-                <div className="space-y-6">
-                  {cartDataArray?.map((service,serviceIndex) => {
-                    const calculatedTotal = service.cart_dtls.reduce((sum, item) => {
-                      const price = Number(item.total_price || item.price || 0);
-                      const quantity = Number(item.quantity || 1);
-                      return sum + price * quantity;
-                    }, 0);
-                    const categoryTotal = Number(service.total_main) || calculatedTotal;
-
-                    return (
-                    <div
-      key={service.cart_id ?? `service-${serviceIndex}`}className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" >
-                        <div className="p-6">
-                          <h2 className="text-xl font-semibold text-indigo-700 mb-4">
-                            {service.leadtype_name}
-                          </h2>
-
-                          <div className="space-y-4">
-                            {service.cart_dtls?.map((item, itemIndex) => (
-                              <div  key={item.service_id ?? `item-${serviceIndex}-${itemIndex}`} className="flex flex-col sm:flex-row justify-between py-4 border-b border-gray-100 last:border-b-0">
-                                <div className="flex items-start gap-4">
-                                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                                    <Image
-                                      src={item.image || "/placeholder-image.jpg"}
-                                      alt={item.service_name || "Service"}
-                                      width={64}
-                                      height={64}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => e.target.src = "/placeholder-image.jpg"}
-                                    />
+                            <div className="space-y-4">
+                              {service.cart_dtls?.map((item, itemIndex) => (
+                                <div
+                                  key={item.service_id ?? `item-${serviceIndex}-${itemIndex}`}
+                                  className="flex flex-col sm:flex-row justify-between py-4 border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                                      <Image
+                                        src={item.image || "/placeholder-image.jpg"}
+                                        alt={item.service_name || "Service"}
+                                        width={64}
+                                        height={64}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => e.target.src = "/placeholder-image.jpg"}
+                                      />
+                                    </div>
+                                    <div>
+                                      <h3 className="font-medium text-gray-800">{item.service_name}</h3>
+                                      {item.description && (
+                                        <div className="text-sm text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: item.description }} />
+                                      )}
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h3 className="font-medium text-gray-800">{item.service_name}</h3>
-                                    {item.description && (
-                                      <div className="text-sm text-gray-500 mt-1" dangerouslySetInnerHTML={{ __html: item.description }} />
-                                    )}
+
+                                  <div className="flex flex-col items-end mt-3 sm:mt-0">
+                                    <p className="font-bold text-gray-800">₹{item.total_price || item.price || 0}</p>
+                                    <div className="flex items-center gap-2 mt-2 border border-gray-200 rounded-full px-3 py-1">
+                                      <button
+                                        onClick={() => onDecrement(item.service_id, "delete", item.quantity)}
+                                        className="text-gray-600 hover:text-indigo-600"
+                                      >
+                                        <FiMinus size={16} />
+                                      </button>
+                                      <span className="text-sm font-medium">{item.quantity || 1}</span>
+                                      <button
+                                        onClick={() => onIncrement(item.service_id, "add", item.quantity)}
+                                        className="text-gray-600 hover:text-indigo-600"
+                                      >
+                                        <FiPlus size={16} />
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
+                              ))}
+                            </div>
 
-                                <div className="flex flex-col items-end mt-3 sm:mt-0">
-                                  <p className="font-bold text-gray-800">₹{item.total_price || item.price || 0}</p>
-                                  <div className="flex items-center gap-2 mt-2 border border-gray-200 rounded-full px-3 py-1">
-                                    <button
-                                      onClick={() => onDecrement(item.service_id, "delete", item.quantity)}
-                                      className="text-gray-600 hover:text-indigo-600"
-                                    >
-                                      <FiMinus size={16} />
-                                    </button>
-                                    <span className="text-sm font-medium">{item.quantity || 1}</span>
-                                    <button
-                                      onClick={() => onIncrement(item.service_id, "add", item.quantity)}
-                                      className="text-gray-600 hover:text-indigo-600"
-                                    >
-                                      <FiPlus size={16} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="mt-6">
-                            <button
-                              onClick={() => handleBookNowClick(service)}
-                              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all flex items-center justify-center"
-                            >
-                              Book Now: ₹{categoryTotal}
-                              <FiChevronRight className="ml-2" />
-                            </button>
+                            <div className="mt-6">
+                              <button
+                                onClick={() => handleBookNowClick(service)}
+                                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all flex items-center justify-center"
+                              >
+                                Book Now: ₹{categoryTotal}
+                                <FiChevronRight className="ml-2" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center mt-12">
+                  <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl w-32 h-32 mx-auto flex items-center justify-center">
+                    <FiShoppingCart className="text-gray-400 text-4xl" />
+                  </div>
+                  <p className="text-gray-500 mt-4">Your cart is currently empty.</p>
+                  <Link href="/">
+                    <button className="mt-4 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all">
+                      Browse Services
+                    </button>
+                  </Link>
                 </div>
-              </>
-            ) : (
-              <div className="text-center mt-12">
-                <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl w-32 h-32 mx-auto flex items-center justify-center">
-                  <FiShoppingCart className="text-gray-400 text-4xl" />
+              )}
+            </>
+          ) : (
+            <div className="text-center mt-12">
+              <div className="bg-white rounded-xl p-8 max-w-md mx-auto shadow-sm border border-gray-200">
+                <div className="text-indigo-600 text-5xl mb-4">
+                  <FiUser className="mx-auto" />
                 </div>
-                <p className="text-gray-500 mt-4">Your cart is currently empty.</p>
-                <Link href="/">
-                  <button className="mt-4 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all">
-                    Browse Services
-                  </button>
-                </Link>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center mt-12">
-            <div className="bg-white rounded-xl p-8 max-w-md mx-auto shadow-sm border border-gray-200">
-              <div className="text-indigo-600 text-5xl mb-4">
-                <FiUser className="mx-auto" />
-              </div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                Access Your Cart
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Sign in to view your cart and complete your booking
-              </p>
-              <button
-                onClick={handlePopup}
-                className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all"
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "#00000080" }}>
-          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">Complete Booking</h3>
-              <button
-                onClick={handleCloseBookingModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            
-            <div className="p-6">
-              <BookingSlots
-                phoneNumber={phoneNumber}
-                recentAddress={recentAddress}
-                recentAddresses={recentAddresses}
-                onAddressUpdate={setRecentAddress}
-              />
-              
-              <div className="mt-6 flex gap-3">
-                {bookingCompleted && (
-                  <button
-                    onClick={() => {
-                      handleCloseBookingModal();
-                      if (currentBookingItem) {
-                        handlePaymentCompleted(currentBookingItem.category_cart_id, false);
-                       setAlertMessage("Your booking is confirmed! Our team will contact you soon.");
-                       setAlertType("success");
-                      }
-                    }}
-                    className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition flex items-center justify-center"
-                  >
-                    Pay Later
-                  </button>
-                )}
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                  Access Your Cart
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Sign in to view your cart and complete your booking
+                </p>
                 <button
-                  onClick={() => {
-                    if (bookingCompleted && currentBookingItem) {
-                      handlePaymentCompleted(currentBookingItem.category_cart_id, true);
-                    }
-                  }}
-                  className={`flex-1 py-2 rounded-lg transition-colors flex items-center justify-center ${
-                    bookingCompleted
-                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                  disabled={!bookingCompleted}
+                  onClick={handlePopup}
+                  className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow transition-all"
                 >
-                  {bookingCompleted ? (
-                    <>
-                      Confirm Booking <FiChevronRight className="ml-2" />
-                    </>
-                  ) : (
-                    "Complete Details"
-                  )}
+                  Sign In
                 </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Confirmation Modal */}
-      <LoginPopup
-        show={showModal}
-        onClose={handleCloseModal}
-        onLoginSuccess={handleLoginSuccess}
-      />
-    </div>
- 
+        {/* Booking Modal */}
+        {showBookingModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "#00000080" }}>
+            <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-900">Complete Booking</h3>
+                <button
+                  onClick={handleCloseBookingModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <BookingSlots
+                  phoneNumber={phoneNumber}
+                  recentAddress={recentAddress}
+                  recentAddresses={recentAddresses}
+                  onAddressUpdate={setRecentAddress}
+                />
+                
+                <div className="mt-6 flex gap-3">
+                  {bookingCompleted && (
+                    <button
+                      onClick={() => {
+                        handleCloseBookingModal();
+                        if (currentBookingItem) {
+                          handlePaymentCompleted(currentBookingItem.category_cart_id, false);
+                          setAlertMessage("Your booking is confirmed! Our team will contact you soon.");
+                          setAlertType("success");
+                        }
+                      }}
+                      className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition flex items-center justify-center"
+                    >
+                      Pay Later
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (bookingCompleted && currentBookingItem) {
+                        handlePaymentCompleted(currentBookingItem.category_cart_id, true);
+                      }
+                    }}
+                    className={`flex-1 py-2 rounded-lg transition-colors flex items-center justify-center ${
+                      bookingCompleted
+                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={!bookingCompleted}
+                  >
+                    {bookingCompleted ? (
+                      <>
+                        Confirm Booking <FiChevronRight className="ml-2" />
+                      </>
+                    ) : (
+                      "Complete Details"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        <LoginPopup
+          show={showModal}
+          onClose={handleCloseModal}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      </div>
     </>
-    
   );
 };
 

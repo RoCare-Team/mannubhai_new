@@ -54,7 +54,8 @@ const createDynamicComponent = (loader, displayName, options = {}) => {
     suspense = true 
   } = options;
 
-  return dynamic(
+  // Fix: Add display name to the returned component
+  const DynamicComponent = dynamic(
     () => loader()
       .then(mod => {
         // Better module resolution
@@ -66,7 +67,10 @@ const createDynamicComponent = (loader, displayName, options = {}) => {
       })
       .catch((error) => {
         console.error(`Failed to load ${displayName}:`, error);
-        return () => <ErrorFallback componentName={displayName} />;
+        // Fix: Return a named component instead of anonymous function
+        const ErrorComponent = () => <ErrorFallback componentName={displayName} />;
+        ErrorComponent.displayName = `${displayName}Error`;
+        return ErrorComponent;
       }),
     {
       ssr,
@@ -74,6 +78,9 @@ const createDynamicComponent = (loader, displayName, options = {}) => {
       loading: customLoading || (() => <LoadingPlaceholder showSkeleton />)
     }
   );
+
+  DynamicComponent.displayName = displayName;
+  return DynamicComponent;
 };
 
 // Priority-based component loading for better LCP
@@ -125,13 +132,32 @@ const CityCategoryView = memo(({
     [city?.status]
   );
 
+  // Fix: Move useCallback hooks outside of useMemo
+  const memoizedAddToCart = useCallback((...args) => {
+    if (addToCart) {
+      addToCart(...args);
+    }
+  }, [addToCart]);
+
+  const memoizedIncreaseQuantity = useCallback((...args) => {
+    if (increaseQuantity) {
+      increaseQuantity(...args);
+    }
+  }, [increaseQuantity]);
+
+  const memoizedDecreaseQuantity = useCallback((...args) => {
+    if (decreaseQuantity) {
+      decreaseQuantity(...args);
+    }
+  }, [decreaseQuantity]);
+
   // Stable cart handlers to prevent re-renders
   const stableCartProps = useMemo(() => ({
     cartItems,
-    addToCart: useCallback((...args) => addToCart?.(...args), [addToCart]),
-    increaseQuantity: useCallback((...args) => increaseQuantity?.(...args), [increaseQuantity]),
-    decreaseQuantity: useCallback((...args) => decreaseQuantity?.(...args), [decreaseQuantity])
-  }), [cartItems, addToCart, increaseQuantity, decreaseQuantity]);
+    addToCart: memoizedAddToCart,
+    increaseQuantity: memoizedIncreaseQuantity,
+    decreaseQuantity: memoizedDecreaseQuantity
+  }), [cartItems, memoizedAddToCart, memoizedIncreaseQuantity, memoizedDecreaseQuantity]);
 
   // Early return with better UX
   if (!isValidPage) {
@@ -211,9 +237,9 @@ CityCategoryView.defaultProps = {
 
 CityCategoryView.displayName = 'CityCategoryView';
 
-export default CityCategoryView;
+// Enhanced caching strategy - renamed to avoid conflict
+export const fetchCacheConfig = 'force-cache';
+export const revalidateTime = 3600; // Revalidate every hour
+export const dynamicBehavior = 'force-static'; // Generate static pages when possible
 
-// Enhanced caching strategy
-export const fetchCache = 'force-cache';
-export const revalidate = 3600; // Revalidate every hour
-export const dynamic = 'force-static'; // Generate static pages when possible
+export default CityCategoryView;

@@ -276,7 +276,7 @@ const ModernComingSoonSection = memo(({ title, cityName, id }) => {
 
           <div className="max-w-2xl mx-auto">
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              We're expanding our premium {title.toLowerCase()} services to{' '}
+              We&apos;re expanding our premium {title.toLowerCase()} services to{' '}
               <span className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 {cityName}
               </span>
@@ -358,7 +358,7 @@ const ModernComingSoonSection = memo(({ title, cityName, id }) => {
                 <div className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
               </div>
               <span className="text-xs sm:text-sm font-medium text-gray-600">
-                We'll notify you when available
+                We&apos;ll notify you when available
               </span>
             </div>
             <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">

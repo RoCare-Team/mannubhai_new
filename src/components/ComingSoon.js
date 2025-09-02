@@ -1,11 +1,6 @@
 'use client';
 import React, { memo, useMemo, useState, useCallback } from "react";
 import Image from 'next/image';
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
 const SERVICE_IMAGES = {
   "Beauty & Personal Care": {
     "Women Salon At Home": "/BeautyHomeIcons/women salon at home.webp",
@@ -63,7 +58,7 @@ const ComingSoonSection = memo(({ title, cityName }) => {
             <div className="h-px bg-gray-300 flex-1 max-w-20"></div>
           </div>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            We're expanding our {title.toLowerCase()} services to{' '}
+            We&apos;re expanding our {title.toLowerCase()} services to{' '}
             <span className="font-semibold text-indigo-600">{cityName}</span>
           </p>
         </div>
