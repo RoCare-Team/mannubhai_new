@@ -505,7 +505,7 @@ export default function FranchiseContactForm() {
               Franchise Opportunity
             </h2>
             <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">
-              Join our growing network of franchise partners and be part of India's leading service provider.
+              Join our growing network of franchise partners and be part of India s leading service provider.
             </p>
 
             <div className="space-y-3 md:space-y-4">
