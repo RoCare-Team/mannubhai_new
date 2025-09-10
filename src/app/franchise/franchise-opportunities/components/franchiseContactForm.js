@@ -1,7 +1,10 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function FranchiseContactForm() {
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,6 +30,10 @@ export default function FranchiseContactForm() {
   const [lockoutTimer, setLockoutTimer] = useState(600);
   const [generatedOtp, setGeneratedOtp] = useState(null);
   
+  // Loading and submission states
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [submissionProgress, setSubmissionProgress] = useState(0);
+  
   // Refs for timers
   const otpIntervalRef = useRef(null);
   const lockoutIntervalRef = useRef(null);
@@ -38,6 +45,21 @@ export default function FranchiseContactForm() {
       if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current);
     };
   }, []);
+
+  // Progress simulation for better UX
+  const simulateProgress = () => {
+    setSubmissionProgress(0);
+    const interval = setInterval(() => {
+      setSubmissionProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + Math.random() * 20;
+      });
+    }, 200);
+    return interval;
+  };
 
   // Handle input changes
   const handleChange = (e) => {
@@ -317,6 +339,8 @@ export default function FranchiseContactForm() {
     setPhoneVerified(false);
     setFailedAttempts(0);
     setGeneratedOtp(null);
+    setIsFormSubmitted(false);
+    setSubmissionProgress(0);
     
     // Clear timers
     if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
@@ -336,6 +360,10 @@ export default function FranchiseContactForm() {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setIsFormSubmitted(true);
+    
+    // Start progress simulation
+    const progressInterval = simulateProgress();
     
     // Track form submission attempt
     if (typeof window !== 'undefined' && window.fbq) {
@@ -373,6 +401,10 @@ export default function FranchiseContactForm() {
       const responseText = await response.text();
       const data = parseResponse(responseText);
       
+      // Complete progress
+      clearInterval(progressInterval);
+      setSubmissionProgress(100);
+      
       if (data.status === 1) {
         // Track successful submission
         if (typeof window !== 'undefined' && window.fbq) {
@@ -383,9 +415,26 @@ export default function FranchiseContactForm() {
           });
         }
         
-        setSuccessMessage('Thank you! We have received your request and will get back to you soon.');
-        resetForm();
-        setTimeout(() => setSuccessMessage(''), 10000);
+        // Store form data in sessionStorage for the thank you page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('franchiseFormData', JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            city: formData.city,
+            investment: formData.investment,
+            submissionTime: new Date().toISOString()
+          }));
+        }
+        
+        // Show success message briefly before redirect
+        setSuccessMessage('Application submitted successfully! Redirecting...');
+        
+        // Redirect to thank you page after a short delay
+        setTimeout(() => {
+          router.push('/franchise/thank-you');
+        }, 2000);
+        
       } else {
         // Track failed submission
         if (typeof window !== 'undefined' && window.fbq) {
@@ -396,6 +445,7 @@ export default function FranchiseContactForm() {
         }
         
         setErrors({ general: data.message || 'Something went wrong. Please try again.' });
+        setIsFormSubmitted(false);
       }
     } catch (error) {
       // Track error
@@ -406,11 +456,44 @@ export default function FranchiseContactForm() {
         });
       }
       
+      clearInterval(progressInterval);
       setErrors({ general: error.message || 'Error processing request. Please try again.' });
+      setIsFormSubmitted(false);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // If form is submitted successfully, show submission feedback
+  if (isFormSubmitted && !errors.general) {
+    return (
+      <section className="py-8 md:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md mx-auto">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-8 text-center shadow-lg">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-green-800 mb-2">Success!</h2>
+              <p className="text-green-700 mb-4">Your franchise application has been submitted successfully.</p>
+              
+              {/* Progress Bar */}
+              <div className="w-full bg-green-200 rounded-full h-2 mb-4">
+                <div 
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${submissionProgress}%` }}
+                ></div>
+              </div>
+              
+              <p className="text-sm text-green-600">Redirecting to thank you page...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-8 md:py-16 bg-white">
@@ -422,7 +505,7 @@ export default function FranchiseContactForm() {
               Franchise Opportunity
             </h2>
             <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">
-              Join our growing network of franchise partners and be part of India s leading service provider.
+              Join our growing network of franchise partners and be part of India's leading service provider.
             </p>
 
             <div className="space-y-3 md:space-y-4">
@@ -703,13 +786,27 @@ export default function FranchiseContactForm() {
 
               <button
                 type="submit"
-                disabled={isSubmitting || (formData.investment && !phoneVerified)}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 md:py-4 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                disabled={isSubmitting || (formData.investment && !phoneVerified) || isFormSubmitted}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 md:py-4 rounded-lg font-bold shadow-md hover:shadow-lg transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base relative overflow-hidden"
               >
-                {isSubmitting ? 'Submitting Application...' : 
-                 (formData.investment && !phoneVerified) ? 'Please Verify Mobile Number First' :
-                 'Submit Application'}
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting Application...
+                  </div>
+                ) : (formData.investment && !phoneVerified) ? 
+                  'Please Verify Mobile Number First' :
+                  'Submit Application'
+                }
               </button>
+              
+              {/* Additional reassurance text */}
+              <p className="text-xs text-gray-500 text-center mt-2">
+                By submitting this form, you agree to our terms and conditions. We'll contact you within 24-48 hours.
+              </p>
             </form>
           </div>
         </div>

@@ -16,6 +16,7 @@ export async function POST(request) {
     formData.append('lead_id', lead_id.toString());
     formData.append('reason', reason);
     formData.append('comment', comment || '');
+    formData.append('source', 'mannubhai_website');
 
     const response = await fetch('https://waterpurifierservicecenter.in/customer/app/cancel_complaint_mb.php', {
       method: 'POST',
@@ -27,7 +28,7 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    
+        
     // Check if cancellation was successful based on API response
     if (data.error === false || data.success === true || data.status === 'success') {
       return Response.json({
@@ -41,10 +42,10 @@ export async function POST(request) {
         error: data.message || data.error || 'Failed to cancel booking'
       }, { status: 400 });
     }
-
+   
   } catch (error) {
     console.error('Error cancelling booking:', error);
-    
+        
     return Response.json({
       success: false,
       error: error.message || 'Internal server error'

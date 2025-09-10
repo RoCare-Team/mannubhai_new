@@ -1,4 +1,4 @@
-import { getActiveBlogs, getCategories } from "@/app/lib/fetchBlogs";
+import { getActiveBlogs, getCategories, getBlogById, getRelatedBlogs } from "@/app/lib/fetchBlogs";
 import BlogImage from '@/components/BlogImage';
 import Link from 'next/link';
 import { 
@@ -44,23 +44,31 @@ function estimateReadingTime(content) {
   return minutes;
 }
 
-// Function to get related blogs
-function getRelatedBlogs(currentBlog, allBlogs, limit = 3) {
-  return allBlogs
-    .filter(blog => 
-      blog.id !== currentBlog.id && 
-      blog.blog_cat_id === currentBlog.blog_cat_id
-    )
-    .slice(0, limit);
+// Updated function to find blog by slug with dual ID support
+async function findBlogBySlug(slug) {
+  try {
+    // First, get all active blogs and try to find by slug
+    const blogs = await getActiveBlogs();
+    let blog = blogs.find(b => b.blog_url === slug);
+    
+    if (!blog) {
+      // If not found by slug, try to get by ID (in case slug is actually an ID)
+      blog = await getBlogById(slug);
+    }
+    
+    return blog;
+  } catch (error) {
+    console.error("Error finding blog by slug:", error);
+    return null;
+  }
 }
 
 export default async function BlogPost({ params }) {
-  const [blogs, categories] = await Promise.all([
-    getActiveBlogs(),
+  // Fetch data concurrently for better performance
+  const [blog, categories] = await Promise.all([
+    findBlogBySlug(params.slug),
     getCategories()
   ]);
-  
-  const blog = blogs.find(b => b.blog_url === params.slug);
 
   if (!blog) {
     return (
@@ -85,8 +93,14 @@ export default async function BlogPost({ params }) {
     );
   }
 
+  // Get related blogs using the updated function from fetchBlogs
+  const relatedBlogs = await getRelatedBlogs(
+    blog.blog_cat_id, 
+    blog.id, // This will work with both ID types now
+    3
+  );
+
   const readingTime = estimateReadingTime(blog.blog_content_text || '');
-  const relatedBlogs = getRelatedBlogs(blog, blogs);
   const currentCategory = categories.find(cat => cat.name === blog.blog_cat_id);
 
   return (
@@ -104,6 +118,17 @@ export default async function BlogPost({ params }) {
               Blogs
             </Link>
             <ChevronRight className="w-4 h-4" />
+            {blog.blog_cat_id && (
+              <>
+                <Link 
+                  href={`/blogs?category=${encodeURIComponent(blog.blog_cat_id)}`}
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  {blog.blog_cat_id}
+                </Link>
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
             <span className="text-gray-900 font-medium truncate max-w-xs">
               {blog.blog_name}
             </span>
@@ -141,10 +166,12 @@ export default async function BlogPost({ params }) {
                 {/* Category Badge on Image */}
                 {blog.blog_cat_id && (
                   <div className="absolute top-6 left-6">
-                    <span className="inline-flex items-center bg-white/90 backdrop-blur-sm text-gray-800 text-sm font-semibold px-4 py-2 rounded-full">
-                      <Tag className="w-4 h-4 mr-2" />
-                      {blog.blog_cat_id}
-                    </span>
+                    <Link href={`/blogs?category=${encodeURIComponent(blog.blog_cat_id)}`}>
+                      <span className="inline-flex items-center bg-white/90 backdrop-blur-sm text-gray-800 text-sm font-semibold px-4 py-2 rounded-full hover:bg-white transition-colors cursor-pointer">
+                        <Tag className="w-4 h-4 mr-2" />
+                        {blog.blog_cat_id}
+                      </span>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -153,7 +180,7 @@ export default async function BlogPost({ params }) {
               <div className="p-8 lg:p-12">
                 {/* Title */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                  {blog.blog_name}
+                  {blog.blog_name || blog.blog_title}
                 </h1>
 
                 {/* Description */}
@@ -226,13 +253,35 @@ export default async function BlogPost({ params }) {
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium text-gray-700">Share this article:</span>
                     <div className="flex space-x-3">
-                      <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                      <button 
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const text = encodeURIComponent(blog.blog_name);
+                          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                        }}
+                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
                         <Facebook className="w-4 h-4" />
                       </button>
-                      <button className="p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors">
+                      <button 
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const text = encodeURIComponent(blog.blog_name);
+                          window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+                        }}
+                        className="p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
+                      >
                         <Twitter className="w-4 h-4" />
                       </button>
-                      <button className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">
+                      <button 
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const title = encodeURIComponent(blog.blog_name);
+                          const summary = encodeURIComponent(blog.blog_description || '');
+                          window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                        }}
+                        className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                      >
                         <Linkedin className="w-4 h-4" />
                       </button>
                       <button className="p-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
@@ -254,6 +303,24 @@ export default async function BlogPost({ params }) {
                     dangerouslySetInnerHTML={{ __html: blog.blog_content_text }}
                   />
                 </div>
+
+                {/* Tags Section */}
+                {blog.meta_keywords && (
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">Tags:</span>
+                      {blog.meta_keywords.split(',').map((tag, index) => (
+                        <Link
+                          key={index}
+                          href={`/blogs?search=${encodeURIComponent(tag.trim())}`}
+                          className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-1 rounded-full transition-colors"
+                        >
+                          #{tag.trim()}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Article Footer */}
                 <div className="mt-12 pt-8 border-t border-gray-200">
@@ -286,13 +353,15 @@ export default async function BlogPost({ params }) {
               <section className="mt-12">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-2xl font-bold text-gray-900">Related Articles</h2>
-                  <Link 
-                    href={`/blogs?category=${blog.blog_cat_id}`}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
-                  >
-                    View all in {blog.blog_cat_id}
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Link>
+                  {blog.blog_cat_id && (
+                    <Link 
+                      href={`/blogs?category=${encodeURIComponent(blog.blog_cat_id)}`}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                    >
+                      View all in {blog.blog_cat_id}
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -321,19 +390,27 @@ export default async function BlogPost({ params }) {
                           )}
 
                           <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
-                            {relatedBlog.blog_name}
+                            {relatedBlog.blog_name || relatedBlog.blog_title}
                           </h3>
 
                           <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
                             {relatedBlog.blog_description}
                           </p>
 
-                          <div className="flex items-center text-gray-500 text-xs">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            {new Date(relatedBlog.publishdate || relatedBlog.created_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                          <div className="flex items-center justify-between text-gray-500 text-xs">
+                            <div className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {new Date(relatedBlog.publishdate || relatedBlog.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center">
+                                <Eye className="w-3 h-3 mr-1" />
+                                <span>{relatedBlog.views || '0'}</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </Link>
@@ -371,9 +448,29 @@ export default async function BlogPost({ params }) {
                 currentCategory={blog.blog_cat_id}
               />
               
+              {/* Author Info Widget */}
+              {(blog.author_name || blog.author) && (
+                <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">About the Author</h3>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        {blog.author_name || blog.author}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Content writer passionate about technology and innovation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* Social Networks Widget */}
               <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Social Networks</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Follow Us</h3>
                 <div className="space-y-3">
                   <a href="#" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
                     <Facebook className="w-5 h-5 mr-3 text-blue-600" />
