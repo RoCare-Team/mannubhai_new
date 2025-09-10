@@ -110,7 +110,7 @@ const FranchiseThankYouPage = () => {
               Thank You{submittedData?.name ? `, ${submittedData.name.split(' ')[0]}` : ''}!
             </h1>
             <p className="text-xl text-gray-600 mb-6">
-              We've received your franchise application successfully.
+              We ve received your franchise application successfully.
             </p>
             
             {/* Display submission details if available */}
@@ -160,7 +160,7 @@ const FranchiseThankYouPage = () => {
               <div className="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-4">2</div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-800">Detailed Discussion</h3>
-                <p className="text-gray-600">We'll guide you through investment details, training programs, and territory availability.</p>
+                <p className="text-gray-600">We ll guide you through investment details, training programs, and territory availability.</p>
               </div>
             </div>
             
@@ -266,9 +266,9 @@ const FranchiseThankYouPage = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg text-gray-700 italic mb-3">
-                    "Joining MannuBhai was the best business decision I've made. The support team guided me every step of the way, and I achieved profitability faster than expected."
+                    Joining MannuBhai was the best business decision I ve made. The support team guided me every step of the way, and I achieved profitability faster than expected.
                   </p>
-                  <div className="text-blue-600 font-semibold">- Rajesh Kumar, Mumbai Partner</div>
+                  <div className="text-blue-600 font-semibold">Rajesh Kumar  Mumbai Partner</div>
                   <div className="text-sm text-gray-500">Franchise Partner since 2022</div>
                 </div>
               </div>
@@ -281,9 +281,9 @@ const FranchiseThankYouPage = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg text-gray-700 italic mb-3">
-                    "The training program was comprehensive and the ongoing support is exceptional. My ROI exceeded expectations within 8 months."
+                    The training program was comprehensive and the ongoing support is exceptional. My ROI exceeded expectations within 8 months.
                   </p>
-                  <div className="text-green-600 font-semibold">- Priya Sharma, Delhi Partner</div>
+                  <div className="text-green-600 font-semibold">Priya Sharma  Delhi Partner</div>
                   <div className="text-sm text-gray-500">Franchise Partner since 2023</div>
                 </div>
               </div>
@@ -343,7 +343,7 @@ const FranchiseThankYouPage = () => {
         <div className="mt-8 text-center">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
             <h3 className="text-xl font-bold mb-2">Ready to Get Started?</h3>
-            <p className="mb-4">Don't wait! Our team is ready to help you begin your franchise journey.</p>
+            <p className="mb-4">Dont wait Our team is ready to help you begin your franchise journey.</p>
             <button 
               onClick={handleScheduleCall}
               className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center"
