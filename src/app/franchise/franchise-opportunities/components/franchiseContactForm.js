@@ -1,6 +1,9 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+// Firebase imports
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/app/firebaseConfig'; 
 
 export default function FranchiseContactForm() {
   const router = useRouter();
@@ -167,6 +170,31 @@ export default function FranchiseContactForm() {
     } catch (error) {
       console.error('SMS Error:', error);
       return false;
+    }
+  };
+
+  // Save lead to Firebase
+  const saveLeadToFirebase = async (leadData) => {
+    try {
+      const docRef = await addDoc(collection(db, 'franchise-leads'), {
+        ...leadData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        status: 'new', // Lead status
+        source: 'website_form', // Lead source
+        verified: phoneVerified,
+        ipAddress: null, // You can add IP detection if needed
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
+        // Additional tracking fields
+        sessionId: typeof window !== 'undefined' ? sessionStorage.getItem('sessionId') || 'unknown' : 'unknown',
+        referrer: typeof window !== 'undefined' ? document.referrer || 'direct' : 'direct'
+      });
+      
+      console.log('Lead saved to Firebase with ID: ', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error saving lead to Firebase: ', error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -365,6 +393,21 @@ export default function FranchiseContactForm() {
     // Start progress simulation
     const progressInterval = simulateProgress();
     
+    // Prepare lead data for Firebase
+    const leadData = {
+      name: formData.name.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: formData.phone,
+      city: formData.city.trim(),
+      pincode: formData.pincode,
+      investment: formData.investment,
+      investmentValue: getInvestmentValue(formData.investment),
+      message: formData.message.trim(),
+      phoneVerified: phoneVerified,
+      submissionTimestamp: new Date().toISOString(),
+      formVersion: '1.0' // For tracking form versions
+    };
+
     // Track form submission attempt
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'Lead', {
@@ -377,6 +420,9 @@ export default function FranchiseContactForm() {
       });
     }
 
+    // Save to Firebase first
+    const firebaseResult = await saveLeadToFirebase(leadData);
+    
     const params = new URLSearchParams({
       name: formData.name,
       pincode: formData.pincode,
@@ -405,7 +451,7 @@ export default function FranchiseContactForm() {
       clearInterval(progressInterval);
       setSubmissionProgress(100);
       
-      if (data.status === 1) {
+      if (data.status === 1 || firebaseResult.success) {
         // Track successful submission
         if (typeof window !== 'undefined' && window.fbq) {
           window.fbq('track', 'CompleteRegistration', {
@@ -423,12 +469,18 @@ export default function FranchiseContactForm() {
             phone: formData.phone,
             city: formData.city,
             investment: formData.investment,
-            submissionTime: new Date().toISOString()
+            submissionTime: new Date().toISOString(),
+            firebaseId: firebaseResult.id || null,
+            externalApiStatus: data.status === 1 ? 'success' : 'failed'
           }));
         }
         
-        // Show success message briefly before redirect
-        setSuccessMessage('Application submitted successfully! Redirecting...');
+        // Show success message even if external API fails but Firebase succeeds
+        const successMsg = data.status === 1 
+          ? 'Application submitted successfully! Redirecting...'
+          : 'Application received! We will contact you soon. Redirecting...';
+        
+        setSuccessMessage(successMsg);
         
         // Redirect to thank you page after a short delay
         setTimeout(() => {
@@ -440,11 +492,17 @@ export default function FranchiseContactForm() {
         if (typeof window !== 'undefined' && window.fbq) {
           window.fbq('trackCustom', 'FormSubmissionFailed', {
             error: data.message || 'unknown_error',
-            content_name: 'Franchise Application Failed'
+            content_name: 'Franchise Application Failed',
+            firebaseStatus: firebaseResult.success ? 'saved' : 'failed'
           });
         }
         
-        setErrors({ general: data.message || 'Something went wrong. Please try again.' });
+        // Show error message but mention Firebase backup if it succeeded
+        const errorMsg = firebaseResult.success 
+          ? `${data.message || 'External service failed, but your application has been saved. We will contact you soon.'}`
+          : `${data.message || 'Something went wrong. Please try again.'}`;
+        
+        setErrors({ general: errorMsg });
         setIsFormSubmitted(false);
       }
     } catch (error) {
@@ -452,13 +510,28 @@ export default function FranchiseContactForm() {
       if (typeof window !== 'undefined' && window.fbq) {
         window.fbq('trackCustom', 'FormSubmissionError', {
           error: error.message || 'network_error',
-          content_name: 'Franchise Application Error'
+          content_name: 'Franchise Application Error',
+          firebaseStatus: firebaseResult.success ? 'saved' : 'failed'
         });
       }
       
       clearInterval(progressInterval);
-      setErrors({ general: error.message || 'Error processing request. Please try again.' });
-      setIsFormSubmitted(false);
+      
+      // If Firebase saved the lead, show a more positive message
+      const errorMsg = firebaseResult.success 
+        ? 'Your application has been saved successfully! We will contact you soon.'
+        : `Error processing request. Please try again.`;
+      
+      if (firebaseResult.success) {
+        setSuccessMessage(errorMsg);
+        // Still redirect to thank you page if Firebase succeeded
+        setTimeout(() => {
+          router.push('/franchise/thank-you');
+        }, 3000);
+      } else {
+        setErrors({ general: errorMsg });
+        setIsFormSubmitted(false);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -805,7 +878,7 @@ export default function FranchiseContactForm() {
               
               {/* Additional reassurance text */}
               <p className="text-xs text-gray-500 text-center mt-2">
-                By submitting this form  you agree to our terms and conditions. We ll contact you within 24-48 hours.
+                By submitting this form you agree to our terms and conditions. We ll contact you within 24-48 hours.
               </p>
             </form>
           </div>

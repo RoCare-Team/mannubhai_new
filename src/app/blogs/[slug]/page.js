@@ -11,18 +11,16 @@ import {
   Home, 
   Tag,
   ArrowLeft,
-  Search,
-  Filter,
-  Menu,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Instagram,
   Eye,
   MessageCircle,
-  Heart
+  Heart,
+  Linkedin
 } from 'lucide-react';
 import BlogSidebar from '../../../components/BlogSidebar.client';
+import SocialShareButtons from '../../../components/SocialShareButtons.client';
+import SaveButton from '../../../components/SaveButton.client';
+import FeedbackButtons from '../../../components/FeedbackButtons.client';
+import { Facebook, Instagram, Twitter } from "@mui/icons-material";
 
 export async function generateStaticParams() {
   const blogs = await getActiveBlogs();
@@ -252,48 +250,10 @@ export default async function BlogPost({ params }) {
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium text-gray-700">Share this article:</span>
-                    <div className="flex space-x-3">
-                      <button 
-                        onClick={() => {
-                          const url = encodeURIComponent(window.location.href);
-                          const text = encodeURIComponent(blog.blog_name);
-                          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-                        }}
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        <Facebook className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const url = encodeURIComponent(window.location.href);
-                          const text = encodeURIComponent(blog.blog_name);
-                          window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
-                        }}
-                        className="p-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
-                      >
-                        <Twitter className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const url = encodeURIComponent(window.location.href);
-                          const title = encodeURIComponent(blog.blog_name);
-                          const summary = encodeURIComponent(blog.blog_description || '');
-                          window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
-                        }}
-                        className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
-                      >
-                        <Linkedin className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                        <Instagram className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <SocialShareButtons blog={blog} />
                   </div>
 
-                  <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Bookmark className="w-4 h-4" />
-                    Save for later
-                  </button>
+                  <SaveButton />
                 </div>
 
                 {/* Article Content */}
@@ -325,18 +285,8 @@ export default async function BlogPost({ params }) {
                 {/* Article Footer */}
                 <div className="mt-12 pt-8 border-t border-gray-200">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-600">Was this article helpful?</span>
-                      <div className="flex space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-green-500 transition-colors">
-                          👍
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                          👎
-                        </button>
-                      </div>
-                    </div>
-
+                    <FeedbackButtons />
+                    
                     <div className="flex items-center space-x-3">
                       <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         <Share2 className="w-4 h-4" />
