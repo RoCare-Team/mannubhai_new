@@ -805,7 +805,7 @@ export default function FranchiseContactForm() {
               
               {/* Additional reassurance text */}
               <p className="text-xs text-gray-500 text-center mt-2">
-                By submitting this form, you agree to our terms and conditions. We'll contact you within 24-48 hours.
+                By submitting this form  you agree to our terms and conditions. We ll contact you within 24-48 hours.
               </p>
             </form>
           </div>
