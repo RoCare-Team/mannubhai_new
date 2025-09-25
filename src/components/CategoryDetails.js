@@ -13,6 +13,7 @@ import {
   FiShield, FiTruck, FiUserCheck, 
   FiChevronDown, FiChevronUp 
 } from "react-icons/fi";
+import { PiPhoneCallFill } from "react-icons/pi";
 
 // Constants
 const DEFAULT_BANNER = "/ApplianceBanner/appliancs.jpg";
@@ -399,6 +400,9 @@ export default function CategoryDetails({
     );
   }
 
+
+  
+
   return (
     <>
       <Head>
@@ -610,21 +614,24 @@ export default function CategoryDetails({
                     <FiShield className="text-blue-600" />
                     Why Choose Us
                   </h3>
-                  <div className="space-y-4">
-                    {[
-                      { icon: <FiUserCheck />, title: "Expert Professionals", desc: "Certified technicians with years of experience" },
-                      { icon: <FiTruck />, title: "Doorstep Service", desc: "We come to you at your convenience" },
-                      { icon: <FiClock />, title: "Quick Service", desc: "Same day or next day service available" }
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        {item.icon}
-                        <div>
-                          <h4 className="font-medium text-gray-800">{item.title}</h4>
-                          <p className="text-sm text-gray-600">{item.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                 <div className="space-y-4">
+  {[
+    { icon: <FiUserCheck />, title: "Expert Professionals", desc: "Certified technicians with years of experience" },
+    { icon: <FiTruck />, title: "Doorstep Service", desc: "We come to you at your convenience" },
+    { icon: <FiClock />, title: "Quick Service", desc: "Same day or next day service available" },
+    ...(category.main_category_id === "5"
+      ? [{ icon: <PiPhoneCallFill />, title: "Contact Us", desc: "9289344723" }]
+      : []),
+  ].map((item, i) => (
+    <div key={i} className="flex items-start gap-3">
+      {item.icon}
+      <div>
+        <h4 className="font-medium text-gray-800">{item.title}</h4>
+        <p className="text-sm text-gray-600">{item.desc}</p>
+      </div>
+    </div>
+  ))}
+</div>
                 </div>
 
                 <div>

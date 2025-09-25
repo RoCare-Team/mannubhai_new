@@ -35,7 +35,7 @@ const SUBSERVICE_IMAGES = {
 
 const DEFAULT_SERVICE_IMAGE = "/HomeIcons/default-service.png";
 const LOADER_LOGO = "/logo.png";
-const MAIN_BANNER = "/All Front Banners/HomeAppliancesService.webp";
+const MAIN_BANNER = "/appliance-service-main.webp";
 const PROMO_BANNER = "/HomeBanner/appliance.webp";
 
 const SLIDER_BANNERS = [
@@ -287,19 +287,15 @@ const Appliance = () => {
               {/* Main Banner */}
               <div className="HeroBanner flex-1 w-full order-1 lg:order-2 relative hidden md:block">
                 <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[800px] border border-gray-200 rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                  <Image
-                    src={MAIN_BANNER} 
-                    alt="Professional home appliance services" 
-                    height={100}
-                    width={100}
-                    className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                      fetchPriority="high"  // Explicit fetch priority
-                      loading="eager"      // Force immediate loading
-                      quality={80}         // Optimized quality for mobile
-                        // Full viewport width on all devices
-                      unoptimized={false}
-                    onError={(e) => e.target.src = DEFAULT_SERVICE_IMAGE}
-                  />
+  <Image
+    src={MAIN_BANNER}
+    alt="Professional home appliance services"
+    fill
+    className="object-cover hover:scale-105 transition-transform duration-500 rounded-xl"
+    priority
+    quality={90}
+    onError={(e) => (e.target.src = DEFAULT_SERVICE_IMAGE)}
+  />
                 </div>
               </div>
             </div>
