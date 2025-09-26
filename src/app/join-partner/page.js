@@ -124,7 +124,7 @@ const MannuBhaiServices = () => {
 
   const handleWhatsappJoin = () => {
     const message = encodeURIComponent("I'm interested in joining Mannu Bhai Services as a professional. Please provide more details.");
-    window.open(`https://wa.me/919461900848?text=${message}`, '_blank');
+    window.open(`https://wa.me/917065021273?text=${message}`, '_blank');
   };
 
   if (!isLoaded) {
