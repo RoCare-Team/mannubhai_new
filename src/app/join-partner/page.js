@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { db } from '../../app/firebaseConfig';
-import ApplicationForm from '../../components/ApplicationForm'; // Import the new universal form
+import ApplicationForm from '../../components/ApplicationForm';
 
 const services = {
   appliances: {
@@ -91,6 +91,7 @@ const MannuBhaiServices = () => {
   const [showForm, setShowForm] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  
 
   // Simulate loading completion
   useEffect(() => {
@@ -124,7 +125,7 @@ const MannuBhaiServices = () => {
 
   const handleWhatsappJoin = () => {
     const message = encodeURIComponent("I'm interested in joining Mannu Bhai Services as a professional. Please provide more details.");
-    window.open(`https://wa.me/917065021273?text=${message}`, '_blank');
+    window.open(`https://wa.me/919319408430?text=${message}`, '_blank');
   };
 
   if (!isLoaded) {
@@ -191,7 +192,7 @@ const MannuBhaiServices = () => {
                     className="group bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-3 mx-auto will-change-transform"
                   >
                     <span>{services[activeTab].icon}</span>
-                    Apply for Services
+                    Become a Service Partner
                     <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                     </svg>
