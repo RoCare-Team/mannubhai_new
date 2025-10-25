@@ -174,13 +174,41 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
   };
 
   // Mock fetch functions - replace with your actual implementations
-  const fetchStatesAndCitiesObject = async () => {
-    return mockStatesAndCities;
-  };
+  // const fetchStatesAndCitiesObject = async () => {
+  //   return mockStatesAndCities;
+  // };
 
-  const fetchCitiesByState = async (db, state) => {
-    return (mockStatesAndCities[state] || []).map(city => ({ cityName: city }));
-  };
+  // const fetchCitiesByState = async (db, state) => {
+  //   return (mockStatesAndCities[state] || []).map(city => ({ cityName: city }));
+  // };
+
+  // Fetch all states
+const fetchStatesAndCitiesObject = async () => {
+  const res = await fetch("https://www.waterpurifierservicecenter.in/wizard/app/getState.php");
+  const data = await res.json();
+  if (data?.AvailableState) {
+    // return object { state: [] } format for compatibility
+    const states = {};
+    data.AvailableState.forEach(item => {
+      states[item.state] = []; // cities will be fetched separately
+    });
+    return states;
+  }
+  return {};
+};
+
+// Fetch cities by state
+const fetchCitiesByState = async (db, state) => {
+  const res = await fetch(
+    `https://www.waterpurifierservicecenter.in/wizard/app/getCity.php?state=${encodeURIComponent(state)}`
+  );
+  const data = await res.json();
+  if (data?.AvailableCities) {
+    return data.AvailableCities.map(c => ({ cityName: c.city_name }));
+  }
+  return [];
+};
+
 
   // Fetch states and cities on component mount
   useEffect(() => {
@@ -224,20 +252,50 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
     loadCitiesForState();
   }, [formData.state, statesAndCities]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-      // Reset city when state changes
-      ...(name === 'state' && { city: '' })
-    }));
+    // Sanitize and trim inputs
+const sanitizeNumber = (value, maxLength = 10) => {
+  return value.replace(/\D/g, "").slice(0, maxLength); // keep only digits
+};
+
+
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [name]: value,
+  //     // Reset city when state changes
+  //     ...(name === 'state' && { city: '' })
+  //   }));
     
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+  //   // Clear error when user starts typing
+  //   if (errors[name]) {
+  //     setErrors(prev => ({ ...prev, [name]: '' }));
+  //   }
+  // };
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  let newValue = value.trimStart(); // remove leading spaces
+
+  // Apply sanitization for specific fields
+  if (name === "phoneNumber" || name === "alternateNumber") {
+    newValue = sanitizeNumber(value, 10);
+  }
+  if (name === "aadhaarNumber") {
+    newValue = sanitizeNumber(value, 12);
+  }
+
+  setFormData(prev => ({
+    ...prev,
+    [name]: newValue,
+    ...(name === "state" && { city: "" }) // reset city if state changes
+  }));
+
+  if (errors[name]) {
+    setErrors(prev => ({ ...prev, [name]: "" }));
+  }
+};
 
   const handleServiceChange = (e) => {
     const newService = e.target.value;
@@ -257,6 +315,9 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
     }));
   };
 
+
+
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -268,10 +329,13 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.state) newErrors.state = 'State is required';
     if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.aadhaarNumber.trim()) newErrors.aadhaarNumber = 'Aadhaar number is required';
-    if (formData.aadhaarNumber && !/^\d{12}$/.test(formData.aadhaarNumber.replace(/\s/g, ''))) {
-      newErrors.aadhaarNumber = 'Please enter a valid 12-digit Aadhaar number';
-    }
+    // if (!formData.aadhaarNumber.trim()) newErrors.aadhaarNumber = 'Aadhaar number is required';
+    // if (formData.aadhaarNumber && !/^\d{12}$/.test(formData.aadhaarNumber.replace(/\s/g, ''))) {
+    //   newErrors.aadhaarNumber = 'Please enter a valid 12-digit Aadhaar number';
+    // }
+    if (formData.aadhaarNumber && !/^\d{12}$/.test(formData.aadhaarNumber)) {
+  newErrors.aadhaarNumber = "Please enter a valid 12-digit Aadhaar number";
+}
     if (formData.skills.length === 0) newErrors.skills = 'Please select at least one skill';
 
     setErrors(newErrors);
@@ -294,11 +358,12 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
       const applicationData = {
         ...formData,
         serviceTitle: servicesData[formData.selectedService].title,
-        submittedAt: new Date().toISOString(), // Replace with serverTimestamp()
+        // submittedAt: new Date().toISOString(), // Replace with serverTimestamp()
+        submittedAt: serverTimestamp(),
         status: 'pending'
       };
 
-      // await addDoc(collection(db, 'applications'), applicationData);
+      await addDoc(collection(db, 'applications'), applicationData);
       console.log('Application submitted:', applicationData);
       
       showAlert('success', '🎉 Application submitted successfully! We will contact you within 24 hours.');
@@ -341,8 +406,8 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Apply for Service</h2>
-            <p className="text-white/90">Complete all fields below</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Join as Partner</h2>
+            <p className="text-white/90">Fill in your details to join our partner network</p>
           </div>
 
           {/* Form */}
@@ -351,7 +416,7 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
               {/* Service Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Select Service *
+                  Select Work Category *
                 </label>
                 <select
                   name="selectedService"
@@ -395,6 +460,8 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
+                     length="10"
+                    maxLength="10"
                     className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                       errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -422,11 +489,13 @@ const ApplicationForm = ({ activeTab, service, onClose, db }) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Aadhaar Number *
+                    Aadhaar Number
                   </label>
                   <input
                     type="text"
                     name="aadhaarNumber"
+                    length="12"
+                    maxLength="12"
                     value={formData.aadhaarNumber}
                     onChange={handleInputChange}
                     className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
