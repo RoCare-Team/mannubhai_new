@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import DOMPurify from "dompurify";
 
 const SERVICES_DATA = [
   {
@@ -46,7 +45,7 @@ const SERVICES_DATA = [
   },
 ];
 
-const MAX_PREVIEW_LENGTH = 300;
+const MAX_PREVIEW_LENGTH = 200;
 
 export default function Services() {
   const [expanded, setExpanded] = useState({});
@@ -58,19 +57,14 @@ export default function Services() {
     }));
   }, []);
 
-  // Precompute preview text
-  const servicesWithPreview = SERVICES_DATA.map(service => {
-    const plainText = service.paragraphs.map(p => DOMPurify.sanitize(p, { ALLOWED_TAGS: [] })).join(" ");
-    return {
-      ...service,
-      previewText: plainText.length > MAX_PREVIEW_LENGTH 
-        ? `${plainText.slice(0, MAX_PREVIEW_LENGTH)}...` 
-        : plainText,
-      needsTruncation: plainText.length > MAX_PREVIEW_LENGTH
-    };
-  });
-
-  const createMarkup = (html) => ({ __html: DOMPurify.sanitize(html) });
+  // Precompute truncated text to avoid doing it on every render
+  const servicesWithPreview = SERVICES_DATA.map(service => ({
+    ...service,
+    previewText: service.paragraphs[0].length > MAX_PREVIEW_LENGTH 
+      ? `${service.paragraphs[0].slice(0, MAX_PREVIEW_LENGTH)}...` 
+      : service.paragraphs[0],
+    needsTruncation: service.paragraphs[0].length > MAX_PREVIEW_LENGTH
+  }));
 
   return (
     <main className="py-12 px-4 sm:px-6 lg:px-8">
@@ -118,17 +112,13 @@ export default function Services() {
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {expanded[title] ? (
-                    paragraphs.map((para, idx) => (
-                      <p 
-                        key={idx} 
-                        className="text-gray-600 mb-4 leading-relaxed"
-                        dangerouslySetInnerHTML={createMarkup(para)}
-                      />
-                    ))
-                  ) : (
-                    <p className="text-gray-600 mb-4 leading-relaxed">{previewText}</p>
-                  )}
+                 <p
+  className="text-gray-600 mb-4 leading-relaxed"
+  dangerouslySetInnerHTML={{
+    __html: expanded[title] ? paragraphs[0] : previewText
+  }}
+/>
+
                 </motion.div>
               </AnimatePresence>
 
