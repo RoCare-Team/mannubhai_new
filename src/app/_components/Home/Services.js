@@ -100,9 +100,9 @@ export default function Services() {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <p className="text-gray-600 mb-4 leading-relaxed">
+                    <div className="text-gray-600 mb-4 leading-relaxed">
                       {expanded[title] ? content : previewText}
-                    </p>
+                    </div>
                   </motion.div>
                 </AnimatePresence>
 
