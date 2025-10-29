@@ -90,14 +90,27 @@ function AddressFormModal({ open, handleClose, onAddressSubmit }) {
     loadCities();
   }, [formData.state]);
 
+   const handlePhoneChange = (e) => {
+    const { id, value } = e.target;
+    // Remove all non-numeric characters including spaces
+    const numericValue = value.replace(/[^0-9]/g, '');
+    setFormData({
+      ...formData,
+      [id]: numericValue
+    });
+  };
+
+
   // Handle pincode lookup
   const handlePincodeChange = async (e) => {
     const newPincode = e.target.value;
+
+     const numericValue = newPincode.replace(/[^0-9]/g, '');
    
     // Update formData with new pincode
     setFormData({
       ...formData,
-      pincode: newPincode
+      pincode: numericValue
     });
    
     // Clear message
@@ -309,8 +322,15 @@ alert(data.msg || "Address saved successfully!");
              fullWidth
              required
              value={formData.phone}
-             onChange={handleInputChange}
-           slotProps={{ htmlInput: { maxLength: 10 } }}
+             onChange={handlePhoneChange}
+            slotProps={{
+                  htmlInput: {
+                    maxLength: 10,
+                    inputMode: "numeric"
+                  }
+                }}
+                helperText={`${formData.phone.length}/10 digits`}
+                error={formData.phone.length > 0 && formData.phone.length !== 10}
            
            
              />
@@ -324,8 +344,17 @@ alert(data.msg || "Address saved successfully!");
              variant='outlined'
              fullWidth
              value={formData.alt_address_mob}
-             onChange={handleInputChange}
-             slotProps={{ htmlInput: { maxLength: 10 } }}
+               onChange={handlePhoneChange}
+            slotProps={{
+                  htmlInput: {
+                    maxLength: 10,
+                    inputMode: "numeric"
+                  }
+                }}
+                helperText={`${formData.alt_address_mob.length}/10 digits`}
+                error={formData.alt_address_mob.length > 0 && formData.alt_address_mob.length !== 10}
+           
+           
              />
 
             </Grid>
@@ -341,10 +370,11 @@ alert(data.msg || "Address saved successfully!");
                 value={formData.pincode}
                 onChange={handlePincodeChange}
                 slotProps={{ htmlInput: { maxLength: 6 } }}
+                helperText={`${formData.pincode.length}/6 digits`}
+                error={formData.pincode.length > 0 && formData.pincode.length !== 6}
                 InputProps={{
                   endAdornment: loading ? <CircularProgress size={20} /> : null
                 }}
-                helperText={message || "Enter 6-digit pincode to auto-fill location"}
               />
             </Grid>
             <Grid size={{  xs:12 ,sm:6 }}>
